@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Styleable for the ScannerView -->
+    <declare-styleable name="ScannerView">
+        <attr name="donutThickness" format="dimension" />
+        <attr name="donutColor" format="color" />
+        <attr name="textSize" format="dimension" />
+    </declare-styleable>
+
+</resources>

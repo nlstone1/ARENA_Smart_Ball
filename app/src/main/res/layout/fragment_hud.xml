@@ -1,0 +1,113 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/hud_fragment_height"
+            android:background="@color/colorStatusNeutral">
+
+    <!-- Name and connection state views -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:layout_alignParentStart="true">
+
+        <!-- Name -->
+        <TextView
+            android:id="@+id/textview_hud_name"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="0dp"
+            android:gravity="center_vertical"
+            android:text="@string/blank_symbol"
+            android:textSize="@dimen/text_medium"
+            android:textColor="@color/colorVLtGray"/>
+
+        <!-- Connection status -->
+        <TextView
+            android:id="@+id/textview_hud_connection"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="2dp"
+            android:textSize="@dimen/text_small"
+            android:textStyle="italic"
+            android:textColor="@color/colorVLtGray"/>
+
+    </LinearLayout>
+
+
+    <!-- Battery and RSSI Views -->
+    <LinearLayout
+        android:id="@+id/layout_hud_stats"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true">
+
+        <!-- Progress -->
+        <ProgressBar
+            android:id="@+id/progress_hud"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"/>
+
+        <!-- Separator -->
+        <View style="@style/horizontalSeparator"
+              android:background="@color/colorTransBlack"/>
+
+        <!-- RSSI -->
+        <ImageView
+            android:id="@+id/imageview_hud_rssi"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/ic_signal"
+            android:contentDescription="@string/battery_ic_content"/>
+
+        <TextView
+            android:id="@+id/textview_hud_rssi"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:layout_margin="6dp"
+            android:text="@string/blank_symbol"
+            android:textSize="@dimen/text_medium_large"
+            android:singleLine="true"
+            android:textColor="@color/colorVLtGray"/>
+
+        <!-- Separator -->
+        <View style="@style/horizontalSeparator"
+              android:background="@color/colorTransBlack"/>
+
+        <!-- Battery -->
+        <ImageView
+            android:id="@+id/imageview_hud_battery"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:src="@drawable/ic_battery"
+            android:contentDescription="@string/battery_ic_content"/>
+
+        <TextView
+            android:id="@+id/textview_hud_battery"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:layout_margin="6dp"
+            android:text="@string/blank_symbol"
+            android:textSize="@dimen/text_medium_large"
+            android:singleLine="true"
+            android:textColor="@color/colorVLtGray"/>
+
+    </LinearLayout>
+
+
+</RelativeLayout>

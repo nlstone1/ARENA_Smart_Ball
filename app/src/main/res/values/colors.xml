@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Color scheme colors -->
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <!-- Status colors -->
+    <color name="colorStatusSuccess">#3311EE</color>
+    <color name="colorStatusFailure">#EE3311</color>
+    <color name="colorStatusNeutral">#949494</color>
+
+    <!-- Color colors -->
+    <color name="colorVDkGray">#111111</color>
+    <color name="colorDkGray">#333333</color>
+    <color name="colorLtGray">#C9C9C9</color>
+    <color name="colorVLtGray">#FEFEFE</color>
+    <color name="colorTransBlack">#80000000</color>
+
+</resources>

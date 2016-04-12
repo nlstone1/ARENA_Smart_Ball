@@ -1,0 +1,40 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Name -->
+        <TextView style="@style/TextSubtitle"
+            android:id="@+id/textview_details_ball_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:textSize="@dimen/text_medium"
+            android:textStyle="normal"/>
+
+        <!-- Address -->
+        <TextView style="@style/TextSubtitle"
+            android:id="@+id/textview_details_ball_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:textSize="@dimen/text_medium"
+            android:textStyle="normal"/>
+
+        <!-- Separator -->
+        <View style="@style/verticalSeparator"/>
+
+        <!-- ExpandableListView for Characteristics and Services -->
+        <ExpandableListView
+            android:id="@+id/expandablelistview_services_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+</ScrollView>
