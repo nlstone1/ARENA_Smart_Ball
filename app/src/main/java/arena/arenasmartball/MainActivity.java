@@ -29,6 +29,7 @@ import arena.arenasmartball.fragments.HUDFragment;
 /**
  * Main Activity for the Application.
  *
+ *
  */
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener
