@@ -6,6 +6,12 @@
              android:orientation="vertical"
              tools:context="arena.arenasmartball.fragments.ScannerFragment">
 
+    <Button
+        android:id="@+id/button_add_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Result"/>
+
     <!-- Scan and connect view -->
     <arena.arenasmartball.views.ScannerView
         android:id="@+id/scanner_view"

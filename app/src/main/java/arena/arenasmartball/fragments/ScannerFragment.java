@@ -6,12 +6,10 @@ import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import arena.arenasmartball.BluetoothBridge;
 import arena.arenasmartball.MainActivity;
 import arena.arenasmartball.R;
-import arena.arenasmartball.ball.SmartBallConnection;
 import arena.arenasmartball.ball.SmartBallScanner;
 import arena.arenasmartball.views.ScannerView;
 
@@ -50,6 +48,16 @@ public class ScannerFragment extends SimpleFragment implements ScannerView.Scann
             // Find the ScannerView
             scannerView = (ScannerView) view.findViewById(R.id.scanner_view);
             scannerView.addScannerViewListener(this);
+
+            // TODO Test button
+            view.findViewById(R.id.button_add_result).setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    scannerView.addScanResult(new ScanResult(null, null, 100, System.currentTimeMillis()));
+                }
+            });
 
             if (load != null)
             {

@@ -24,7 +24,6 @@ import java.util.Set;
 
 import arena.arenasmartball.R;
 import arena.arenasmartball.Utils;
-import arena.arenasmartball.ball.SmartBallScanner;
 
 /**
  * Custom View for showing and connecting to scan results.
@@ -58,7 +57,7 @@ public class ScannerView extends View// implements SmartBallScanner.SmartBallSca
     private float scanResultRadius;
 
     // Directional offset for the view
-    private float rotOffset;
+    private float rotOffset1, rotOffset2;
 
     // Paint used for drawing
     private static final Paint PAINT;
@@ -95,7 +94,8 @@ public class ScannerView extends View// implements SmartBallScanner.SmartBallSca
 //    private static final String DRAGGED_RESULT_KEY = "arena.arenasmartball.views.draggedResult";
     private static final String CONNECTED_RESULT_KEY = "arena.arenasmartball.views.connectedResult";
 //    private static final String MOVE_CONNECTED_KEY = "arena.arenasmartball.views.moveConnected";
-    private static final String ROT_OFFSET_KEY = "arena.arenasmartball.views.rotOffset";
+    private static final String ROT_OFFSET1_KEY = "arena.arenasmartball.views.rotOffset1";
+    private static final String ROT_OFFSET2_KEY = "arena.arenasmartball.views.rotOffset2";
 
     /**
      * Required Constructor.
@@ -147,7 +147,8 @@ public class ScannerView extends View// implements SmartBallScanner.SmartBallSca
         viewUpdater = new ViewUpdater(this);
         viewUpdater.start();
 
-        rotOffset = 0.0f;
+        rotOffset1 = 0.0f;
+        rotOffset2 = 0.0f;
 
         draggedResult = null;
 
@@ -235,7 +236,8 @@ public class ScannerView extends View// implements SmartBallScanner.SmartBallSca
 //        draggedResult = bundle.getParcelable(DRAGGED_RESULT_KEY);
         connectedResult = bundle.getParcelable(CONNECTED_RESULT_KEY);
 //        moveConnected = bundle.getBoolean(MOVE_CONNECTED_KEY);
-        rotOffset = bundle.getFloat(ROT_OFFSET_KEY);
+        rotOffset1 = bundle.getFloat(ROT_OFFSET1_KEY);
+        rotOffset2 = bundle.getFloat(ROT_OFFSET2_KEY);
     }
 
     /**
@@ -256,7 +258,8 @@ public class ScannerView extends View// implements SmartBallScanner.SmartBallSca
 //        bundle.putParcelable(DRAGGED_RESULT_KEY, draggedResult);
         bundle.putParcelable(CONNECTED_RESULT_KEY, connectedResult);
 //        bundle.putBoolean(MOVE_CONNECTED_KEY, moveConnected);
-        bundle.putFloat(ROT_OFFSET_KEY, rotOffset);
+        bundle.putFloat(ROT_OFFSET1_KEY, rotOffset1);
+        bundle.putFloat(ROT_OFFSET2_KEY, rotOffset2);
     }
 
     /**
@@ -285,8 +288,8 @@ public class ScannerView extends View// implements SmartBallScanner.SmartBallSca
                 result = scanResults.get(i);
 
                 // Calculate the destination position of the ScanResultWrapper
-                x = (float) Math.cos((dir + rotOffset) * Utils.DEG_2_RAD) * radius;
-                y = (float) Math.sin((dir + rotOffset) * Utils.DEG_2_RAD) * radius;
+                x = (float) Math.cos((dir + rotOffset1 + rotOffset2) * Utils.DEG_2_RAD) * radius;
+                y = (float) Math.sin((dir + rotOffset1 + rotOffset2) * Utils.DEG_2_RAD) * radius;
 
                 result.setPosition(getWidth() / 2 + x, getHeight() / 2 + y);
 
@@ -342,8 +345,8 @@ public class ScannerView extends View// implements SmartBallScanner.SmartBallSca
                 result = scanResults.get(i);
 
                 // Calculate the destination position of the ScanResultWrapper
-                x = (float) Math.cos((dir + rotOffset) * Utils.DEG_2_RAD) * radius;
-                y = (float) Math.sin((dir + rotOffset) * Utils.DEG_2_RAD) * radius;
+                x = (float) Math.cos((dir + rotOffset1 + rotOffset2) * Utils.DEG_2_RAD) * radius;
+                y = (float) Math.sin((dir + rotOffset1 + rotOffset2) * Utils.DEG_2_RAD) * radius;
 
                 result.forcePosition(getWidth() / 2 + x, getHeight() / 2 + y);
                 result.isCarried = false;
@@ -514,7 +517,10 @@ public class ScannerView extends View// implements SmartBallScanner.SmartBallSca
      */
     private void addResult(ScanResultWrapper result, int idx)
     {
-        rotOffset = 180.0f / (scanResults.size() + 1);
+        int s = scanResults.size() + 1;
+//        rotOffset1 = (idx - s / 2) * 360.0f / (s * s);
+        rotOffset1 = -Utils.pointDirection(getWidth() / 2, getHeight() / 2, result.x, result.y);
+        rotOffset1 -= 360.0f * idx / s;
 
         synchronized (scanResults)
         {
@@ -525,25 +531,12 @@ public class ScannerView extends View// implements SmartBallScanner.SmartBallSca
         }
     }
 
-//    /*
-//     * Removes a ScanResultWrapper.
-//     */
-//    private void removeResult(ScanResultWrapper result)
-//    {
-//        synchronized (scanResults)
-//        {
-//            scanResults.remove(result);
-//        }
-//
-//        rotOffset = 180.0f / scanResults.size();
-//    }
-
     /*
      * Removes and returns the ScanResultWrapper at the specified index.
      */
     private ScanResultWrapper removeResult(int idx)
     {
-        rotOffset = 180.0f / (scanResults.size() - 1);
+        rotOffset1 += 360.0 * idx / scanResults.size();
 
         synchronized (scanResults)
         {
@@ -557,6 +550,7 @@ public class ScannerView extends View// implements SmartBallScanner.SmartBallSca
     private void insertResult(ScanResultWrapper draggedResult)
     {
         // Otherwise place somewhere on the periphery
+        int idx = 0;
         if (scanResults.size() > 1)
         {
             // Try to insert it such that it is in the right spot
@@ -586,14 +580,18 @@ public class ScannerView extends View// implements SmartBallScanner.SmartBallSca
             }
 
             if (Math.abs(idx1 - idx2) == scanResults.size() - 1)
-                addResult(draggedResult, 0);
+                addResult(draggedResult, idx = 0);
             else
-                addResult(draggedResult, Math.max(idx1, idx2));
+                addResult(draggedResult, idx = Math.max(idx1, idx2));
         }
         else
         {
             addResult(draggedResult, -1);
         }
+
+//        // Adjust rotOffset
+//        rotOffset1 = 180.0f * idx / scanResults.size()
+//                - Utils.pointDirection(getWidth() / 2, getHeight() / 2, draggedResult.x, draggedResult.y);
     }
 
     private boolean isInConnectRegion(ScanResultWrapper scanResult)
