@@ -1,6 +1,9 @@
 package arena.arenasmartball;
 
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -19,6 +22,38 @@ public class Utils
 
     // Log tag String
     private static final String TAG = "Utils";
+
+    /**
+     * Calculates the signal strength of the given rssi measurement.
+     * @param rssi The rssi
+     * @return The signal strength, in the range [0, 100]
+     */
+    public static int getRSSISignalStrength(int rssi)
+    {
+        return WifiManager.calculateSignalLevel(rssi, 5);
+    }
+
+    /**
+     * Tests two ScanResults for equality, comparing device addresses.
+     * @param a The first ScanResult to test
+     * @param b The second ScanResult to test
+     * @return Whether or not the two ScanResults represent the same device
+     */
+    public static boolean areEqual(ScanResult a, ScanResult b)
+    {
+        return !(a == null || b == null) && areEqual(a.getDevice(), b.getDevice());
+    }
+
+    /**
+     * Tests two BluetoothDevice for equality, comparing addresses.
+     * @param a The first BluetoothDevice to test
+     * @param b The second BluetoothDevice to test
+     * @return Whether or not the two BluetoothDevice represent the same device
+     */
+    public static boolean areEqual(BluetoothDevice a, BluetoothDevice b)
+    {
+        return !(a == null || b == null) && a.getAddress().contentEquals(b.getAddress());
+    }
 
     /**
      * Calculates the squared distance between the two points.

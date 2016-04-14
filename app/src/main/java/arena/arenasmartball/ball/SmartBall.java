@@ -467,7 +467,7 @@ public class SmartBall
      * Executes the top GattCommand in the sequence. If the sequence fails to begin execution, it is removed.
      * @return False if the top command failed to start and was removed, true in any other situation
      */
-    protected boolean executeTopCommandInSequence()
+    protected synchronized boolean executeTopCommandInSequence()
     {
         if (commandSequenceQueue.isEmpty())
             return true;

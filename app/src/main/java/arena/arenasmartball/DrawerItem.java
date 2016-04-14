@@ -75,6 +75,7 @@ public enum DrawerItem
             {
                 Bundle bundle = new Bundle();
                 currentFragment.save(bundle);
+                currentFragment.onClose();
                 SAVED_FRAGMENTS.put(currentDrawerItem, bundle);
             }
 
@@ -88,6 +89,7 @@ public enum DrawerItem
                     MainActivity.getBluetoothBridge().removeBluetoothBridgeStateChangeListener(currentFragment);
 
                 currentFragment = FRAGMENT_CLASS.newInstance();
+                currentFragment.onOpen();
                 MainActivity.getBluetoothBridge().addBluetoothBridgeStateChangeListener(currentFragment);
 //                if (SAVE_FRAGMENT)
 //                {

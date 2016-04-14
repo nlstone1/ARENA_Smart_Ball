@@ -17,13 +17,21 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_settings">Settings</string>
+    <string name="connected">Connected</string>
+    <string name="cancel_connection">Cancel Connection</string>
     <string name="not_connected">Not Connected</string>
     <string name="name">Name:&#160;</string>
     <string name="address">Address:&#160;</string>
+    <string name="enable_scanning">Enable Scanning</string>
     <string name="scanning">Scanning…</string>
+    <string name="discover">Discover</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="no_device_chosen">No Device Chosen</string>
 
     <!-- Content descriptions -->
     <string name="battery_ic_content">battery_ic_content</string>
+    <string name="ball_ic_content">ball_ic_content</string>
 
     <!-- The symbol to use to represent blank fields -->
     <string name="blank_symbol">&#160;N/A</string>

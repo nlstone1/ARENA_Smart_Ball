@@ -18,13 +18,11 @@ import arena.arenasmartball.ball.SmartBallScanner;
  *
  * Created by Nathaniel on 4/5/2016.
  */
-public class BluetoothBridge implements SmartBallScanner.SmartBallScannerListener,
-        SmartBallConnection.SmartBallConnectionListener
+public class BluetoothBridge implements SmartBallConnection.SmartBallConnectionListener, SmartBall.EventListener
 {
     /** The possible states of the BluetoothBridge. */
     public enum State
     {
-        SCANNING,
         CONNECTION_CHANGING,
         CONNECTED,
         DISCONNECTED
@@ -182,6 +180,7 @@ public class BluetoothBridge implements SmartBallScanner.SmartBallScannerListene
         // Connect
         smartBallConnection = new SmartBallConnection(result);
         smartBallConnection.connect(activity, this);
+        smartBallConnection.getSmartBall().getEventListeners().add(this);
     }
 
     /**
@@ -204,8 +203,9 @@ public class BluetoothBridge implements SmartBallScanner.SmartBallScannerListene
             smartBallConnection.disconnect();
         }
 
-        // Connect
+        // Disconnect
         smartBallConnection.connect(activity, this);
+        smartBallConnection.getSmartBall().getEventListeners().add(this);
     }
 
     /**
@@ -254,7 +254,6 @@ public class BluetoothBridge implements SmartBallScanner.SmartBallScannerListene
 
         // Create Scanner
         smartBallScanner = new SmartBallScanner(bluetoothAdapter);
-        smartBallScanner.addSmartBallScannerListener(this);
 
         checkReady();
 
@@ -295,7 +294,8 @@ public class BluetoothBridge implements SmartBallScanner.SmartBallScannerListene
 
         if (state == SmartBallConnection.ConnectionState.CONNECTED)
         {
-            this.state = State.CONNECTED;
+//            this.state = State.CONNECTED;
+            return;
         }
         else if (state == SmartBallConnection.ConnectionState.DISCONNECTED ||
                  state == SmartBallConnection.ConnectionState.NOT_CONNECTED)
@@ -325,59 +325,30 @@ public class BluetoothBridge implements SmartBallScanner.SmartBallScannerListene
     {    }
 
     /**
-     * Called when scanning is started.
+     * Called when the SmartBall experiences a kick event.
+     *
+     * @param ball  The SmartBall
+     * @param event The kick event
      */
     @Override
-    public void onScanStarted()
+    public void onBallKickEvent(SmartBall ball, SmartBall.KickEvent event)
+    {    }
+
+    /**
+     * Called when all BLE characteristics have been discovered.
+     *
+     * @param ball The SmartBall
+     */
+    @Override
+    public void onBallCharacteristicDiscoveryCompleted(SmartBall ball)
     {
-        State oldState = state;
-        state = State.SCANNING;
+        State oldState = this.state;
+        this.state = State.CONNECTED;
 
         // Notify Listeners
         for (BluetoothBridgeStateChangeListener listener: listeners)
-            listener.onBluetoothBridgeStateChanged(this, state, oldState);
+            listener.onBluetoothBridgeStateChanged(this, this.state, oldState);
     }
-
-    /**
-     * Called when scanning is stopped.
-     *
-     * @param failed    True if the scan stopped due to a failure
-     * @param errorCode The error code of the failure if one did occur
-     */
-    @Override
-    public void onScanStopped(boolean failed, int errorCode)
-    {
-//        State oldState = state;
-//
-//        if (smartBallConnection != null &&
-//           (smartBallConnection.getConnectionState() == SmartBallConnection.ConnectionState.DISCONNECTED ||
-//            smartBallConnection.getConnectionState() == SmartBallConnection.ConnectionState.NOT_CONNECTED))
-//        {
-//            state = State.DISCONNECTED;
-//        }
-//
-//        // Notify listeners
-//        for (BluetoothBridgeStateChangeListener listener: listeners)
-//            listener.onBluetoothBridgeStateChanged(this, state, oldState);
-    }
-
-    /**
-     * Called when a SmartBall has been found.
-     *
-     * @param result The ScanResult representing the found SmartBall.
-     */
-    @Override
-    public void onSmartBallFound(ScanResult result)
-    {    }
-
-    /**
-     * Called when a SmartBall has been lost.
-     *
-     * @param result The ScanResult representing the lost SmartBall.
-     */
-    @Override
-    public void onSmartBallLost(ScanResult result)
-    {    }
 
     /*
      * Verifies that BT is ready, launching the request to turn BT on dialog if otherwise.

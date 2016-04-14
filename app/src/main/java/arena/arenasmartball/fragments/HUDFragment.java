@@ -39,9 +39,6 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     // The name of the command sequence used to read the SmartBall battery info
     private static final String READ_BALL_BATTERY_COM_SEQ_NAME = "HUDFragReadBallInfo";
 
-    // Lock for the reader thread
-    private static final Object BALL_INFO_READER_LOCK = new Object();
-
     // The parent View
     private View view;
 
@@ -64,14 +61,14 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     // The battery level icon
     private ImageView batteryIcon;
 
-    // Denotes whether or not the ball is charging
-    private boolean ballIsCharging;
-
-    // Records the battery level of the ball
-    private double batteryLevel;
-
-    // Thread to handle periodically reading from the SmartBall
-    private BallInfoReaderThread readerThread;
+//    // Denotes whether or not the ball is charging
+//    private boolean ballIsCharging;
+//
+//    // Records the battery level of the ball
+//    private double batteryLevel;
+//
+//    // Thread to handle periodically updating
+//    private UpdaterThread updaterThread;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -91,12 +88,11 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
         signalIcon = (ImageView)view.findViewById(R.id.imageview_hud_rssi);
 
         // Create Thread
-        readerThread = new BallInfoReaderThread();
-        readerThread.isAsleep = true;
-        readerThread.start();
+//        updaterThread = new UpdaterThread();
+//        updaterThread.start();
 
         // Set Default values
-        setDefaultValues();
+        setValuesForCurrentState(MainActivity.getBluetoothBridge());
         MainActivity.getBluetoothBridge().addBluetoothBridgeStateChangeListener(this);
 
         return view;
@@ -105,26 +101,29 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     @Override
     public void onPause()
     {
+        Log.w(TAG, "onPause()");
+
         super.onPause();
-        readerThread.sleep(true);
+//        updaterThread.kill();
+//        updaterThread = null;
     }
 
     @Override
     public void onResume()
     {
+        Log.w(TAG, "onResume()");
+
         super.onResume();
-        readerThread.sleep(false);
+
+//        updaterThread = new UpdaterThread();
+//
+//        if (MainActivity.getBluetoothBridge().getState() == BluetoothBridge.State.CONNECTED)
+//            updaterThread.reset();
 
         // Set values
-        MainActivity.getBluetoothBridge().addBluetoothBridgeStateChangeListener(this);
-        setValuesForCurrentState(MainActivity.getBluetoothBridge());
-    }
-
-    @Override
-    public void onDestroyView()
-    {
-        super.onDestroyView();
-//        readerThread.isRunning = false;
+        BluetoothBridge bridge = MainActivity.getBluetoothBridge();
+        bridge.addBluetoothBridgeStateChangeListener(this);
+        setValuesForCurrentState(bridge);
     }
 
     /**
@@ -146,17 +145,8 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     @Override
     public void onRssiRead(SmartBallConnection connection, int rssi)
     {
-        final int level = WifiManager.calculateSignalLevel(rssi, 101);
-
-        getActivity().runOnUiThread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                signalView.setText(Utils.getPercentString(level));
-                signalIcon.setImageLevel(level);
-            }
-        });
+        final int level = Utils.getRSSISignalStrength(rssi);
+        setRSSIViews(level);
     }
 
     /**
@@ -168,20 +158,14 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     @Override
     public void onCommandSequenceEvent(GattCommandSequence sequence, GattCommandSequence.Event event)
     {
-//        if (sequence.NAME.equals(READ_BALL_BATTERY_COM_SEQ_NAME))
-//        {
-//            // In the event of failure try to read again
-//            if (event == GattCommandSequence.Event.ENDED_EARLY || event == GattCommandSequence.Event.FAILED_TO_BEGIN)
-//            {
-//                Log.w(TAG, "Error starting command sequence to read ball battery info: " + event + ", trying again...");
-//                SmartBall ball = MainActivity.getBluetoothBridge().getSmartBall();
-//
-//                if (ball != null)
-//                    requestReadBallInfo(ball);
-//                else
-//                    Log.w(TAG, "Error requesting ball battery info: ball is null");
-//            }
-//        }
+        if (sequence.NAME.equals(READ_BALL_BATTERY_COM_SEQ_NAME))
+        {
+            // In the event of failure try to read again
+            if (event == GattCommandSequence.Event.ENDED_EARLY || event == GattCommandSequence.Event.FAILED_TO_BEGIN)
+            {
+                Log.w(TAG, "Error starting command sequence to read ball battery info: " + event);
+            }
+        }
     }
 
     /**
@@ -194,24 +178,24 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     @Override
     public void onCommandRead(String id, byte[] data, int status)
     {
-        if (id.equals(SmartBall.Characteristic.BATTERY.name()))
-        {
-            byte batteryLevelByte = (data == null || data.length == 0 ? 0 : data[0]);
-            batteryLevel = 0.0085 * batteryLevelByte * batteryLevelByte + 0.143 * batteryLevelByte;
-        }
-        else if (id.equals(SmartBall.Characteristic.CHARGING_STATE.name()))
-        {
-            ballIsCharging = (data[0] == 1); // TODO may be wrong
-        }
-
-        getActivity().runOnUiThread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                setBatteryViews();
-            }
-        });
+//        if (id.equals(SmartBall.Characteristic.BATTERY.name()))
+//        {
+//            byte batteryLevelByte = (data == null || data.length == 0 ? 0 : data[0]);
+//            batteryLevel = 0.0085 * batteryLevelByte * batteryLevelByte + 0.143 * batteryLevelByte;
+//        }
+//        else if (id.equals(SmartBall.Characteristic.CHARGING_STATE.name()))
+//        {
+//            ballIsCharging = (data[0] == 24 && data[1] == 0);
+//        }
+//
+//        getActivity().runOnUiThread(new Runnable()
+//        {
+//            @Override
+//            public void run()
+//            {
+//                setBatteryViews();
+//            }
+//        });
     }
 
     /**
@@ -227,6 +211,9 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     {
         // Set values
         setValuesForCurrentState(bridge);
+
+//        if (bridge.getState() == BluetoothBridge.State.CONNECTED)
+//            updaterThread.reset();
     }
 
     /*
@@ -234,36 +221,54 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
      */
     private void setValuesForCurrentState(BluetoothBridge bridge)
     {
-        switch (bridge.getState())
+        final SmartBallConnection connection = bridge.getSmartBallConnection();
+
+        if (connection == null)
         {
-            case SCANNING:
-                setScanningValues();
-                break;
-            case CONNECTION_CHANGING:
-                setConnectionPendingValues(bridge.getSmartBall());
-                break;
-            case CONNECTED:
-                setConnectionStableValues(bridge.getSmartBall());
-                break;
-            case DISCONNECTED:
-                if (bridge.getSmartBall() == null)
-                    setDefaultValues();
-                else
-                    setConnectionStableValues(bridge.getSmartBall());
-                break;
-            default:
-                setDefaultValues();
-                break;
+            setValuesForNullConnection();
+            return;
         }
 
-        // Wake up thread
-        readerThread.sleep(false);
+        if (getActivity() != null)
+            getActivity().runOnUiThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    // Set Background Color
+                    if (connection.getConnectionState() == SmartBallConnection.ConnectionState.DISCONNECTED)
+                        view.setBackgroundResource(R.color.colorStatusFailure);
+                    else if (connection.getConnectionState() == SmartBallConnection.ConnectionState.CONNECTED)
+                        view.setBackgroundResource(R.color.colorStatusSuccess);
+                    else
+                        view.setBackgroundResource(R.color.colorStatusNeutral);
+
+                    // Set name
+                    nameView.setText(connection.getSmartBall().DEVICE.getName());
+
+                    // Set connection status
+                    connectionView.setText(connection.getConnectionState().displayName);
+                    connectionView.setVisibility(View.VISIBLE);
+
+                    // Show progress circle if needed
+                    progressView.setVisibility(
+                            connection.getConnectionState() == SmartBallConnection.ConnectionState.CONNECTING ||
+                            connection.getConnectionState() == SmartBallConnection.ConnectionState.DISCONNECTING ?
+                            View.VISIBLE : View.GONE);
+
+                    // Hide stats view if not connected
+                    statsView.setVisibility(
+                            connection.getConnectionState() == SmartBallConnection.ConnectionState.CONNECTED ?
+                            View.VISIBLE : View.GONE);
+
+                }
+            });
     }
 
-    /*
-     * Sets the default values of the views of this Fragment.
+    /**
+     * Sets the view values for when there is a null connection.
      */
-    private void setDefaultValues()
+    private void setValuesForNullConnection()
     {
         if (getActivity() == null)
             return;
@@ -285,106 +290,59 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     }
 
     /*
-     * Sets the values when scanning is taking place.
-     */
-    private void setScanningValues()
-    {
-        if (getActivity() == null)
-            return;
-
-        getActivity().runOnUiThread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                view.setBackgroundResource(R.color.colorStatusNeutral);
-                nameView.setText(getString(R.string.scanning));
-                connectionView.setVisibility(View.GONE);
-                progressView.setVisibility(View.VISIBLE);
-                statsView.setVisibility(View.GONE);
-            }
-        });
-    }
-
-    /*
-     * Sets the values when there is a SmartBall that is in the process of changing its connection state.
-     */
-    private void setConnectionPendingValues(@NonNull final SmartBall ball)
-    {
-        if (getActivity() == null)
-            return;
-
-        getActivity().runOnUiThread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                view.setBackgroundResource(R.color.colorStatusNeutral);
-                nameView.setText(ball.DEVICE.getName());
-                connectionView.setVisibility(View.VISIBLE);
-                connectionView.setText(ball.CONNECTION.getConnectionState().displayName);
-                progressView.setVisibility(View.VISIBLE);
-                statsView.setVisibility(View.GONE);
-            }
-        });
-    }
-
-    /*
-     * Sets the values when there is a SmartBall that is in a stable connection state.
-     */
-    private void setConnectionStableValues(@NonNull final SmartBall ball)
-    {
-        if (getActivity() == null)
-            return;
-
-        getActivity().runOnUiThread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                nameView.setText(ball.DEVICE.getName());
-                connectionView.setVisibility(View.VISIBLE);
-                connectionView.setText(ball.CONNECTION.getConnectionState().displayName);
-                progressView.setVisibility(View.GONE);
-
-                if (ball.CONNECTION.getConnectionState() == SmartBallConnection.ConnectionState.CONNECTED)
-                {
-                    view.setBackgroundResource(R.color.colorStatusSuccess);
-                    statsView.setVisibility(View.VISIBLE);
-
-                    // Query stats // TODO Have thread running?
-                }
-                else
-                {
-                    view.setBackgroundResource(R.color.colorStatusFailure);
-                    statsView.setVisibility(View.GONE);
-                }
-            }
-        });
-    }
-
-    /**
      * Sets the values of the battery related views.
      */
-    private void setBatteryViews()
+    private void setBatteryViews(final int batteryLevel, final boolean ballIsCharging)
     {
-        batteryView.setText(Utils.getPercentString(batteryLevel));
-        batteryIcon.setImageLevel((int)Math.round(batteryLevel) + (ballIsCharging ? 1000 : 0));
+        getActivity().runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                batteryView.setText(Utils.getPercentString(batteryLevel));
+                batteryIcon.setImageLevel((int) Math.round(batteryLevel) + (ballIsCharging ? 1000 : 0));
+            }
+        });
     }
 
     /*
-     * Creates and executes a CommandSequence to read the battery level SmartBall.
-     * @param ball The SmartBall whose info to read
+     * Sets the values of the rssi related views.
      */
-    private void requestReadBallInfo(SmartBall ball)
+    private void setRSSIViews(final int level)
     {
-        Log.d(TAG, "Requesting to read SmartBall info...");
+        getActivity().runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                signalView.setText(Utils.getPercentString(level));
+                signalIcon.setImageLevel(level);
+            }
+        });
+    }
 
+    /*
+     * Creates and executes a CommandSequence to read the rssi of the SmartBall.
+     */
+    private void requestReadBallRSSI()
+    {
         // Read rssi
         SmartBallConnection connection = MainActivity.getBluetoothBridge().getSmartBallConnection();
 
         if (connection != null && connection.getBluetoothGatt() != null)
             connection.getBluetoothGatt().readRemoteRssi();
+    }
+
+    /*
+     * Creates and executes a CommandSequence to read the battery level of the SmartBall.
+     * @param ball The SmartBall whose info to read
+     */
+    private void requestReadBallBattery()
+    {
+        SmartBall ball = MainActivity.getBluetoothBridge().getSmartBall();
+
+        if (ball == null)
+            return;
 
         // Create the command sequence
         GattCommandSequence sequence = new GattCommandSequence(READ_BALL_BATTERY_COM_SEQ_NAME, this);
@@ -408,80 +366,130 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     }
 
     /**
-     * Class to handle periodically reading from the SmartBall.
+     * Thread for periodically updating the HUDFragment.
+     *
+     * Created by Theodore on 4/6/2016.
      */
-    private class BallInfoReaderThread extends Thread
+    public class UpdaterThread extends Thread
     {
-        // Whether or not is sleeping
-        private boolean isAsleep;
+        // The delay for reading the battery
+        private final int BATTERY_READ_DELAY_S = 10;
 
-        // True when running
-        private boolean isRunning;
+        // Lock for sleeping on
+        private final Object LOCK;
 
-        // The SmartBall
-        private SmartBall ball;
+        // The timer for reading the battery level
+        private int batteryReadTimer;
+
+        // Whether the thread should die
+        private boolean isDead;
+
+        // Whether or not this thread should block
+        private boolean isBlocked;
 
         /**
-         * Sets whether or not this Runnable should sleep
-         * @param sleep Whether or not to sleep
+         * Default Constructor.
          */
-        public void sleep(boolean sleep)
+        public UpdaterThread()
         {
-            isAsleep = sleep;
+            LOCK = new Object();
+        }
 
-            if (!isAsleep)
-            {
-                synchronized (BALL_INFO_READER_LOCK)
-                {
-                    BALL_INFO_READER_LOCK.notifyAll();
-                }
-            }
+        /**
+         * Resets the timers and blocked status (to unblocked) of this UpdaterThread.
+         */
+        public void reset()
+        {
+            Log.e(TAG, "STUPID RESET CALLED(*COUSOUHOSUDHO");
+
+            batteryReadTimer = 0;
+            unblock();
+            interrupt();
+            unblock();
         }
 
         @Override
         public void run()
         {
-            isRunning = true;
+            isDead = false;
+            isBlocked = true;
+            batteryReadTimer = 0;
 
-//            while (isRunning)
-//            {
-//                Log.d(TAG, "Update Thread loop start...");
-//
-//                // Get the SmartBall
-//                ball = MainActivity.getBluetoothBridge().getSmartBall();
-//
-//                // Block if asleep
-//                while (isAsleep)
-//                {
-//                    synchronized (BALL_INFO_READER_LOCK)
-//                    {
-//                        try
-//                        {
-//                            Log.d(TAG, "Update Thread waiting while asleep");
-//                            BALL_INFO_READER_LOCK.wait();
-//                        }
-//                        catch (InterruptedException e)
-//                        { /* Ignore */ }
-//                    }
-//                }
-//
-//                // Query the data
-//                if (ball != null && ball.CONNECTION.getConnectionState() == SmartBallConnection.ConnectionState.CONNECTED)
-//                {
-//                    Log.d(TAG, "Update Thread requesting ball info...");
-//                    requestReadBallInfo(ball);
-//                }
-//                else
-//                    Log.w(TAG, "Update Thread: Global ball is null");
-//
-//                // Sleep
-//                try
-//                {
-//                    Thread.sleep(1000L);
-//                }
-//                catch (InterruptedException e)
-//                {/* Ignore */ }
-//            }
+            while (!isDead)
+            {
+                // Block if needed
+                if (isBlocked)
+                {
+                    synchronized (LOCK)
+                    {
+                        try
+                        {
+                            LOCK.wait();
+                        }
+                        catch (InterruptedException ignore) {}
+                    }
+                }
+
+                if (!isDead && !isBlocked)
+                {
+                    // Otherwise do work and continue
+
+                    // Read battery
+                    if (--batteryReadTimer <= 0)
+                    {
+                        batteryReadTimer = BATTERY_READ_DELAY_S;
+                        Log.e(TAG, "BATTERY REQUESTED******************************");
+                        requestReadBallBattery();
+                    }
+
+                    // Read rssi
+                    requestReadBallRSSI();
+
+                    try
+                    {
+                        Thread.sleep(1000L);
+                    }
+                    catch (InterruptedException ignore) {}
+                }
+            }
+        }
+
+        /**
+         * Unblocks this UpdaterThread if needed.
+         */
+        public void unblock()
+        {
+            if (!isBlocked)
+                return;
+
+            isBlocked = false;
+
+            // Wake up
+            synchronized (LOCK)
+            {
+                LOCK.notify();
+            }
+        }
+
+        /**
+         * Blocks this UpdaterThread.
+         */
+        public void block()
+        {
+            isBlocked = true;
+        }
+
+        /**
+         * Kills this UpdaterThread.
+         */
+        public void kill()
+        {
+            isDead = false;
+
+            synchronized (LOCK)
+            {
+                LOCK.notify();
+            }
         }
     }
 }

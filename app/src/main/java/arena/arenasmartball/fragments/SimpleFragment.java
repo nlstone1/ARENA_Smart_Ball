@@ -24,6 +24,18 @@ public class SimpleFragment extends Fragment implements BluetoothBridge.Bluetoot
     }
 
     /**
+     * Called when this SimpleFragment is opened.
+     */
+    public void onOpen()
+    {   }
+
+    /**
+     * Called when this SimpleFragment is closed.
+     */
+    public void onClose()
+    {   }
+
+    /**
      * Load any saved instance state here.
      * @param bundle The Bundle from which to load
      */

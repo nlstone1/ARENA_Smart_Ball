@@ -11,6 +11,12 @@
     <!-- Fragment Sizes -->
     <dimen name="hud_fragment_height">48dp</dimen>
 
+    <!-- Size of main smart ball icon -->
+    <dimen name="main_smartball_icon_size">64dp</dimen>
+
+    <!-- Size of scan result smart ball icon -->
+    <dimen name="scanresult_smartball_icon_size">48dp</dimen>
+
     <!-- Text sizes -->
     <dimen name="text_small">12sp</dimen>
     <dimen name="text_medium">16sp</dimen>

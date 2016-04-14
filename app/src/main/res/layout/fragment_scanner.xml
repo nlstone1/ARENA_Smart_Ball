@@ -6,12 +6,111 @@
              android:orientation="vertical"
              tools:context="arena.arenasmartball.fragments.ScannerFragment">
 
-    <!-- Scan and connect view -->
-    <arena.arenasmartball.views.ScannerView
-        android:id="@+id/scanner_view"
-        android:padding="32dp"
+    <!-- Separator -->
+    <View style="@style/verticalSeparator"/>
+
+    <!-- Connect Title -->
+    <TextView style="@style/TextTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        custom:donutThickness="72sp"/>
+        android:text="@string/connect"
+        android:textSize="@dimen/text_large"/>
+
+    <!-- Separator -->
+    <View style="@style/verticalSeparator"/>
+
+    <!-- Preview Layout-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Ball Image -->
+        <ImageView
+            android:id="@+id/imageview_scanner_ball_image"
+            android:layout_width="@dimen/main_smartball_icon_size"
+            android:layout_height="@dimen/main_smartball_icon_size"
+            android:layout_margin="4dp"
+            android:src="@drawable/smartball_image"
+            android:contentDescription="@string/ball_ic_content"/>
+
+        <!-- Connect Button -->
+        <Button
+            android:id="@+id/button_scanner_connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="@string/connect"/>
+
+        <!-- Ball Name -->
+        <TextView
+            android:id="@+id/textview_scanner_ball_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_toEndOf="@id/imageview_scanner_ball_image"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/button_scanner_connect"
+            android:text="@string/no_device_chosen"
+            android:textSize="@dimen/text_medium"
+            android:singleLine="true"
+            android:ellipsize="end"/>
+
+        </RelativeLayout>
+
+    <!-- Separator -->
+    <View style="@style/verticalSeparator"/>
+
+    <!-- Discover Title -->
+    <TextView style="@style/TextTitle"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/discover"
+              android:textSize="@dimen/text_large"/>
+
+    <!-- Separator -->
+    <View style="@style/verticalSeparator"/>
+
+    <!-- Switch and status string -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Switch -->
+        <Switch
+            android:id="@+id/switch_scanner_scan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:padding="8dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"/>
+
+        <!-- Text -->
+        <TextView
+            android:id="@+id/textview_scanner_scan_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/switch_scanner_scan"
+            android:text="@string/enable_scanning"
+            android:textSize="@dimen/text_medium"
+            android:singleLine="true"
+            android:ellipsize="end"/>
+
+    </RelativeLayout>
+
+    <!-- Separator -->
+    <View style="@style/verticalSeparator"/>
+
+    <!-- List of found items -->
+    <ListView
+        android:id="@+id/listview_scanner_results"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </ListView>
 
 </LinearLayout>

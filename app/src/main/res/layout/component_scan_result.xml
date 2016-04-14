@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/component_scan_result"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:descendantFocusability="blocksDescendants"
+              android:focusable="false"
+              android:clickable="false"
+              android:layout_margin="4dp">
+
+    <!-- Ball Image -->
+    <ImageView
+        android:id="@+id/imageview_scanresult_ball_image"
+        android:layout_width="@dimen/scanresult_smartball_icon_size"
+        android:layout_height="@dimen/scanresult_smartball_icon_size"
+        android:layout_margin="4dp"
+        android:focusable="false"
+        android:clickable="false"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/smartball_image"
+        android:contentDescription="@string/ball_ic_content"/>
+
+    <!-- Name, rssi, and status layout -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:focusable="false"
+        android:clickable="false"
+        android:layout_toEndOf="@id/imageview_scanresult_ball_image"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="8dp">
+
+        <!-- Name and rssi -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:clickable="false"
+            android:orientation="horizontal">
+
+            <!-- Name -->
+            <TextView
+                android:id="@+id/textview_scanresult_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:focusable="false"
+                android:clickable="false"
+                android:text="DB00387938"
+                android:textSize="@dimen/text_medium"/>
+
+            <!-- RSSI -->
+            <ImageView
+                android:id="@+id/imageview_scanresult_rssi"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingTop="4dp"
+                android:focusable="false"
+                android:clickable="false"
+                android:src="@drawable/ic_signal"
+                android:contentDescription="@string/battery_ic_content"/>
+
+        </LinearLayout>
+
+        <!-- Connection status -->
+        <TextView
+            android:id="@+id/textview_scanresult_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:clickable="false"
+            android:layout_margin="4dp"
+            android:text="@string/connected"
+            android:textStyle="italic"
+            android:textSize="@dimen/text_medium"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
