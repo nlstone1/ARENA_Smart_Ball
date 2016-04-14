@@ -1,6 +1,7 @@
 package arena.arenasmartball.fragments;
 
 import android.app.Fragment;
+import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,6 +36,18 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     // The name of the command sequence used to read the SmartBall battery info
     private static final String READ_BALL_BATTERY_COM_SEQ_NAME = "HUDFragReadBallInfo";
 
+//    // The charging flag bundle id
+//    private static String CHARGING_FLAG_BUNDLE_ID = "HUDFragment.CF";
+//
+//    // The batter level bundle id
+//    private static String BATTERY_LEVEL_BUNDLE_ID = "HUDFragment.BL";
+
+    // Denotes whether or not the ball is charging
+    private static boolean ballIsCharging;
+
+    // Records the battery level of the ball
+    private static double batteryLevel;
+
     // The parent View
     private View view;
 
@@ -57,14 +70,8 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     // The battery level icon
     private ImageView batteryIcon;
 
-//    // Denotes whether or not the ball is charging
-//    private boolean ballIsCharging;
-//
-//    // Records the battery level of the ball
-//    private double batteryLevel;
-//
-//    // Thread to handle periodically updating
-//    private UpdaterThread updaterThread;
+    // Thread to handle periodically updating
+    private UpdaterThread updaterThread;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -84,8 +91,8 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
         signalIcon = (ImageView)view.findViewById(R.id.imageview_hud_rssi);
 
         // Create Thread
-//        updaterThread = new UpdaterThread();
-//        updaterThread.start();
+        updaterThread = new UpdaterThread();
+        updaterThread.start();
 
         // Set Default values
         setValuesForCurrentState(MainActivity.getBluetoothBridge());
@@ -95,31 +102,65 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     }
 
     @Override
+    public void onDestroyView()
+    {
+        super.onDestroyView();
+
+        BluetoothBridge bridge = MainActivity.getBluetoothBridge();
+        bridge.removeBluetoothBridgeStateChangeListener(this);
+
+        if (bridge.getSmartBallConnection() != null)
+            bridge.getSmartBallConnection().removeSmartBallConnectionListener(this);
+
+        updaterThread.kill();
+        updaterThread = null;
+    }
+
+    @Override
     public void onPause()
     {
-        Log.w(TAG, "onPause()");
-
         super.onPause();
+        updaterThread.block();
 //        updaterThread.kill();
 //        updaterThread = null;
+
+//        Bundle bundle;
+//
+//        if (getArguments() == null)
+//        {
+//            bundle = new Bundle();
+//            setArguments(bundle);
+//        }
+//        else
+//            bundle = getArguments();
+//
+//        // Save
+//        bundle.putBoolean(CHARGING_FLAG_BUNDLE_ID, ballIsCharging);
+//        bundle.putDouble(BATTERY_LEVEL_BUNDLE_ID, batteryLevel);
     }
 
     @Override
     public void onResume()
     {
-        Log.w(TAG, "onResume()");
-
         super.onResume();
 
 //        updaterThread = new UpdaterThread();
 //
-//        if (MainActivity.getBluetoothBridge().getState() == BluetoothBridge.State.CONNECTED)
-//            updaterThread.reset();
+        if (MainActivity.getBluetoothBridge().getState() == BluetoothBridge.State.CONNECTED)
+            updaterThread.reset();
 
         // Set values
         BluetoothBridge bridge = MainActivity.getBluetoothBridge();
         bridge.addBluetoothBridgeStateChangeListener(this);
         setValuesForCurrentState(bridge);
+
+//        // Load
+//        Bundle bundle = getArguments();
+//        if (bundle != null)
+//        {
+//            ballIsCharging = bundle.getBoolean(CHARGING_FLAG_BUNDLE_ID);
+//            batteryLevel = bundle.getDouble(BATTERY_LEVEL_BUNDLE_ID);
+//        }
     }
 
     /**
@@ -174,24 +215,35 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     @Override
     public void onCommandRead(String id, byte[] data, int status)
     {
-//        if (id.equals(SmartBall.Characteristic.BATTERY.name()))
-//        {
-//            byte batteryLevelByte = (data == null || data.length == 0 ? 0 : data[0]);
-//            batteryLevel = 0.0085 * batteryLevelByte * batteryLevelByte + 0.143 * batteryLevelByte;
-//        }
-//        else if (id.equals(SmartBall.Characteristic.CHARGING_STATE.name()))
-//        {
-//            ballIsCharging = (data[0] == 24 && data[1] == 0);
-//        }
-//
-//        getActivity().runOnUiThread(new Runnable()
-//        {
-//            @Override
-//            public void run()
-//            {
-//                setBatteryViews();
-//            }
-//        });
+        if (status == BluetoothGatt.GATT_FAILURE)
+            return;
+
+        if (id.equals(Services.Characteristic.BATTERY.name()))
+        {
+            byte batteryLevelByte = (data == null || data.length == 0 ? 0 : data[0]);
+            batteryLevel = Math.ceil(0.0085 * batteryLevelByte * batteryLevelByte + 0.143 * batteryLevelByte);
+        }
+        else if (id.equals(Services.Characteristic.CHARGING_STATE.name()))
+        {
+            ballIsCharging = (data[0] > 0 && data[1] == 0);
+        }
+
+        final boolean charging = ballIsCharging;
+        final double level = batteryLevel;
+
+        try
+        {
+            getActivity().runOnUiThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    setBatteryViews(level, charging);
+                }
+            });
+        }
+        catch (Exception e)
+        { /* Ignore */ }
     }
 
     /**
@@ -208,8 +260,8 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
         // Set values
         setValuesForCurrentState(bridge);
 
-//        if (bridge.getState() == BluetoothBridge.State.CONNECTED)
-//            updaterThread.reset();
+        if (bridge.getState() == BluetoothBridge.State.CONNECTED)
+            updaterThread.reset();
     }
 
     /*
@@ -222,8 +274,16 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
         if (connection == null)
         {
             setValuesForNullConnection();
+            updaterThread.block();
             return;
         }
+
+        connection.addSmartBallConnectionListener(this);
+
+        if (connection.getConnectionState() == SmartBallConnection.ConnectionState.CONNECTED)
+            updaterThread.unblock();
+        else
+            updaterThread.block();
 
         if (getActivity() != null)
             getActivity().runOnUiThread(new Runnable()
@@ -288,8 +348,10 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     /*
      * Sets the values of the battery related views.
      */
-    private void setBatteryViews(final int batteryLevel, final boolean ballIsCharging)
+    private void setBatteryViews(final double batteryLevel, final boolean ballIsCharging)
     {
+        Log.w(TAG, "Battery View set: level = " + batteryLevel + ", Charging = " + ballIsCharging);
+
         getActivity().runOnUiThread(new Runnable()
         {
             @Override
@@ -396,8 +458,6 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
          */
         public void reset()
         {
-            Log.e(TAG, "STUPID RESET CALLED(*COUSOUHOSUDHO");
-
             batteryReadTimer = 0;
             unblock();
             interrupt();
@@ -434,7 +494,6 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
                     if (--batteryReadTimer <= 0)
                     {
                         batteryReadTimer = BATTERY_READ_DELAY_S;
-                        Log.e(TAG, "BATTERY REQUESTED******************************");
                         requestReadBallBattery();
                     }
 

@@ -9,6 +9,7 @@ import android.util.Log;
 import java.util.HashSet;
 import java.util.Set;
 
+import arena.arenasmartball.ball.Services;
 import arena.arenasmartball.ball.SmartBall;
 import arena.arenasmartball.ball.SmartBallConnection;
 import arena.arenasmartball.ball.SmartBallScanner;
@@ -295,7 +296,11 @@ public class BluetoothBridge implements SmartBallConnection.SmartBallConnectionL
         if (state == SmartBallConnection.ConnectionState.CONNECTED)
         {
 //            this.state = State.CONNECTED;
-            return;
+
+            if (connection.getSmartBall().getNumCharacteristicsFound() == Services.Characteristic.values().length)
+                this.state = State.CONNECTED;
+            else
+                return;
         }
         else if (state == SmartBallConnection.ConnectionState.DISCONNECTED ||
                  state == SmartBallConnection.ConnectionState.NOT_CONNECTED)

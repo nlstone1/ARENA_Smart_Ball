@@ -19,4 +19,11 @@
         android:name="arena.arenasmartball.fragments.HUDFragment"
         tools:layout="@layout/fragment_hud"/>
 
+    <!-- Placeholder for fragments -->
+    <FrameLayout
+        android:id="@+id/framelayout_content_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </FrameLayout>
+
 </LinearLayout>

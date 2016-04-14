@@ -6,62 +6,6 @@
              android:orientation="vertical"
              tools:context="arena.arenasmartball.fragments.ScannerFragment">
 
-    <!-- Separator -->
-    <View style="@style/verticalSeparator"/>
-
-    <!-- Connect Title -->
-    <TextView style="@style/TextTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/connect"
-        android:textSize="@dimen/text_large"/>
-
-    <!-- Separator -->
-    <View style="@style/verticalSeparator"/>
-
-    <!-- Preview Layout-->
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <!-- Ball Image -->
-        <ImageView
-            android:id="@+id/imageview_scanner_ball_image"
-            android:layout_width="@dimen/main_smartball_icon_size"
-            android:layout_height="@dimen/main_smartball_icon_size"
-            android:layout_margin="4dp"
-            android:src="@drawable/smartball_image"
-            android:contentDescription="@string/ball_ic_content"/>
-
-        <!-- Connect Button -->
-        <Button
-            android:id="@+id/button_scanner_connect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:text="@string/connect"/>
-
-        <!-- Ball Name -->
-        <TextView
-            android:id="@+id/textview_scanner_ball_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:layout_toEndOf="@id/imageview_scanner_ball_image"
-            android:layout_centerVertical="true"
-            android:layout_toStartOf="@id/button_scanner_connect"
-            android:text="@string/no_device_chosen"
-            android:textSize="@dimen/text_medium"
-            android:singleLine="true"
-            android:ellipsize="end"/>
-
-        </RelativeLayout>
-
-    <!-- Separator -->
-    <View style="@style/verticalSeparator"/>
-
     <!-- Discover Title -->
     <TextView style="@style/TextTitle"
               android:layout_width="wrap_content"

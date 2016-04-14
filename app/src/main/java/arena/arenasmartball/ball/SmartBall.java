@@ -273,6 +273,15 @@ public class SmartBall
     }
 
     /**
+     * Gets the number of characteristics that have been found by this SmartBall.
+     * @return The number of characteristics that have been found by this SmartBall
+     */
+    public int getNumCharacteristicsFound()
+    {
+        return characteristicRepository.size();
+    }
+
+    /**
      * Method to get a BluetoothGattCharacteristic from this SmartBall.
      * @param characteristic The Characteristic representing the BluetoothGattCharacteristic to get
      * @return The BluetoothGattCharacteristic corresponding to characteristic

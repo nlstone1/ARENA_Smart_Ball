@@ -5,6 +5,7 @@
 
     <!-- Name and connection state views -->
     <LinearLayout
+        android:id="@+id/linearlayout_hud_name"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -40,6 +41,17 @@
 
     </LinearLayout>
 
+    <!-- Progress -->
+    <ProgressBar style="@android:style/Widget.ProgressBar.Large"
+             android:id="@+id/progress_hud"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_centerVertical="true"
+             android:layout_toEndOf="@id/linearlayout_hud_name"
+             android:layout_margin="4dp"
+             android:padding="6dp"
+             android:indeterminate="true"/>
+
 
     <!-- Battery and RSSI Views -->
     <LinearLayout
@@ -49,13 +61,6 @@
         android:orientation="horizontal"
         android:layout_centerVertical="true"
         android:layout_alignParentEnd="true">
-
-        <!-- Progress -->
-        <ProgressBar
-            android:id="@+id/progress_hud"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"/>
 
         <!-- Separator -->
         <View style="@style/horizontalSeparator"

@@ -30,7 +30,7 @@ public class Utils
      */
     public static int getRSSISignalStrength(int rssi)
     {
-        return WifiManager.calculateSignalLevel(rssi, 5);
+        return WifiManager.calculateSignalLevel(rssi, 101);
     }
 
     /**

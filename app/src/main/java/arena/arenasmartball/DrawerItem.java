@@ -111,7 +111,8 @@ public enum DrawerItem
 
                 FragmentTransaction transaction = activity.getFragmentManager().beginTransaction();
 
-                transaction.replace(R.id.content_main, currentFragment);
+                transaction.replace(R.id.framelayout_content_main, currentFragment);
+//                transaction.replace(R.id.content_main, currentFragment);
                 transaction.addToBackStack(null);
 
                 transaction.commit();

@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
@@ -33,26 +34,17 @@ import arena.arenasmartball.ball.SmartBallScanner;
  *
  * Created by Nathaniel on 4/5/2016.
  */
-public class ScannerFragment extends SimpleFragment implements CompoundButton.OnCheckedChangeListener, View.OnClickListener,
-        SmartBallScanner.SmartBallScannerListener, AdapterView.OnItemClickListener
+public class ScannerFragment extends SimpleFragment implements CompoundButton.OnCheckedChangeListener,
+        SmartBallScanner.SmartBallScannerListener
 {
-    // The bundle id for the selected result
-    private static final String SELECTED_RESULT_BUNDLE_ID = "ScannerFragment.SR";
-
-    // The currently selected ScanResult
-    private ScanResult selectedScanResult;
+    // The tag for this class
+    private static final String TAG = "ScannerFragment";
 
     // A sorted list of ScanResults
     private PriorityQueue<ScanResult> resultQueue;
 
-    // The name of the selected result
-    private TextView selectedResultNameView;
-
     // The scanning status
     private TextView scanStatusView;
-
-    // The connect / disconnect button
-    private Button connectButton;
 
     // The scan switch
     private Switch scanSwitch;
@@ -70,12 +62,17 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
             @Override
             public int compare(ScanResult lhs, ScanResult rhs)
             {
-                if (Utils.areEqual(lhs, selectedScanResult))
-                    return -100;
-                else if (Utils.areEqual(rhs, selectedScanResult))
-                    return 100;
-                else
-                    return lhs.getRssi() - rhs.getRssi();
+                SmartBall globalBall = MainActivity.getBluetoothBridge().getSmartBall();
+
+                if (globalBall != null)
+                {
+                    if (Utils.areEqual(lhs.getDevice(), globalBall.DEVICE))
+                        return -100;
+                    else if (Utils.areEqual(rhs.getDevice(), globalBall.DEVICE))
+                        return 100;
+                }
+
+                return lhs.getRssi() - rhs.getRssi();
             }
         });
     }
@@ -87,15 +84,9 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
         View view = inflater.inflate(R.layout.fragment_scanner, container, false);
 
         // Get views
-        selectedResultNameView = (TextView) view.findViewById(R.id.textview_scanner_ball_name);
         scanStatusView = (TextView) view.findViewById(R.id.textview_scanner_scan_status);
-        connectButton = (Button) view.findViewById(R.id.button_scanner_connect);
         scanSwitch = (Switch) view.findViewById(R.id.switch_scanner_scan);
         resultList = (ListView) view.findViewById(R.id.listview_scanner_results);
-
-        // Set listeners
-        connectButton.setOnClickListener(this);
-        scanSwitch.setOnCheckedChangeListener(this);
 
         // Attach to Scanner
         MainActivity.getBluetoothBridge().getSmartBallScanner().addSmartBallScannerListener(this);
@@ -103,28 +94,19 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
         // Initialize
         setValuesForCurrentState(MainActivity.getBluetoothBridge());
 
+        // Set listeners
+        scanSwitch.setOnCheckedChangeListener(this);
+
         return view;
     }
 
-    /**
-     * Load any saved instance state here.
-     * @param bundle The Bundle from which to load
-     */
     @Override
-    public void load(@NonNull Bundle bundle)
+    public void onDestroyView()
     {
-        selectedScanResult = bundle.getParcelable(SELECTED_RESULT_BUNDLE_ID);
-    }
+        super.onDestroyView();
 
-    /**
-     * Save any state information here.
-     * @param bundle The Bundle to which to save
-     */
-    @Override
-    public void save(@NonNull Bundle bundle)
-    {
-        if (selectedScanResult != null)
-            bundle.putParcelable(SELECTED_RESULT_BUNDLE_ID, selectedScanResult);
+        MainActivity.getBluetoothBridge().getSmartBallScanner().removeSmartBallScannerListener(this);
+        MainActivity.getBluetoothBridge().removeBluetoothBridgeStateChangeListener(this);
     }
 
     /*
@@ -132,33 +114,6 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
      */
     private void setValuesForCurrentState(BluetoothBridge bridge)
     {
-        // Set displayed result views
-        if (selectedScanResult == null)
-        {
-            selectedResultNameView.setText(R.string.no_device_chosen);
-            connectButton.setText(R.string.connect);
-            connectButton.setEnabled(false);
-        }
-        else
-        {
-            selectedResultNameView.setText(selectedScanResult.getDevice().getName());
-            connectButton.setEnabled(true);
-
-            SmartBall globalBall = bridge.getSmartBall();
-
-            if (globalBall != null && Utils.areEqual(globalBall.DEVICE, selectedScanResult.getDevice()))
-            {
-                if (bridge.getSmartBallConnection().getConnectionState() == SmartBallConnection.ConnectionState.CONNECTED)
-                    connectButton.setText(R.string.disconnect);
-                else if (bridge.getSmartBallConnection().getConnectionState() == SmartBallConnection.ConnectionState.CONNECTING)
-                    connectButton.setText(R.string.cancel_connection);
-                else
-                    connectButton.setText(R.string.connect);
-            }
-            else
-                connectButton.setText(R.string.connect);
-        }
-
         // Set scanning views
         if (bridge.getSmartBallScanner().isScanningStarted())
         {
@@ -191,7 +146,6 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
 
         // Set adapter
         resultList.setAdapter(results);
-        resultList.setOnItemClickListener(this);
     }
 
     /**
@@ -204,14 +158,19 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
     @Override
     public void onBluetoothBridgeStateChanged(final BluetoothBridge bridge, BluetoothBridge.State newState, BluetoothBridge.State oldState)
     {
-        getActivity().runOnUiThread(new Runnable()
+        try
         {
-            @Override
-            public void run()
+            getActivity().runOnUiThread(new Runnable()
             {
-                setValuesForCurrentState(bridge);
-            }
-        });
+                @Override
+                public void run()
+                {
+                    setValuesForCurrentState(MainActivity.getBluetoothBridge());
+                }
+            });
+        }
+        catch (Exception e)
+        { /* Ignore */ }
     }
 
     /**
@@ -229,50 +188,50 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
             MainActivity.getBluetoothBridge().stopScanning();
     }
 
-    /**
-     * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
-     */
-    @Override
-    public void onClick(View v)
-    {
-        BluetoothBridge bridge = MainActivity.getBluetoothBridge();
+//    /**
+//     * Called when a view has been clicked.
+//     *
+//     * @param v The view that was clicked.
+//     */
+//    @Override
+//    public void onClick(View v)
+//    {
+//        BluetoothBridge bridge = MainActivity.getBluetoothBridge();
+//
+//        if (bridge.getSmartBall() != null && Utils.areEqual(selectedScanResult.getDevice(), bridge.getSmartBall().DEVICE))
+//        {
+//            if (bridge.getSmartBallConnection().getConnectionState() == SmartBallConnection.ConnectionState.CONNECTED ||
+//                bridge.getSmartBallConnection().getConnectionState() == SmartBallConnection.ConnectionState.CONNECTING)
+//                bridge.disconnect();
+//            else
+//                bridge.reconnect();
+//        }
+//        else
+//            bridge.connect(selectedScanResult);
+//    }
 
-        if (bridge.getSmartBall() != null && Utils.areEqual(selectedScanResult.getDevice(), bridge.getSmartBall().DEVICE))
-        {
-            if (bridge.getSmartBallConnection().getConnectionState() == SmartBallConnection.ConnectionState.CONNECTED ||
-                bridge.getSmartBallConnection().getConnectionState() == SmartBallConnection.ConnectionState.CONNECTING)
-                bridge.disconnect();
-            else
-                bridge.reconnect();
-        }
-        else
-            bridge.connect(selectedScanResult);
-    }
-
-    /**
-     * Callback method to be invoked when an item in this AdapterView has
-     * been clicked.
-     * <p>
-     * Implementers can call getItemAtPosition(position) if they need
-     * to access the data associated with the selected item.
-     *
-     * @param parent   The AdapterView where the click happened.
-     * @param view     The view within the AdapterView that was clicked (this
-     *                 will be a view provided by the adapter)
-     * @param position The position of the view in the adapter.
-     * @param id       The row id of the item that was clicked.
-     */
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-    {
-        selectedScanResult = (ScanResult)parent.getItemAtPosition(position);
-
-        Log.e("DEBUG", "Item Click: Item = " + selectedScanResult);
-
-        setValuesForCurrentState(MainActivity.getBluetoothBridge()); // TODO make more efficient?
-    }
+//    /**
+//     * Callback method to be invoked when an item in this AdapterView has
+//     * been clicked.
+//     * <p>
+//     * Implementers can call getItemAtPosition(position) if they need
+//     * to access the data associated with the selected item.
+//     *
+//     * @param parent   The AdapterView where the click happened.
+//     * @param view     The view within the AdapterView that was clicked (this
+//     *                 will be a view provided by the adapter)
+//     * @param position The position of the view in the adapter.
+//     * @param id       The row id of the item that was clicked.
+//     */
+//    @Override
+//    public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+//    {
+//        selectedScanResult = (ScanResult)parent.getItemAtPosition(position);
+//
+//        Log.e("DEBUG", "Item Click: Item = " + selectedScanResult);
+//
+//        setValuesForCurrentState(MainActivity.getBluetoothBridge()); // TODO make more efficient?
+//    }
 
     /**
      * Called when scanning is started.
@@ -280,14 +239,19 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
     @Override
     public void onScanStarted()
     {
-        getActivity().runOnUiThread(new Runnable()
+        try
         {
-            @Override
-            public void run()
+            getActivity().runOnUiThread(new Runnable()
             {
-                setValuesForCurrentState(MainActivity.getBluetoothBridge());
-            }
-        });
+                @Override
+                public void run()
+                {
+                    setValuesForCurrentState(MainActivity.getBluetoothBridge());
+                }
+            });
+        }
+        catch (Exception e)
+        { /* Ignore */ }
     }
 
     /**
@@ -299,14 +263,27 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
     @Override
     public void onScanStopped(boolean failed, int errorCode)
     {
-        getActivity().runOnUiThread(new Runnable()
+        if (failed)
         {
-            @Override
-            public void run()
+            Log.e(TAG, "Scanning stopped with error: " + SmartBallScanner.getScanErrorString(errorCode));
+
+            if (getMainActivity() != null)
+                Toast.makeText(getMainActivity(), "Scanning Failed", Toast.LENGTH_SHORT).show();
+        }
+
+        try
+        {
+            getActivity().runOnUiThread(new Runnable()
             {
-                setValuesForCurrentState(MainActivity.getBluetoothBridge());
-            }
-        });
+                @Override
+                public void run()
+                {
+                    setValuesForCurrentState(MainActivity.getBluetoothBridge());
+                }
+            });
+        }
+        catch (Exception e)
+        { /* Ignore */ }
     }
 
     /**
@@ -334,7 +311,7 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
     /**
      * Implementation of an ArrayAdapter containing views for displaying ScanResults.
      */
-    public class ScanResultArrayAdapter extends ArrayAdapter<ScanResult>
+    public class ScanResultArrayAdapter extends ArrayAdapter<ScanResult> implements View.OnClickListener
     {
         /**
          * Constructor.
@@ -364,26 +341,71 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
 
             // Get components on View
             ScanResult item = getItem(position);
-            TextView nameView = (TextView)view.findViewById(R.id.textview_scanresult_name);
-            TextView statusView = (TextView)view.findViewById(R.id.textview_scanresult_status);
-            ImageView rssiView = (ImageView)view.findViewById(R.id.imageview_scanresult_rssi);
+            TextView nameView = (TextView) view.findViewById(R.id.textview_scanresult_name);
+            TextView statusView = (TextView) view.findViewById(R.id.textview_scanresult_status);
+            ImageView rssiView = (ImageView) view.findViewById(R.id.imageview_scanresult_rssi);
+            Button connectButton = (Button) view.findViewById(R.id.button_scanresult_connect);
+            connectButton.setTag(position);
+            connectButton.setOnClickListener(this);
 
             // Set views
-            nameView.setText(item.getDevice().getName());
-            nameView.setTypeface(null, Utils.areEqual(item, selectedScanResult) ? Typeface.BOLD : Typeface.NORMAL);
-            rssiView.setImageLevel(Utils.getRSSISignalStrength(item.getRssi()));
-
             SmartBall globalBall = MainActivity.getBluetoothBridge().getSmartBall();
+
+            nameView.setText(item.getDevice().getName());
+            rssiView.setImageLevel(Utils.getRSSISignalStrength(item.getRssi()));
 
             if (globalBall != null && Utils.areEqual(item.getDevice(), globalBall.DEVICE))
             {
+                nameView.setTypeface(null, Typeface.BOLD);
                 statusView.setVisibility(View.VISIBLE);
                 statusView.setText(MainActivity.getBluetoothBridge().getSmartBallConnection().getConnectionState().displayName);
+
+                if (globalBall.CONNECTION.getConnectionState() == SmartBallConnection.ConnectionState.CONNECTED)
+                    connectButton.setText(R.string.disconnect);
+                else if (globalBall.CONNECTION.getConnectionState() == SmartBallConnection.ConnectionState.CONNECTING)
+                    connectButton.setText(R.string.cancel_connection);
+                else
+                    connectButton.setText(R.string.connect);
             }
             else
+            {
+                nameView.setTypeface(null, Typeface.NORMAL);
+                connectButton.setText(R.string.connect);
                 statusView.setVisibility(View.GONE);
+            }
 
             return view;
+        }
+
+        /**
+         * Called when a view has been clicked.
+         *
+         * @param v The view that was clicked.
+         */
+        @Override
+        public void onClick(View v)
+        {
+            Button connectButton;
+
+            if (v instanceof Button)
+                connectButton = (Button) v;
+            else
+                return;
+
+            ScanResult item = getItem((Integer)connectButton.getTag());
+            BluetoothBridge bridge = MainActivity.getBluetoothBridge();
+            SmartBall globalBall = bridge.getSmartBall();
+
+            if (globalBall != null && Utils.areEqual(item.getDevice(), globalBall.DEVICE))
+            {
+                if (globalBall.CONNECTION.getConnectionState() == SmartBallConnection.ConnectionState.CONNECTED ||
+                    globalBall.CONNECTION.getConnectionState() == SmartBallConnection.ConnectionState.CONNECTING)
+                    bridge.disconnect();
+                else
+                    bridge.reconnect();
+            }
+            else
+                bridge.connect(item);
         }
     }
 }
