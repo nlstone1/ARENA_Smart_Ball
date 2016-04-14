@@ -26,6 +26,7 @@
 
         <TextView style="@style/TextTitle"
             android:text="@string/services"
+            android:textSize="@dimen/text_large"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 

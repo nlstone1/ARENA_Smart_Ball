@@ -7,9 +7,30 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textview_group_item"
+    <RelativeLayout
+        android:id="@+id/layout_service_item"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:paddingStart="48sp"
+        android:paddingEnd="48sp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content">
+
+        <TextView style="@style/TextTitle"
+            android:id="@+id/textview_service_item_title"
+            android:textSize="@dimen/text_small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/textview_service_item_uuid"
+            android:text="@string/uuid"
+            android:textSize="@dimen/text_small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textview_service_item_title"
+            android:layout_alignStart="@id/textview_service_item_title"/>
+
+    </RelativeLayout>
 
 </LinearLayout>

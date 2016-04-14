@@ -1,6 +1,10 @@
 package arena.arenasmartball.ball;
 
+import android.support.annotation.StringRes;
+
 import java.util.UUID;
+
+import arena.arenasmartball.R;
 
 /**
  * Static class containing Service and Characteristic enums.
@@ -12,42 +16,55 @@ public class Services
     /** Identifiers for principal Services used by the SmartBall */
     public enum Service
     {
-        GENERIC_ACCESS ("1800"),
-        GENERIC_ATTRIBUTE ("1801"),
-        DEVICE_INFORMATION ("180A"),
-        BATTERY_SERVICE ("180F"),
-        SMART_BALL_SERVICE ("AD04");
+        GENERIC_ACCESS ("1800", R.string.generic_access),
+        GENERIC_ATTRIBUTE ("1801", R.string.generic_attribute),
+        DEVICE_INFORMATION ("180A", R.string.device_information),
+        BATTERY_SERVICE ("180F", R.string.battery_service),
+        SMART_BALL_SERVICE ("AD04", R.string.smart_ball_service);
 
         /** The UUID of the service containing this Characteristic. */
         public final UUID _UUID;
 
+        /** String resource for the name of this Service */
+        public final int NAME_RES_ID;
+
         /**
          * Service constructor.
          * @param serviceUUID The four character representation
+         * @param nameResId The name
          */
-        Service(String serviceUUID)
+        Service(String serviceUUID, @StringRes int nameResId)
         {
             _UUID = createSmartBallUUID(serviceUUID);
+            NAME_RES_ID = nameResId;
         }
     }
 
     /** Identifiers for useful characteristics on the SmartBall. */
     public enum Characteristic
     {
-        DEVICE_NAME (Service.GENERIC_ACCESS, "2A00"),
-        MODEL_NUMBER (Service.DEVICE_INFORMATION, "2A24"),
-        SERIAL_NUMBER (Service.DEVICE_INFORMATION, "2A25"),
-        FIRMWARE_VERSION (Service.DEVICE_INFORMATION, "2A26"),
-        SOFTWARE_REVISION (Service.DEVICE_INFORMATION, "2A28"),
-        BATTERY (Service.BATTERY_SERVICE, "2A19"),
-        KICK_BIT (Service.SMART_BALL_SERVICE, "AD14"),
-        COMMAND_FIELD (Service.SMART_BALL_SERVICE, "AD15"),
-        //FIRMWARE_WRITE_FIELD ("AD04", "AD16"),
-        DATA_CALLBACK (Service.SMART_BALL_SERVICE, "AD17"),
-        SAMPLE_RATE (Service.SMART_BALL_SERVICE, "AD20"),
-        CHARGING_STATE (Service.SMART_BALL_SERVICE, "AD1F"),
-        COMMAND_CALLBACK (Service.SMART_BALL_SERVICE, "ADFE"),
-        TIMEOUT_COUNTER (Service.SMART_BALL_SERVICE, "AD33");
+        DEVICE_NAME (Service.GENERIC_ACCESS, "2A00", R.string.device_name),
+        APPEARANCE (Service.GENERIC_ACCESS, "2A01", R.string.appearance),
+        PPCP (Service.GENERIC_ACCESS, "2A04", R.string.ppcp),
+
+        SYSTEM_ID (Service.DEVICE_INFORMATION, "2A23", R.string.system_id),
+        MODEL_NUMBER (Service.DEVICE_INFORMATION, "2A24", R.string.model_number),
+        SERIAL_NUMBER (Service.DEVICE_INFORMATION, "2A25", R.string.serial_number),
+        FIRMWARE_VERSION (Service.DEVICE_INFORMATION, "2A26", R.string.firmware_revision),
+        SOFTWARE_REVISION (Service.DEVICE_INFORMATION, "2A28", R.string.software_revision),
+        MANUFACTURER_NAME (Service.DEVICE_INFORMATION, "2A29", R.string.manufacturer_name),
+
+        BATTERY (Service.BATTERY_SERVICE, "2A19", R.string.battery_service),
+
+        KICK_EVENT (Service.SMART_BALL_SERVICE, "AD12", R.string.kick_event),
+        KICK_BIT (Service.SMART_BALL_SERVICE, "AD14", R.string.logging),
+        COMMAND_FIELD (Service.SMART_BALL_SERVICE, "AD15", R.string.command_field),
+        FIRMWARE_WRITE_FIELD (Service.SMART_BALL_SERVICE, "AD16", R.string.firmware_write_field),
+        DATA_CALLBACK (Service.SMART_BALL_SERVICE, "AD17", R.string.response_buffer),
+        SAMPLE_RATE (Service.SMART_BALL_SERVICE, "AD20", R.string.sample_rate),
+        CHARGING_STATE (Service.SMART_BALL_SERVICE, "AD1F", R.string.status),
+        COMMAND_CALLBACK (Service.SMART_BALL_SERVICE, "ADFE", R.string.error),
+        TIMEOUT_COUNTER (Service.SMART_BALL_SERVICE, "AD33", R.string.file_size);
 
         /** The Service containing this Characteristic. */
         public final Service SERVICE;
@@ -55,15 +72,20 @@ public class Services
         /** The UUID of this Characteristic. */
         public final UUID _UUID;
 
+        /** The String resource id for the name of this Characteristic */
+        public final int NAME_RES_ID;
+
         /**
          * Characteristic constructor.
          * @param service The Service
          * @param charUUID The four character representation
+         * @param nameResId The name
          */
-        Characteristic(Service service, String charUUID)
+        Characteristic(Service service, String charUUID, @StringRes int nameResId)
         {
             SERVICE = service;
             _UUID = createSmartBallUUID(charUUID);
+            NAME_RES_ID = nameResId;
         }
     }
 

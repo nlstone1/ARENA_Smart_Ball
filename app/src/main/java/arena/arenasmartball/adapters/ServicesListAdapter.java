@@ -85,7 +85,7 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     @Override
     public Object getGroup(int groupPosition)
     {
-        return data.get(groupPosition).get(0).SERVICE._UUID.toString();
+        return data.get(groupPosition).get(0).SERVICE;
     }
 
     /**
@@ -99,7 +99,7 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     @Override
     public Object getChild(int groupPosition, int childPosition)
     {
-        return data.get(groupPosition).get(childPosition)._UUID.toString();
+        return data.get(groupPosition).get(childPosition);
     }
 
     /**
@@ -168,10 +168,15 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
             convertView = inflater.inflate(R.layout.details_service_list_group, null);
         }
 
+        Services.Service service = (Services.Service) getGroup(groupPosition);
+
         View view = convertView.findViewById(R.id.layout_service_group);
 
         TextView title = (TextView) view.findViewById(R.id.textview_service_group_title);
-        title.setText((String) getGroup(groupPosition));
+        title.setText(service.NAME_RES_ID);
+
+        TextView uuid = (TextView) view.findViewById(R.id.textview_service_group_uuid);
+        uuid.setText(service._UUID.toString().toUpperCase());
 
         return convertView;
     }
@@ -197,8 +202,15 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
             convertView = inflater.inflate(R.layout.details_service_list_item, null);
         }
 
-        TextView textView = (TextView) convertView.findViewById(R.id.textview_group_item);
-        textView.setText((String) getChild(groupPosition, childPosition));
+        Services.Characteristic characteristic = (Services.Characteristic) getChild(groupPosition, childPosition);
+
+        View view = convertView.findViewById(R.id.layout_service_item);
+
+        TextView title = (TextView) view.findViewById(R.id.textview_service_item_title);
+        title.setText(characteristic.NAME_RES_ID);
+
+        TextView uuid = (TextView) view.findViewById(R.id.textview_service_item_uuid);
+        uuid.setText(characteristic._UUID.toString().toUpperCase());
 
         return convertView;
     }

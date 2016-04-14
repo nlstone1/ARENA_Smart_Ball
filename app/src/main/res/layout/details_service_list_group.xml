@@ -13,14 +13,23 @@
         android:paddingBottom="2dp"
         android:paddingStart="32sp"
         android:paddingEnd="2sp"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <TextView
+        <TextView style="@style/TextTitle"
             android:id="@+id/textview_service_group_title"
-            android:textStyle="bold"
+            android:textSize="@dimen/text_medium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/textview_service_group_uuid"
+            android:text="@string/uuid"
+            android:textSize="@dimen/text_medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textview_service_group_title"
+            android:layout_alignStart="@id/textview_service_group_title"/>
 
         </RelativeLayout>
 

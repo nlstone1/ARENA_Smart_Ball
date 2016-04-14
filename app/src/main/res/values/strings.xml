@@ -29,6 +29,7 @@
     <string name="connect">Connect</string>
     <string name="disconnect">Disconnect</string>
     <string name="no_device_chosen">No Device Chosen</string>
+    <string name="uuid">UUID: %s</string>
 
     <!-- Content descriptions -->
     <string name="battery_ic_content">battery_ic_content</string>
@@ -40,5 +41,34 @@
     <!-- Dialog Strings -->
     <string name="access_location_explanation">"This application needs to access the location of the device in order to scan for Smart Balls."</string>
     <string name="access_location_denied_explanation">"This application will not be able to scan for Smart Balls without knowing the device's location."</string>
+
+    <!-- Service names -->
+    <string name="generic_access">Generic Access</string>
+    <string name="generic_attribute">Generic Attribute</string>
+    <string name="device_information">Device Information</string>
+    <string name="battery_service">Battery Service</string>
+    <string name="smart_ball_service">Smart Ball Service</string>
+
+    <!-- Characteristic names -->
+    <string name="device_name">Device Name</string>
+    <string name="appearance">Appearance</string>
+    <string name="ppcp">Peripheral Preferred Connection Parameters</string>
+    <string name="service_changed">Service Changed</string>
+    <string name="system_id">System ID</string>
+    <string name="model_number">Model Number</string>
+    <string name="serial_number">Serial Number</string>
+    <string name="firmware_revision">Firmware Revision</string>
+    <string name="software_revision">Software Revision</string>
+    <string name="manufacturer_name">Manufacturer Name</string>
+    <string name="battery_level">Battery Level</string>
+    <string name="logging">Logging</string>
+    <string name="command_field">Command Field</string>
+    <string name="firmware_write_field">Firmware Write Field</string>
+    <string name="response_buffer">Response Buffer</string>
+    <string name="sample_rate">Sample Rate</string>
+    <string name="status">Status</string>
+    <string name="error">Error</string>
+    <string name="kick_event">Kick Event</string>
+    <string name="file_size">File Size</string>
 
 </resources>
