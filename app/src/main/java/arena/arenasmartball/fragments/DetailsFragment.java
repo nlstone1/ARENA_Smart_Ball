@@ -49,8 +49,8 @@ public class DetailsFragment extends SimpleFragment implements GattCommand.ReadG
         View view = inflater.inflate(R.layout.fragment_details, container, false);
 
         // Assign views
-        nameView = (TextView)view.findViewById(R.id.textview_details_ball_name);
-        addressView = (TextView)view.findViewById(R.id.textview_details_ball_address);
+        nameView = (TextView) view.findViewById(R.id.textview_details_ball_name);
+        addressView = (TextView) view.findViewById(R.id.textview_details_ball_address);
 
         // Refresh
         refreshTitleViews();

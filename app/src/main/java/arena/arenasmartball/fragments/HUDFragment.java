@@ -2,15 +2,11 @@ package arena.arenasmartball.fragments;
 
 import android.app.Fragment;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.le.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,9 +16,9 @@ import arena.arenasmartball.R;
 import arena.arenasmartball.Utils;
 import arena.arenasmartball.ball.GattCommand;
 import arena.arenasmartball.ball.GattCommandSequence;
+import arena.arenasmartball.ball.Services;
 import arena.arenasmartball.ball.SmartBall;
 import arena.arenasmartball.ball.SmartBallConnection;
-import arena.arenasmartball.views.ScannerView;
 
 /**
  * Fragment containing the heads up display.
@@ -348,18 +344,18 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
         GattCommandSequence sequence = new GattCommandSequence(READ_BALL_BATTERY_COM_SEQ_NAME, this);
 
         // Get the characteristics
-        BluetoothGattCharacteristic battChar = ball.getCharacteristic(SmartBall.Characteristic.BATTERY);
-        BluetoothGattCharacteristic chargeChar = ball.getCharacteristic(SmartBall.Characteristic.CHARGING_STATE);
+        BluetoothGattCharacteristic battChar = ball.getCharacteristic(Services.Characteristic.BATTERY);
+        BluetoothGattCharacteristic chargeChar = ball.getCharacteristic(Services.Characteristic.CHARGING_STATE);
 
         // Add the command to read the battery level
         if (battChar != null)
             sequence.addCommand(new GattCommand.ReadGattCommand<>
-                (battChar, SmartBall.Characteristic.BATTERY.name(), this));
+                (battChar, Services.Characteristic.BATTERY.name(), this));
 
         // Add the command to read the charging state
         if (chargeChar != null)
             sequence.addCommand(new GattCommand.ReadGattCommand<>
-                (chargeChar, SmartBall.Characteristic.CHARGING_STATE.name(), this));
+                (chargeChar, Services.Characteristic.CHARGING_STATE.name(), this));
 
         // Execute the sequence
         ball.addCommandSequenceToQueue(sequence);

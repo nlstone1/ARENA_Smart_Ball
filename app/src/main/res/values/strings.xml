@@ -24,6 +24,7 @@
     <string name="address">Address:&#160;</string>
     <string name="enable_scanning">Enable Scanning</string>
     <string name="scanning">Scanning…</string>
+    <string name="services">Services</string>
     <string name="discover">Discover</string>
     <string name="connect">Connect</string>
     <string name="disconnect">Disconnect</string>

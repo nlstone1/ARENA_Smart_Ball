@@ -1,8 +1,6 @@
 package arena.arenasmartball.fragments;
 
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanResult;
-import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -29,7 +27,6 @@ import arena.arenasmartball.Utils;
 import arena.arenasmartball.ball.SmartBall;
 import arena.arenasmartball.ball.SmartBallConnection;
 import arena.arenasmartball.ball.SmartBallScanner;
-import arena.arenasmartball.views.ScannerView;
 
 /**
  * Fragment for the Scanner screen.

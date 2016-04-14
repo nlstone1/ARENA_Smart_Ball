@@ -1,6 +1,5 @@
 package arena.arenasmartball.ball;
 
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -281,11 +280,11 @@ public class SmartBallConnection extends BluetoothGattCallback
         // Add Characteristics to repository
         for (BluetoothGattService service: services)
         {
-            for (SmartBall.Characteristic sc: SmartBall.Characteristic.values())
+            for (Services.Characteristic sc: Services.Characteristic.values())
             {
-                if (sc.SERVICE_UUID.equals(service.getUuid()))
+                if (sc.SERVICE._UUID.equals(service.getUuid()))
                 {
-                    characteristic = service.getCharacteristic(sc.CHAR_UUID);
+                    characteristic = service.getCharacteristic(sc._UUID);
 
                     if (characteristic == null)
                         Log.w(TAG, "Characteristic not found: " + sc.name() + ": Device may not be a SmartBall");

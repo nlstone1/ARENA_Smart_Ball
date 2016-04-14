@@ -79,7 +79,7 @@ public class GattCommandUtils
                 dataType == 1 ? DATA_TRANSMIT_SEQUENCE_1 : DATA_TRANSMIT_SEQUENCE_2,
                 callback);
         sequence.addCommand(new GattCommand.WriteGattCommand<>(
-                ball.getCharacteristic(SmartBall.Characteristic.COMMAND_FIELD),
+                ball.getCharacteristic(Services.Characteristic.COMMAND_FIELD),
                 new byte[] {10, 0, 0, 0, 0, lower, upper, 0, 0, dataType}
         ));
 
@@ -97,7 +97,7 @@ public class GattCommandUtils
 
         // Write a 3 to CommandField
         sequence.addCommand(new GattCommand.WriteGattCommand<>(
-                ball.getCharacteristic(SmartBall.Characteristic.COMMAND_FIELD),
+                ball.getCharacteristic(Services.Characteristic.COMMAND_FIELD),
                 new byte[] {6}));
 
         ball.addCommandSequenceToQueue(sequence);
@@ -117,7 +117,7 @@ public class GattCommandUtils
         BluetoothGattDescriptor descriptor;
 
         // Write Descriptor 2902 - KickBit
-        descriptor = SmartBall.getDescriptor(ball.getCharacteristic(SmartBall.Characteristic.KICK_BIT), "2902");
+        descriptor = SmartBall.getDescriptor(ball.getCharacteristic(Services.Characteristic.KICK_BIT), "2902");
 
         if (descriptor != null)
             sequence.addCommand(new GattCommand.WriteGattCommand<>(descriptor, new byte[]{1, 0}));
@@ -128,7 +128,7 @@ public class GattCommandUtils
         }
 
         // Write Descriptor 2902 - DataCallback
-        descriptor = SmartBall.getDescriptor(ball.getCharacteristic(SmartBall.Characteristic.DATA_CALLBACK), "2902");
+        descriptor = SmartBall.getDescriptor(ball.getCharacteristic(Services.Characteristic.DATA_CALLBACK), "2902");
 
         if (descriptor != null)
             sequence.addCommand(new GattCommand.WriteGattCommand<>(descriptor, new byte[]{1, 0}));
@@ -140,12 +140,12 @@ public class GattCommandUtils
 
         // Write a 6 to CommandField
         sequence.addCommand(new GattCommand.WriteGattCommand<>(
-                ball.getCharacteristic(SmartBall.Characteristic.COMMAND_FIELD),
+                ball.getCharacteristic(Services.Characteristic.COMMAND_FIELD),
                 new byte[] {6}));
 
         // Write a 3 to CommandField
         sequence.addCommand(new GattCommand.WriteGattCommand<>(
-                ball.getCharacteristic(SmartBall.Characteristic.COMMAND_FIELD),
+                ball.getCharacteristic(Services.Characteristic.COMMAND_FIELD),
                 new byte[] {3}));
 
         ball.addCommandSequenceToQueue(sequence);
@@ -171,7 +171,7 @@ public class GattCommandUtils
     {
         GattCommandSequence sequence = new GattCommandSequence("Disconnect", callback);
 
-        BluetoothGattCharacteristic characteristic = ball.getCharacteristic(SmartBall.Characteristic.COMMAND_FIELD);
+        BluetoothGattCharacteristic characteristic = ball.getCharacteristic(Services.Characteristic.COMMAND_FIELD);
 
         if (characteristic != null)
             sequence.addCommand(new GattCommand.WriteGattCommand<>(

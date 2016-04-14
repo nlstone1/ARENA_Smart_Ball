@@ -1,8 +1,8 @@
 package arena.arenasmartball.adapters;
 
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +10,13 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import arena.arenasmartball.R;
+import arena.arenasmartball.ball.Services;
 import arena.arenasmartball.ball.SmartBall;
 
 /**
@@ -26,7 +30,13 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     private Context context;
 
     // List of services
-    private List<BluetoothGattService> services;
+//    private List<BluetoothGattService> services;
+    // Map of characteristics for a SmartBall
+//    private HashMap<_UUID, List<SmartBall.Characteristic>> characteristics;
+    private List<List<Services.Characteristic>> data;
+
+    // Log tag String
+    private static final String TAG = "ServicesListAdapter";
 
     /**
      * Creates a ServicesListAdapter for the specified SmartBall.
@@ -35,11 +45,11 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     public ServicesListAdapter(Context context, SmartBall smartBall)
     {
         this.context = context;
+        data = new ArrayList<>();
 
-        if (smartBall != null && smartBall.CONNECTION != null)
-            services = smartBall.CONNECTION.getBluetoothGatt().getServices();
-        else
-            services = new ArrayList<>(0);
+        init();
+
+        Log.d(TAG, data.toString());
     }
 
     /**
@@ -50,7 +60,7 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     @Override
     public int getGroupCount()
     {
-        return services.size();
+        return data.size();
     }
 
     /**
@@ -63,7 +73,7 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     @Override
     public int getChildrenCount(int groupPosition)
     {
-        return services.get(groupPosition).getCharacteristics().size();
+        return data.get(groupPosition).size();
     }
 
     /**
@@ -75,7 +85,7 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     @Override
     public Object getGroup(int groupPosition)
     {
-        return services.get(groupPosition).getUuid().toString();
+        return data.get(groupPosition).get(0).SERVICE._UUID.toString();
     }
 
     /**
@@ -89,7 +99,7 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     @Override
     public Object getChild(int groupPosition, int childPosition)
     {
-        return services.get(groupPosition).getCharacteristics().get(childPosition).getUuid().toString();
+        return data.get(groupPosition).get(childPosition)._UUID.toString();
     }
 
     /**
@@ -104,7 +114,7 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     @Override
     public long getGroupId(int groupPosition)
     {
-        return services.get(groupPosition).getUuid().hashCode();
+        return data.get(groupPosition).get(0).SERVICE._UUID.hashCode();
     }
 
     /**
@@ -121,7 +131,7 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     @Override
     public long getChildId(int groupPosition, int childPosition)
     {
-        return services.get(groupPosition).getCharacteristics().get(childPosition).getUuid().hashCode();
+        return data.get(groupPosition).get(childPosition)._UUID.hashCode();
     }
 
     /**
@@ -158,8 +168,10 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
             convertView = inflater.inflate(R.layout.details_service_list_group, null);
         }
 
-        TextView textView = (TextView) convertView.findViewById(R.id.textview_group_title);
-        textView.setText((String) getGroup(groupPosition));
+        View view = convertView.findViewById(R.id.layout_service_group);
+
+        TextView title = (TextView) view.findViewById(R.id.textview_service_group_title);
+        title.setText((String) getGroup(groupPosition));
 
         return convertView;
     }
@@ -201,6 +213,36 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition)
     {
-        return false;
+        return true;
+    }
+
+    /*
+     * Initializes this Adapter.
+     */
+    private void init()
+    {
+        HashMap<UUID, List<Services.Characteristic>> characteristics = new HashMap<>();
+
+        for (Services.Characteristic characteristic: Services.Characteristic.values())
+        {
+            addCharacteristic(characteristics, characteristic);
+        }
+
+        for (Map.Entry<UUID, List<Services.Characteristic>> entry: characteristics.entrySet())
+        {
+            data.add(entry.getValue());
+        }
+    }
+
+    /*
+     * Adds a Characteristic to the characteristics map.
+     */
+    private void addCharacteristic(HashMap<UUID, List<Services.Characteristic>> characteristics,
+                                   Services.Characteristic characteristic)
+    {
+        if (!characteristics.containsKey(characteristic.SERVICE._UUID))
+            characteristics.put(characteristic.SERVICE._UUID, new ArrayList<Services.Characteristic>(1));
+
+        characteristics.get(characteristic.SERVICE._UUID).add(characteristic);
     }
 }

@@ -29,42 +29,6 @@ public class SmartBall
         KICKED
     }
 
-    /** Identifiers for useful characteristics on the SmartBall. */
-    public enum Characteristic
-    {
-        DEVICE_NAME ("1800", "2A00"),
-        MODEL_NUMBER ("180A", "2A24"),
-        SERIAL_NUMBER ("180A", "2A25"),
-        FIRMWARE_VERSION ("180A", "2A26"),
-        SOFTWARE_REVISION ("180A", "2A28"),
-        BATTERY ("180F", "2A19"),
-        KICK_BIT ("AD04", "AD14"),
-        COMMAND_FIELD ("AD04", "AD15"),
-        //FIRMWARE_WRITE_FIELD ("AD04", "AD16"),
-        DATA_CALLBACK ("AD04", "AD17"),
-        SAMPLE_RATE ("AD04", "AD20"),
-        CHARGING_STATE ("AD04", "AD1F"),
-        COMMAND_CALLBACK ("AD04", "ADFE"),
-        TIMEOUT_COUNTER ("AD04", "AD33");
-
-        /** The UUID of the service containing this Characteristic. */
-        public final UUID SERVICE_UUID;
-
-        /** The UUID of this Characteristic. */
-        public final UUID CHAR_UUID;
-
-        /**
-         * Characteristic constructor.
-         * @param serviceUUID The four character representation
-         * @param charUUID The four character representation
-         */
-        Characteristic(String serviceUUID, String charUUID)
-        {
-            SERVICE_UUID = createSmartBallUUID(serviceUUID);
-            CHAR_UUID = createSmartBallUUID(charUUID);
-        }
-    }
-
     /** The tag for this class. */
     private static final String TAG = "SmartBall";
 
@@ -87,7 +51,7 @@ public class SmartBall
      * A repository of all characteristics contained in the SmartBall, populated on service discovery with the key
      * SmartBall characteristics defined in Characteristic.
      */
-    private HashMap<Characteristic, BluetoothGattCharacteristic> characteristicRepository;
+    private HashMap<Services.Characteristic, BluetoothGattCharacteristic> characteristicRepository;
 
     /**
      * The array of CharacteristicListeners. Each Characteristic defined in the enum in this class may have a
@@ -126,26 +90,16 @@ public class SmartBall
     }
 
     /**
-     * Takes the four unique characters of the UUID String and creates a UUID for a SmartBall (per the Bluetooth specs).
-     * @param chars The four unique characters specifying the UUID
-     * @return A smart ball UUID
-     */
-    public static UUID createSmartBallUUID(String chars)
-    {
-        return UUID.fromString("0000" + chars + "-0000-1000-8000-00805F9B34FB");
-    }
-
-    /**
-     * Method to get the Descriptor belonging to the given Characteristic with the UUID specified by the four unique
-     * characters of a SmartBall UUID.
+     * Method to get the Descriptor belonging to the given Characteristic with the _UUID specified by the four unique
+     * characters of a SmartBall _UUID.
      * @param characteristic The BluetoothGattCharacteristic whose descriptor to get
-     * @param uuidIdChars The four unique characters specifying the UUID
+     * @param uuidIdChars The four unique characters specifying the _UUID
      * @return The Descriptor belonging to the given Characteristic
      */
     public static BluetoothGattDescriptor getDescriptor(BluetoothGattCharacteristic characteristic, String uuidIdChars)
     {
         if (characteristic != null)
-            return characteristic.getDescriptor(createSmartBallUUID(uuidIdChars));
+            return characteristic.getDescriptor(Services.createSmartBallUUID(uuidIdChars));
         else
         {
             Log.e(TAG, "getDescriptor() passed a null characteristic");
@@ -154,8 +108,8 @@ public class SmartBall
     }
 
     /**
-     * Method to get the List of CharacteristicListeners listening on the Characteristic with the given UUID.
-     * @return The List of CharacteristicListeners listening on the Characteristic with the given UUID
+     * Method to get the List of CharacteristicListeners listening on the Characteristic with the given _UUID.
+     * @return The List of CharacteristicListeners listening on the Characteristic with the given _UUID
      */
     public Set<CharacteristicListener> getCharacteristicListeners(UUID uuid)
     {
@@ -228,9 +182,9 @@ public class SmartBall
      * @param listener The CharacteristicListener to add
      * @param characteristic The Characteristic for which to listen
      */
-    public void addCharacteristicListener(CharacteristicListener listener, Characteristic characteristic)
+    public void addCharacteristicListener(CharacteristicListener listener, Services.Characteristic characteristic)
     {
-        UUID uuid = characteristic.CHAR_UUID;
+        UUID uuid = characteristic._UUID;
         Set<CharacteristicListener> listeners = characteristicListeners.get(uuid);
 
         if (listeners == null)
@@ -323,7 +277,7 @@ public class SmartBall
      * @param characteristic The Characteristic representing the BluetoothGattCharacteristic to get
      * @return The BluetoothGattCharacteristic corresponding to characteristic
      */
-    public BluetoothGattCharacteristic getCharacteristic(Characteristic characteristic)
+    public BluetoothGattCharacteristic getCharacteristic(Services.Characteristic characteristic)
     {
         return characteristicRepository.get(characteristic);
     }
@@ -442,7 +396,7 @@ public class SmartBall
      * Adds a Characteristic to the Characteristic repository.
      * @param characteristic The Characteristic to add
      */
-    protected void addCharacteristicToRepository(Characteristic characteristic,
+    protected void addCharacteristicToRepository(Services.Characteristic characteristic,
                                                  BluetoothGattCharacteristic bluetoothGattCharacteristic)
     {
         // Add the characteristic to the repository and notify listeners if the characteristic is new
@@ -454,7 +408,7 @@ public class SmartBall
             Log.d(TAG, "Num Characteristics found = : " + numCharacteristicsFound);
 
             // If all characteristics have been discovered, notify listeners
-            if (numCharacteristicsFound == Characteristic.values().length)
+            if (numCharacteristicsFound == Services.Characteristic.values().length)
             {
                 Log.d(TAG, "All Characteristics have been discovered, notifying listeners");
                 for (EventListener listener: eventListeners)
@@ -569,7 +523,7 @@ public class SmartBall
                         listener.onBallKickEvent(ball, KickEvent.READY_TO_KICK);
                 }
             }
-        }, Characteristic.KICK_BIT);
+        }, Services.Characteristic.KICK_BIT);
     }
 
     /**
@@ -611,7 +565,7 @@ public class SmartBall
                     }
                 }
             }
-        }, Characteristic.DATA_CALLBACK);
+        }, Services.Characteristic.DATA_CALLBACK);
     }
 
     /**
