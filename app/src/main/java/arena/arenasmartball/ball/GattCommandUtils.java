@@ -2,6 +2,7 @@ package arena.arenasmartball.ball;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 /**
@@ -39,7 +40,7 @@ public class GattCommandUtils
      * @param name The name for the command sequence
      * @param callback An optional callback to listen for GattCommandSequence events
      */
-    public static void executeCommand(final SmartBall ball, GattCommand<?> command, String name,
+    public static void executeCommand(final SmartBall ball, GattCommand<?> command, @NonNull String name,
                                       GattCommandSequence.CommandSequenceCallback callback)
     {
         GattCommandSequence sequence = new GattCommandSequence(name, callback);

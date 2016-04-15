@@ -30,6 +30,9 @@
     <string name="disconnect">Disconnect</string>
     <string name="no_device_chosen">No Device Chosen</string>
     <string name="uuid">UUID: %s</string>
+    <string name="requesting_value">Requesting Value…</string>
+    <string name="unable_to_read">Unable to Read</string>
+    <string name="value_received">Value Received</string>
     <string name="ready">READY</string>
     <string name="reset">Reset</string>
     <string name="download">Download</string>

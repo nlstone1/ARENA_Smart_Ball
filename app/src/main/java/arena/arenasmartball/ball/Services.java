@@ -1,5 +1,6 @@
 package arena.arenasmartball.ball;
 
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.support.annotation.StringRes;
 
 import java.util.UUID;
@@ -97,5 +98,17 @@ public class Services
     public static UUID createSmartBallUUID(String chars)
     {
         return UUID.fromString("0000" + chars + "-0000-1000-8000-00805F9B34FB");
+    }
+
+    /**
+     * Tests whether a Characteristic is read-only.
+     * @param characteristic The Characteristic
+     * @return True if the Characteristic can be read
+     */
+    public static boolean canRead(BluetoothGattCharacteristic characteristic)
+    {
+        return true;
+//        return (characteristic.getPermissions() & BluetoothGattCharacteristic.PERMISSION_READ)
+//                == BluetoothGattCharacteristic.PERMISSION_READ;
     }
 }

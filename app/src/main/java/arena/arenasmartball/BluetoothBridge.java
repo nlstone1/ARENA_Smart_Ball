@@ -277,6 +277,11 @@ public class BluetoothBridge implements SmartBallConnection.SmartBallConnectionL
     public void setReady(boolean isReady)
     {
         this.isReady = isReady;
+
+        if (isReady)
+        {
+            smartBallScanner.reinit(bluetoothAdapter);
+        }
     }
 
     /**

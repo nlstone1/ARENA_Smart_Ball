@@ -3,6 +3,7 @@
 <!-- Layout for main group for services and characteristics in the details fragment -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/linearlayout_service_list_group"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">

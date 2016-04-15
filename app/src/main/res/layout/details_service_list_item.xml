@@ -3,6 +3,7 @@
 <!-- Layout for secondary groups for characteristics in the details fragment -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/linearlayout_service_list"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
@@ -30,6 +31,19 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/textview_service_item_title"
             android:layout_alignStart="@id/textview_service_item_title"/>
+
+        <TextView style="@style/TextTitle"
+                  android:id="@+id/textview_service_item_value"
+                  android:textSize="@dimen/text_small"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_centerVertical="true"
+                  android:textAlignment="viewEnd"
+                  android:ellipsize="marquee"
+                  android:maxLines="1"
+                  android:marqueeRepeatLimit="marquee_forever"
+                  android:layout_alignParentEnd="true"
+                  android:layout_toEndOf="@+id/textview_service_item_uuid"/>
 
     </RelativeLayout>
 

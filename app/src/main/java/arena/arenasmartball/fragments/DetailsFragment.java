@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
-import android.widget.TextView;
 
 import arena.arenasmartball.MainActivity;
 import arena.arenasmartball.R;
@@ -29,11 +28,11 @@ public class DetailsFragment extends SimpleFragment implements GattCommand.ReadG
     // The name of the command sequence used to read the SmartBall info
     private static final String READ_BALL_INFO_COM_SEQ_NAME = "DetailsFragReadBallInfo";
 
-    // TextView displaying the name of the ball
-    private TextView nameView;
-
-    // TextView displaying the Bluetooth address of the ball
-    private TextView addressView;
+//    // TextView displaying the name of the ball
+//    private TextView nameView;
+//
+//    // TextView displaying the Bluetooth address of the ball
+//    private TextView addressView;
 
     /**
      * Required empty public constructor.
@@ -48,12 +47,12 @@ public class DetailsFragment extends SimpleFragment implements GattCommand.ReadG
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_details, container, false);
 
-        // Assign views
-        nameView = (TextView) view.findViewById(R.id.textview_details_ball_name);
-        addressView = (TextView) view.findViewById(R.id.textview_details_ball_address);
+//        // Assign views
+//        nameView = (TextView) view.findViewById(R.id.textview_details_ball_name);
+//        addressView = (TextView) view.findViewById(R.id.textview_details_ball_address);
 
-        // Refresh
-        refreshTitleViews();
+//        // Refresh
+//        refreshTitleViews();
 
         // Initialize the service/characteristic list
         ServicesListAdapter adapter = new ServicesListAdapter(getActivity(), MainActivity.getBluetoothBridge().getSmartBall());
@@ -101,26 +100,26 @@ public class DetailsFragment extends SimpleFragment implements GattCommand.ReadG
         }
     }
 
-    /**
-     * Sets the text in the title views of this Fragment using the currently active SmartBall.
-     */
-    private void refreshTitleViews()
-    {
-        // If there is a smart ball, re-assign views
-        SmartBall smartBall = MainActivity.getBluetoothBridge().getSmartBall();
-
-        if (smartBall != null)
-        {
-            // Set the name and address views
-            nameView.setText(concat(R.string.name, smartBall.DEVICE.getName()));
-            addressView.setText(concat(R.string.address, smartBall.DEVICE.getAddress()));
-        }
-        else
-        {
-            nameView.setText(concat(R.string.name, R.string.blank_symbol));
-            addressView.setText(concat(R.string.address, R.string.blank_symbol));
-        }
-    }
+//    /**
+//     * Sets the text in the title views of this Fragment using the currently active SmartBall.
+//     */
+//    private void refreshTitleViews()
+//    {
+//        // If there is a smart ball, re-assign views
+//        SmartBall smartBall = MainActivity.getBluetoothBridge().getSmartBall();
+//
+//        if (smartBall != null)
+//        {
+//            // Set the name and address views
+//            nameView.setText(concat(R.string.name, smartBall.DEVICE.getName()));
+//            addressView.setText(concat(R.string.address, smartBall.DEVICE.getAddress()));
+//        }
+//        else
+//        {
+//            nameView.setText(concat(R.string.name, R.string.blank_symbol));
+//            addressView.setText(concat(R.string.address, R.string.blank_symbol));
+//        }
+//    }
 
 //    /*
 //     * Creates and executes a CommandSequence to read the serial and model numbers from the given SmartBall.

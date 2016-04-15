@@ -9,7 +9,7 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <!-- Fragment Sizes -->
-    <dimen name="hud_fragment_height">48dp</dimen>
+    <dimen name="hud_fragment_height">64dp</dimen>
 
     <!-- Size of main smart ball icon -->
     <dimen name="main_smartball_icon_size">64dp</dimen>
@@ -19,9 +19,9 @@
 
     <!-- Text sizes -->
     <dimen name="text_small">18sp</dimen>
-    <dimen name="text_medium">21sp</dimen>
-    <dimen name="text_medium_large">24sp</dimen>
-    <dimen name="text_large">27sp</dimen>
+    <dimen name="text_medium">22sp</dimen>
+    <dimen name="text_medium_large">25sp</dimen>
+    <dimen name="text_large">28sp</dimen>
     <dimen name="text_xlarge">32sp</dimen>
     <dimen name="text_title">48sp</dimen>
     <dimen name="text_subtitle">24sp</dimen>

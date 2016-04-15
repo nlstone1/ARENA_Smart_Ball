@@ -33,7 +33,7 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
 //    private List<BluetoothGattService> services;
     // Map of characteristics for a SmartBall
 //    private HashMap<_UUID, List<SmartBall.Characteristic>> characteristics;
-    private List<List<Services.Characteristic>> data;
+    private List<List<CharWrapper>> data;
 
     // Log tag String
     private static final String TAG = "ServicesListAdapter";
@@ -85,7 +85,7 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     @Override
     public Object getGroup(int groupPosition)
     {
-        return data.get(groupPosition).get(0).SERVICE;
+        return data.get(groupPosition).get(0).CHARACTERISTIC.SERVICE;
     }
 
     /**
@@ -114,7 +114,7 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     @Override
     public long getGroupId(int groupPosition)
     {
-        return data.get(groupPosition).get(0).SERVICE._UUID.hashCode();
+        return data.get(groupPosition).get(0).CHARACTERISTIC.SERVICE._UUID.hashCode();
     }
 
     /**
@@ -131,7 +131,7 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     @Override
     public long getChildId(int groupPosition, int childPosition)
     {
-        return data.get(groupPosition).get(childPosition)._UUID.hashCode();
+        return data.get(groupPosition).get(childPosition).CHARACTERISTIC._UUID.hashCode();
     }
 
     /**
@@ -202,15 +202,26 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
             convertView = inflater.inflate(R.layout.details_service_list_item, null);
         }
 
-        Services.Characteristic characteristic = (Services.Characteristic) getChild(groupPosition, childPosition);
-
-        View view = convertView.findViewById(R.id.layout_service_item);
+        final CharWrapper charWrapper = (CharWrapper) getChild(groupPosition, childPosition);
+        final View view = convertView.findViewById(R.id.layout_service_item);
 
         TextView title = (TextView) view.findViewById(R.id.textview_service_item_title);
-        title.setText(characteristic.NAME_RES_ID);
+        title.setText(charWrapper.CHARACTERISTIC.NAME_RES_ID);
 
         TextView uuid = (TextView) view.findViewById(R.id.textview_service_item_uuid);
-        uuid.setText(characteristic._UUID.toString().toUpperCase());
+        uuid.setText(charWrapper.CHARACTERISTIC._UUID.toString().toUpperCase());
+
+        final TextView value = (TextView) view.findViewById(R.id.textview_service_item_value);
+        charWrapper.assignValueTo(value);
+
+        view.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                charWrapper.assignValueTo(value);
+            }
+        });
 
         return convertView;
     }
@@ -233,14 +244,14 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
      */
     private void init()
     {
-        HashMap<UUID, List<Services.Characteristic>> characteristics = new HashMap<>();
+        HashMap<UUID, List<CharWrapper>> characteristics = new HashMap<>();
 
         for (Services.Characteristic characteristic: Services.Characteristic.values())
         {
             addCharacteristic(characteristics, characteristic);
         }
 
-        for (Map.Entry<UUID, List<Services.Characteristic>> entry: characteristics.entrySet())
+        for (Map.Entry<UUID, List<CharWrapper>> entry: characteristics.entrySet())
         {
             data.add(entry.getValue());
         }
@@ -249,12 +260,12 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
     /*
      * Adds a Characteristic to the characteristics map.
      */
-    private void addCharacteristic(HashMap<UUID, List<Services.Characteristic>> characteristics,
+    private void addCharacteristic(HashMap<UUID, List<CharWrapper>> characteristics,
                                    Services.Characteristic characteristic)
     {
         if (!characteristics.containsKey(characteristic.SERVICE._UUID))
-            characteristics.put(characteristic.SERVICE._UUID, new ArrayList<Services.Characteristic>(1));
+            characteristics.put(characteristic.SERVICE._UUID, new ArrayList<CharWrapper>(1));
 
-        characteristics.get(characteristic.SERVICE._UUID).add(characteristic);
+        characteristics.get(characteristic.SERVICE._UUID).add(new CharWrapper(characteristic));
     }
 }

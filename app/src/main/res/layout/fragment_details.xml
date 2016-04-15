@@ -3,23 +3,23 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-        <!-- Name -->
-        <TextView style="@style/TextSubtitle"
-            android:id="@+id/textview_details_ball_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:textSize="@dimen/text_medium"
-            android:textStyle="normal"/>
+        <!--&lt;!&ndash; Name &ndash;&gt;-->
+        <!--<TextView style="@style/TextSubtitle"-->
+            <!--android:id="@+id/textview_details_ball_name"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_margin="4dp"-->
+            <!--android:textSize="@dimen/text_medium"-->
+            <!--android:textStyle="normal"/>-->
 
-        <!-- Address -->
-        <TextView style="@style/TextSubtitle"
-            android:id="@+id/textview_details_ball_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:textSize="@dimen/text_medium"
-            android:textStyle="normal"/>
+        <!--&lt;!&ndash; Address &ndash;&gt;-->
+        <!--<TextView style="@style/TextSubtitle"-->
+            <!--android:id="@+id/textview_details_ball_address"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_margin="4dp"-->
+            <!--android:textSize="@dimen/text_medium"-->
+            <!--android:textStyle="normal"/>-->
 
         <!-- Separator -->
         <View style="@style/verticalSeparator"/>

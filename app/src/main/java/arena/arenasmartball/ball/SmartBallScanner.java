@@ -7,7 +7,6 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.os.ParcelUuid;
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,8 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import arena.arenasmartball.MainActivity;
 
 /**
  * Class to handle scanning for SmartBalls.
@@ -141,6 +138,15 @@ public class SmartBallScanner
             default:
                 return "Unknown Error (" + errorCode + ")";
         }
+    }
+
+    /**
+     * Re-initializes the SmartBallScanner for the specified BluetoothAdapter.
+     * @param adapter The BluetoothAdapter
+     */
+    public void reinit(BluetoothAdapter adapter)
+    {
+        scanner = adapter.getBluetoothLeScanner();
     }
 
     /**
