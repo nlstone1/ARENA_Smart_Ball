@@ -30,6 +30,10 @@
     <string name="disconnect">Disconnect</string>
     <string name="no_device_chosen">No Device Chosen</string>
     <string name="uuid">UUID: %s</string>
+    <string name="ready">READY</string>
+    <string name="reset">Reset</string>
+    <string name="download">Download</string>
+    <string name="capture">CAPTURE</string>
 
     <!-- Content descriptions -->
     <string name="battery_ic_content">battery_ic_content</string>

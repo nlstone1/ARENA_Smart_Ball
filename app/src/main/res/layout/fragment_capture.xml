@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <!-- Header layout -->
+    <RelativeLayout
+        android:id="@+id/relativelayout_capture_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/capture_header_size"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true">
+
+        <!-- Ready field -->
+        <TextView
+            android:id="@+id/textview_capture_ready"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:background="@color/colorReadyOff"
+            android:text="@string/ready"
+            android:textSize="@dimen/text_medium"
+            android:textColor="@color/colorVLtGray"
+            android:textStyle="bold"/>
+
+        <!-- Countdown timer -->
+        <TextView
+            android:id="@+id/textview_capture_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:text="0"
+            android:textSize="@dimen/text_title"
+            android:textColor="@color/colorLtGray"
+            android:textStyle="bold"/>
+
+    </RelativeLayout>
+
+    <!-- Footer Layout -->
+    <LinearLayout style="?android:attr/buttonBarStyle"
+        android:id="@+id/linearlayout_capture_footer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/capture_header_size"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:orientation="horizontal">
+
+        <!-- Reset Button -->
+        <Button style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/button_capture_reset"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/reset"/>
+
+        <!-- Download Button -->
+        <Button style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/button_capture_download"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/download"/>
+
+    </LinearLayout>
+
+    <!-- Separators -->
+    <View style="@style/verticalSeparator"
+        android:layout_below="@id/relativelayout_capture_header"/>
+    <View style="@style/verticalSeparator"
+          android:layout_above="@id/linearlayout_capture_footer"/>
+
+    <!-- Capture button -->
+    <Button style="?android:attr/buttonBarButtonStyle"
+        android:id="@+id/button_capture_capture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@id/linearlayout_capture_footer"
+        android:layout_below="@id/relativelayout_capture_header"
+        android:text="@string/capture"
+        android:textSize="@dimen/text_xlarge"/>
+
+</RelativeLayout>

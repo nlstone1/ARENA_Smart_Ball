@@ -3,12 +3,10 @@ package arena.arenasmartball.fragments;
 import android.bluetooth.le.ScanResult;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -23,6 +21,7 @@ import java.util.PriorityQueue;
 
 import arena.arenasmartball.BluetoothBridge;
 import arena.arenasmartball.MainActivity;
+import arena.arenasmartball.PeriodicUpdateThread;
 import arena.arenasmartball.R;
 import arena.arenasmartball.Utils;
 import arena.arenasmartball.ball.SmartBall;
@@ -52,6 +51,9 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
     // The ListView of results
     private ListView resultList;
 
+//    // The Thread to handle periodic rescanning
+//    private PeriodicRescanner rescanner;
+
     /**
      * Required empty public constructor.
      */
@@ -67,9 +69,9 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
                 if (globalBall != null)
                 {
                     if (Utils.areEqual(lhs.getDevice(), globalBall.DEVICE))
-                        return -100;
+                        return -1;
                     else if (Utils.areEqual(rhs.getDevice(), globalBall.DEVICE))
-                        return 100;
+                        return 1;
                 }
 
                 return lhs.getRssi() - rhs.getRssi();
@@ -91,6 +93,16 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
         // Attach to Scanner
         MainActivity.getBluetoothBridge().getSmartBallScanner().addSmartBallScannerListener(this);
 
+//        // Create Thread
+//        if (rescanner != null)
+//        {
+//            rescanner.kill();
+//            rescanner.unblock();
+//        }
+//
+//        rescanner = new PeriodicRescanner();
+//        rescanner.start();
+
         // Initialize
         setValuesForCurrentState(MainActivity.getBluetoothBridge());
 
@@ -107,6 +119,12 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
 
         MainActivity.getBluetoothBridge().getSmartBallScanner().removeSmartBallScannerListener(this);
         MainActivity.getBluetoothBridge().removeBluetoothBridgeStateChangeListener(this);
+
+//        if (rescanner != null)
+//        {
+//            rescanner.kill();
+//            rescanner.unblock();
+//        }
     }
 
     /*
@@ -117,11 +135,13 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
         // Set scanning views
         if (bridge.getSmartBallScanner().isScanningStarted())
         {
+//            rescanner.unblock();
             scanSwitch.setChecked(true);
             scanStatusView.setText(R.string.scanning);
         }
         else
         {
+//            rescanner.block();
             scanSwitch.setChecked(false);
             scanStatusView.setText(R.string.enable_scanning);
         }
@@ -187,51 +207,6 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
         else
             MainActivity.getBluetoothBridge().stopScanning();
     }
-
-//    /**
-//     * Called when a view has been clicked.
-//     *
-//     * @param v The view that was clicked.
-//     */
-//    @Override
-//    public void onClick(View v)
-//    {
-//        BluetoothBridge bridge = MainActivity.getBluetoothBridge();
-//
-//        if (bridge.getSmartBall() != null && Utils.areEqual(selectedScanResult.getDevice(), bridge.getSmartBall().DEVICE))
-//        {
-//            if (bridge.getSmartBallConnection().getConnectionState() == SmartBallConnection.ConnectionState.CONNECTED ||
-//                bridge.getSmartBallConnection().getConnectionState() == SmartBallConnection.ConnectionState.CONNECTING)
-//                bridge.disconnect();
-//            else
-//                bridge.reconnect();
-//        }
-//        else
-//            bridge.connect(selectedScanResult);
-//    }
-
-//    /**
-//     * Callback method to be invoked when an item in this AdapterView has
-//     * been clicked.
-//     * <p>
-//     * Implementers can call getItemAtPosition(position) if they need
-//     * to access the data associated with the selected item.
-//     *
-//     * @param parent   The AdapterView where the click happened.
-//     * @param view     The view within the AdapterView that was clicked (this
-//     *                 will be a view provided by the adapter)
-//     * @param position The position of the view in the adapter.
-//     * @param id       The row id of the item that was clicked.
-//     */
-//    @Override
-//    public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-//    {
-//        selectedScanResult = (ScanResult)parent.getItemAtPosition(position);
-//
-//        Log.e("DEBUG", "Item Click: Item = " + selectedScanResult);
-//
-//        setValuesForCurrentState(MainActivity.getBluetoothBridge()); // TODO make more efficient?
-//    }
 
     /**
      * Called when scanning is started.
@@ -408,4 +383,48 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
                 bridge.connect(item);
         }
     }
+
+//    /**
+//     * Thread for periodically rescanning.
+//     *
+//     * Created by Theodore on 4/6/2016.
+//     */
+//    public class PeriodicRescanner extends PeriodicUpdateThread
+//    {
+//        // Cooldown timer
+//        private int coolDown;
+//
+//        /**
+//         * Constructor.
+//         */
+//        public PeriodicRescanner()
+//        {
+//            super(500L);
+//            coolDown = 4;
+//        }
+//
+//        @Override
+//        public void unblock()
+//        {
+//            coolDown = 4;
+//            super.unblock();
+//        }
+//
+//        /**
+//         * Called when this Thread is updates.
+//         */
+//        @Override
+//        public void onUpdate()
+//        {
+//            BluetoothBridge bridge = MainActivity.getBluetoothBridge();
+//            if (bridge.getSmartBallScanner().isScanningStarted() && --coolDown <= 0)
+//            {
+//                Log.d(TAG, "Periodic rescan called");
+//                bridge.getSmartBallScanner().stopScanning();
+//                bridge.getSmartBallScanner().startScanning();
+////                bridge.stopScanning();
+////                bridge.startScanning();
+//            }
+//        }
+//    }
 }

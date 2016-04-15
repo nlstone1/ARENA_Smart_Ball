@@ -48,7 +48,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="4dp"
-                android:text="DB00387938"
                 android:textSize="@dimen/text_medium"/>
 
             <!-- RSSI -->
@@ -68,7 +67,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
-            android:text="@string/connected"
             android:textStyle="italic"
             android:textSize="@dimen/text_medium"/>
 

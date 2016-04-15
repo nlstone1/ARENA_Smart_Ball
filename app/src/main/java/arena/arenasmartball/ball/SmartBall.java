@@ -38,6 +38,9 @@ public class SmartBall
     /** The connection to the SmartBall. */
     public final SmartBallConnection CONNECTION;
 
+    /** Records the kickBit value of this SmartBall. */
+    private boolean kickBit;
+
     /** Flag to keep track of when data transmission has ended/begun. */
     private boolean dataTransmitInProgress;
 
@@ -105,6 +108,15 @@ public class SmartBall
             Log.e(TAG, "getDescriptor() passed a null characteristic");
             return null;
         }
+    }
+
+    /**
+     * Gets the kick bit value of this SmartBall.
+     * @return The kick bit value of this SmartBall
+     */
+    public boolean getKickBit()
+    {
+        return kickBit;
     }
 
     /**
@@ -521,12 +533,14 @@ public class SmartBall
 
                 if (value[0] == 0) // Been kicked
                 {
+                    kickBit = false;
                     Log.d(TAG, "Ball has been kicked");
                     for (EventListener listener: eventListeners)
                         listener.onBallKickEvent(ball, KickEvent.KICKED);
                 }
                 else if (value[0] == 1) // Ready to kick
                 {
+                    kickBit = true;
                     Log.d(TAG, "Ball is ready to be kicked");
                     for (EventListener listener: eventListeners)
                         listener.onBallKickEvent(ball, KickEvent.READY_TO_KICK);

@@ -17,6 +17,9 @@
     <!-- Size of scan result smart ball icon -->
     <dimen name="scanresult_smartball_icon_size">48dp</dimen>
 
+    <!-- Size of the header layout on the Capture fragment -->
+    <dimen name="capture_header_size">64dp</dimen>
+
     <!-- Text sizes -->
     <dimen name="text_small">12sp</dimen>
     <dimen name="text_medium">16sp</dimen>

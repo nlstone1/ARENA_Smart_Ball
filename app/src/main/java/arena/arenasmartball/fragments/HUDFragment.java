@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import arena.arenasmartball.BluetoothBridge;
 import arena.arenasmartball.MainActivity;
+import arena.arenasmartball.PeriodicUpdateThread;
 import arena.arenasmartball.R;
 import arena.arenasmartball.Utils;
 import arena.arenasmartball.ball.GattCommand;
@@ -71,7 +72,7 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     private ImageView batteryIcon;
 
     // Thread to handle periodically updating
-    private UpdaterThread updaterThread;
+    private StatsUpdater updaterThread;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -91,7 +92,7 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
         signalIcon = (ImageView)view.findViewById(R.id.imageview_hud_rssi);
 
         // Create Thread
-        updaterThread = new UpdaterThread();
+        updaterThread = new StatsUpdater();
         updaterThread.start();
 
         // Set Default values
@@ -121,22 +122,6 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     {
         super.onPause();
         updaterThread.block();
-//        updaterThread.kill();
-//        updaterThread = null;
-
-//        Bundle bundle;
-//
-//        if (getArguments() == null)
-//        {
-//            bundle = new Bundle();
-//            setArguments(bundle);
-//        }
-//        else
-//            bundle = getArguments();
-//
-//        // Save
-//        bundle.putBoolean(CHARGING_FLAG_BUNDLE_ID, ballIsCharging);
-//        bundle.putDouble(BATTERY_LEVEL_BUNDLE_ID, batteryLevel);
     }
 
     @Override
@@ -144,8 +129,6 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
     {
         super.onResume();
 
-//        updaterThread = new UpdaterThread();
-//
         if (MainActivity.getBluetoothBridge().getState() == BluetoothBridge.State.CONNECTED)
             updaterThread.reset();
 
@@ -153,14 +136,6 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
         BluetoothBridge bridge = MainActivity.getBluetoothBridge();
         bridge.addBluetoothBridgeStateChangeListener(this);
         setValuesForCurrentState(bridge);
-
-//        // Load
-//        Bundle bundle = getArguments();
-//        if (bundle != null)
-//        {
-//            ballIsCharging = bundle.getBoolean(CHARGING_FLAG_BUNDLE_ID);
-//            batteryLevel = bundle.getDouble(BATTERY_LEVEL_BUNDLE_ID);
-//        }
     }
 
     /**
@@ -428,123 +403,47 @@ public class HUDFragment extends Fragment implements BluetoothBridge.BluetoothBr
      *
      * Created by Theodore on 4/6/2016.
      */
-    public class UpdaterThread extends Thread
+    public class StatsUpdater extends PeriodicUpdateThread
     {
         // The delay for reading the battery
         private final int BATTERY_READ_DELAY_S = 10;
 
-        // Lock for sleeping on
-        private final Object LOCK;
-
         // The timer for reading the battery level
         private int batteryReadTimer;
 
-        // Whether the thread should die
-        private boolean isDead;
-
-        // Whether or not this thread should block
-        private boolean isBlocked;
-
         /**
-         * Default Constructor.
+         * Constructor.
          */
-        public UpdaterThread()
+        public StatsUpdater()
         {
-            LOCK = new Object();
+            super(1000L);
         }
 
         /**
-         * Resets the timers and blocked status (to unblocked) of this UpdaterThread.
+         * Called when this Thread is updates.
          */
+        @Override
+        public void onUpdate()
+        {
+            // Read battery
+            if (--batteryReadTimer <= 0)
+            {
+                batteryReadTimer = BATTERY_READ_DELAY_S;
+                requestReadBallBattery();
+            }
+
+            // Read rssi
+            requestReadBallRSSI();
+        }
+
+        /**
+         * Resets the delay timer and blocked status (to unblocked) of this Thread.
+         */
+        @Override
         public void reset()
         {
             batteryReadTimer = 0;
-            unblock();
-            interrupt();
-            unblock();
-        }
-
-        @Override
-        public void run()
-        {
-            isDead = false;
-            isBlocked = true;
-            batteryReadTimer = 0;
-
-            while (!isDead)
-            {
-                // Block if needed
-                if (isBlocked)
-                {
-                    synchronized (LOCK)
-                    {
-                        try
-                        {
-                            LOCK.wait();
-                        }
-                        catch (InterruptedException ignore) {}
-                    }
-                }
-
-                if (!isDead && !isBlocked)
-                {
-                    // Otherwise do work and continue
-
-                    // Read battery
-                    if (--batteryReadTimer <= 0)
-                    {
-                        batteryReadTimer = BATTERY_READ_DELAY_S;
-                        requestReadBallBattery();
-                    }
-
-                    // Read rssi
-                    requestReadBallRSSI();
-
-                    try
-                    {
-                        Thread.sleep(1000L);
-                    }
-                    catch (InterruptedException ignore) {}
-                }
-            }
-        }
-
-        /**
-         * Unblocks this UpdaterThread if needed.
-         */
-        public void unblock()
-        {
-            if (!isBlocked)
-                return;
-
-            isBlocked = false;
-
-            // Wake up
-            synchronized (LOCK)
-            {
-                LOCK.notify();
-            }
-        }
-
-        /**
-         * Blocks this UpdaterThread.
-         */
-        public void block()
-        {
-            isBlocked = true;
-        }
-
-        /**
-         * Kills this UpdaterThread.
-         */
-        public void kill()
-        {
-            isDead = false;
-
-            synchronized (LOCK)
-            {
-                LOCK.notify();
-            }
+            super.reset();
         }
     }
 }

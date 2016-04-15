@@ -4,14 +4,18 @@
     <!-- Color scheme colors -->
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#0fe81c</color>
 
     <!-- Status colors -->
     <color name="colorStatusSuccess">#3311EE</color>
     <color name="colorStatusFailure">#EE3311</color>
     <color name="colorStatusNeutral">#949494</color>
 
+    <color name="colorReadyOn">#33EE11</color>
+    <color name="colorReadyOff">#A9A9A9</color>
+
     <!-- Color colors -->
+    <color name="colorClear">#00000000</color>
     <color name="colorVDkGray">#111111</color>
     <color name="colorDkGray">#333333</color>
     <color name="colorLtGray">#C9C9C9</color>

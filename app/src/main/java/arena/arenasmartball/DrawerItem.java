@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.util.HashMap;
 
+import arena.arenasmartball.fragments.CaptureFragment;
 import arena.arenasmartball.fragments.DetailsFragment;
 import arena.arenasmartball.fragments.ScannerFragment;
 import arena.arenasmartball.fragments.SimpleFragment;
@@ -24,7 +25,7 @@ public enum DrawerItem
     CONNECT_DRAWER (R.string.connect_drawer_name, R.drawable.ic_drawer_connect, ScannerFragment.class),
     DETAILS_DRAWER (R.string.details_drawer_name, R.drawable.ic_drawer_details, DetailsFragment.class),
     COMMAND_DRAWER (R.string.command_drawer_name, R.drawable.ic_drawer_commands, null),
-    CAPTURE_DRAWER (R.string.capture_drawer_name, R.drawable.ic_drawer_capture, null),
+    CAPTURE_DRAWER (R.string.capture_drawer_name, R.drawable.ic_drawer_capture, CaptureFragment.class),
     RESULTS_DRAWER (R.string.results_drawer_name, R.drawable.ic_drawer_results, null),
     DATA_DRAWER (R.string.data_drawer_name, R.drawable.ic_drawer_data, null);
 
