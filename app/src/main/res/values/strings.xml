@@ -8,7 +8,7 @@
     <string name="details_drawer_name">Details</string>
     <string name="command_drawer_name">Commands</string>
     <string name="capture_drawer_name">Capture</string>
-    <string name="results_drawer_name">Results</string>
+    <string name="download_drawer_name">Download</string>
     <string name="data_drawer_name">Data</string>
 
     <!-- Text Strings -->
@@ -34,13 +34,17 @@
     <string name="requesting_value">Requesting Value…</string>
     <string name="unable_to_read">Unable to Read</string>
     <string name="value_received">Value Received</string>
-    <string name="ready">READY</string>
     <string name="reset">Reset</string>
     <string name="download">Download</string>
+    <string name="cancel_download">Cancel Download</string>
     <string name="capture">CAPTURE</string>
     <string name="ready">Ready</string>
     <string name="ball_reset">Ball Reset</string>
     <string name="impact_detected">Impact Detected</string>
+    <string name="last_impact">Last Impact:&#160;</string>
+    <string name="downloading_data_with_type">Downloading type %d data…</string>
+    <string name="download_complete">Download Complete</string>
+    <string name="no_current_download">No Current Download</string>
 
     <!-- Content descriptions -->
     <string name="battery_ic_content">battery_ic_content</string>

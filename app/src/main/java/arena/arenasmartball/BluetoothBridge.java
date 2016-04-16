@@ -6,6 +6,7 @@ import android.bluetooth.le.ScanResult;
 import android.content.Intent;
 import android.util.Log;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -50,6 +51,12 @@ public class BluetoothBridge implements SmartBallConnection.SmartBallConnectionL
     // The SmartBallConnection handle
     private SmartBallConnection smartBallConnection;
 
+    // Records the time of the last impact recorded by the app, in milliseconds from Jan 1 1970
+    private long timeOfLastImpact;
+
+    // Records the time of the last download time from app, in milliseconds from Jan 1 1970
+    private long timeOfLastDownload;
+
     // The BluetoothBridgeStateChangeListener attached to this BluetoothBridge
     private Set<BluetoothBridgeStateChangeListener> listeners;
 
@@ -66,6 +73,24 @@ public class BluetoothBridge implements SmartBallConnection.SmartBallConnectionL
     {
         state = State.DISCONNECTED;
         listeners = new HashSet<>();
+    }
+
+    /**
+     * Gets the time of the last impact, in milliseconds from Jan 1 1970.
+     * @return The time of the last impact, or 0 if no impact has been recorded yet
+     */
+    public long getTimeOfLastImpact()
+    {
+        return timeOfLastImpact;
+    }
+
+    /**
+     * Gets the time of the last download, in milliseconds from Jan 1 1970.
+     * @return The time of the last download, or 0 if no impact has been recorded yet
+     */
+    public long getTimeOfLastDownload()
+    {
+        return timeOfLastDownload;
     }
 
     /**
@@ -342,7 +367,12 @@ public class BluetoothBridge implements SmartBallConnection.SmartBallConnectionL
      */
     @Override
     public void onBallKickEvent(SmartBall ball, SmartBall.KickEvent event)
-    {    }
+    {
+        if (event == SmartBall.KickEvent.KICKED)
+        {
+            timeOfLastImpact = System.currentTimeMillis();
+        }
+    }
 
     /**
      * Called when all BLE characteristics have been discovered.

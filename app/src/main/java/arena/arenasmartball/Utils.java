@@ -9,6 +9,8 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.util.Date;
 
 /**
  * Class containing useful functions.
@@ -23,6 +25,12 @@ public class Utils
     // Log tag String
     private static final String TAG = "Utils";
 
+    // Date reference for convenience
+    private static final Date DATE = new Date();
+
+    // The DateFormatter
+    private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance();
+
     /**
      * Calculates the signal strength of the given rssi measurement.
      * @param rssi The rssi
@@ -31,6 +39,17 @@ public class Utils
     public static int getRSSISignalStrength(int rssi)
     {
         return WifiManager.calculateSignalLevel(rssi, 101);
+    }
+
+    /**
+     * Gets a formatted date String from a time in milliseconds from Jan 1, 1970.
+     * @param timeMillis The time in milliseconds from Jan 1, 1970
+     * @return A formatted date String from a time in milliseconds from Jan 1, 1970
+     */
+    public static String getDateString(long timeMillis)
+    {
+        DATE.setTime(timeMillis);
+        return DATE_FORMAT.format(DATE);
     }
 
     /**

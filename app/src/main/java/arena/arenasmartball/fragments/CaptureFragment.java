@@ -3,39 +3,27 @@ package arena.arenasmartball.fragments;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.le.ScanResult;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.PriorityQueue;
 
 import arena.arenasmartball.BluetoothBridge;
+import arena.arenasmartball.DrawerItem;
 import arena.arenasmartball.MainActivity;
 import arena.arenasmartball.PeriodicUpdateThread;
 import arena.arenasmartball.R;
-import arena.arenasmartball.Utils;
 import arena.arenasmartball.ball.GattCommand;
 import arena.arenasmartball.ball.GattCommandSequence;
 import arena.arenasmartball.ball.GattCommandUtils;
 import arena.arenasmartball.ball.Services;
 import arena.arenasmartball.ball.SmartBall;
-import arena.arenasmartball.ball.SmartBallConnection;
-import arena.arenasmartball.ball.SmartBallScanner;
 
 /**
  * Fragment for the capture impact screen.
@@ -62,6 +50,9 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
 
     // Countdown timer
     private static int countdownTimer;
+
+    // Time of last button press
+//    private static long timeOfLastCapture = System.currentTimeMillis();
 
     // Views
     private TextView readyView;
@@ -149,7 +140,8 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
             else
             {
                 readyView.setBackgroundResource(R.color.colorReadyOff);
-                captureButton.setEnabled(!ball.isDataTransmitInProgress()); // TODO
+                captureButton.setEnabled(!ball.isDataTransmitInProgress() &&
+                        System.currentTimeMillis() - bridge.getTimeOfLastImpact() > 1000L); // TODO
             }
 
             countdownView.setText("" + countdownTimer);
@@ -218,13 +210,14 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
                 ball.addCharacteristicListener(this, Services.Characteristic.TIMEOUT_COUNTER);
                 GattCommandUtils.executeKickCommandSequence(ball, this);
 
-                // Check after 4000 ms whether the kick bit has been set. If not, cancel: there is an error.
+                // Check after KICK_BIT_RESPONSE_DELAY ms whether the kick bit has been set. If not, cancel: there is an error.
                 v.postDelayed(new Runnable()
                 {
                     @Override
                     public void run()
                     {
-                        if (!resetCalled && !ball.getKickBit() /*&& (requestedTypeTwoData || requestedTypeOneData)*/) // Error
+                        // TODO removed a ! from in front of KickBit
+                        if (!resetCalled && ball.getKickBit() /*&& (requestedTypeTwoData || requestedTypeOneData)*/) // Error
                         {
                             ball.flushCommandQueue();
                             ball.clearDataTransmitInProgressFlag();
@@ -266,6 +259,11 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
                 ball.getEventListeners().add(this);
                 GattCommandUtils.executeEndTransmissionCommandSequence(ball, null);
             }
+        }
+        else if (v.getId() == R.id.button_capture_download)
+        {
+            DrawerItem.DOWNLOAD_DRAWER.openDrawer(getMainActivity());
+            return;
         }
 
         setValuesForCurrentState(MainActivity.getBluetoothBridge());

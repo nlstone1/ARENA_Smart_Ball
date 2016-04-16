@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <!-- Title with time of last impact -->
+    <TextView
+        android:id="@+id/textview_download_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_alignParentTop="true"
+        android:textSize="@dimen/text_large"/>
+
+    <!-- Separator -->
+    <View style="@style/verticalSeparator"
+        android:layout_below="@id/textview_download_title"/>
+
+    <!-- Status text -->
+    <TextView style="@style/TextSubtitle"
+        android:id="@+id/textview_download_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="6dp"
+        android:layout_below="@id/textview_download_title"
+        android:textSize="@dimen/text_small"
+        android:textColor="@color/colorLtGray"/>
+
+    <!-- Download Button -->
+    <Button style="?attr/buttonBarButtonStyle"
+        android:id="@+id/button_download_read"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="@dimen/text_large"
+        android:text="@string/download"/>
+
+    <!-- Download progress -->
+    <ProgressBar style="@android:style/Widget.DeviceDefault.ProgressBar.Horizontal"
+        android:id="@+id/progressbar_download"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:progress="100"
+        android:indeterminate="false"
+        android:layout_above="@id/button_download_read"/>
+
+    <!-- Separator -->
+    <View style="@style/verticalSeparator"
+          android:layout_below="@id/progressbar_download"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/progressbar_download"
+        android:layout_below="@id/textview_download_status"
+        android:background="@color/colorLtGray">
+
+    </FrameLayout>
+
+</RelativeLayout>
