@@ -20,6 +20,9 @@
     <!-- Size of the header layout on the Capture fragment -->
     <dimen name="capture_header_size">64dp</dimen>
 
+    <!-- Donut stuff -->
+    <dimen name="donutThickness">64dp</dimen>
+
     <!--&lt;!&ndash; Height of data download progress bar &ndash;&gt;-->
     <!--<dimen name="download_progress_height">48dp</dimen>-->
 

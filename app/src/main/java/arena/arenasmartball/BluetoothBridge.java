@@ -219,7 +219,7 @@ public class BluetoothBridge implements SmartBallConnection.SmartBallConnectionL
 
         if (smartBallConnection == null)
         {
-            Log.e(TAG, "Called reconnect but no previous connection exists!");
+            Log.e(TAG, "Called onReconnect but no previous connection exists!");
             return;
         }
 

@@ -3,6 +3,7 @@ package arena.arenasmartball.fragments;
 import android.bluetooth.le.ScanResult;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,22 +12,18 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Comparator;
-import java.util.PriorityQueue;
-
 import arena.arenasmartball.BluetoothBridge;
 import arena.arenasmartball.MainActivity;
-import arena.arenasmartball.PeriodicUpdateThread;
 import arena.arenasmartball.R;
 import arena.arenasmartball.Utils;
 import arena.arenasmartball.ball.SmartBall;
 import arena.arenasmartball.ball.SmartBallConnection;
 import arena.arenasmartball.ball.SmartBallScanner;
+import arena.arenasmartball.views.DonutView;
 
 /**
  * Fragment for the Scanner screen.
@@ -34,13 +31,10 @@ import arena.arenasmartball.ball.SmartBallScanner;
  * Created by Nathaniel on 4/5/2016.
  */
 public class ScannerFragment extends SimpleFragment implements CompoundButton.OnCheckedChangeListener,
-        SmartBallScanner.SmartBallScannerListener
+        SmartBallScanner.SmartBallScannerListener, DonutView.DonutViewListener
 {
     // The tag for this class
     private static final String TAG = "ScannerFragment";
-
-    // A sorted list of ScanResults
-    private PriorityQueue<ScanResult> resultQueue;
 
     // The scanning status
     private TextView scanStatusView;
@@ -48,8 +42,8 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
     // The scan switch
     private Switch scanSwitch;
 
-    // The ListView of results
-    private ListView resultList;
+    // The DonutView
+    private DonutView donutView;
 
 //    // The Thread to handle periodic rescanning
 //    private PeriodicRescanner rescanner;
@@ -59,24 +53,7 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
      */
     public ScannerFragment()
     {
-        resultQueue = new PriorityQueue<>(4, new Comparator<ScanResult>()
-        {
-            @Override
-            public int compare(ScanResult lhs, ScanResult rhs)
-            {
-                SmartBall globalBall = MainActivity.getBluetoothBridge().getSmartBall();
 
-                if (globalBall != null)
-                {
-                    if (Utils.areEqual(lhs.getDevice(), globalBall.DEVICE))
-                        return -1;
-                    else if (Utils.areEqual(rhs.getDevice(), globalBall.DEVICE))
-                        return 1;
-                }
-
-                return lhs.getRssi() - rhs.getRssi();
-            }
-        });
     }
 
     @Override
@@ -88,7 +65,6 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
         // Get views
         scanStatusView = (TextView) view.findViewById(R.id.textview_scanner_scan_status);
         scanSwitch = (Switch) view.findViewById(R.id.switch_scanner_scan);
-        resultList = (ListView) view.findViewById(R.id.listview_scanner_results);
 
         // Attach to Scanner
         MainActivity.getBluetoothBridge().getSmartBallScanner().addSmartBallScannerListener(this);
@@ -103,11 +79,25 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
 //        rescanner = new PeriodicRescanner();
 //        rescanner.start();
 
-        // Initialize
-        setValuesForCurrentState(MainActivity.getBluetoothBridge());
-
         // Set listeners
         scanSwitch.setOnCheckedChangeListener(this);
+
+        // The Donut
+        donutView = (DonutView) view.findViewById(R.id.da_donut);
+        donutView.addDonutViewListener(this);
+
+        view.findViewById(R.id.button_test_DA_DONUT).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Log.d(TAG, "onClick");
+                donutView.addScanResult(new ScanResult(null, null, 101, System.nanoTime()));
+            }
+        });
+
+        // Initialize
+        setValuesForCurrentState(MainActivity.getBluetoothBridge());
 
         return view;
     }
@@ -115,6 +105,8 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
     @Override
     public void onDestroyView()
     {
+        donutView.removeDonutViewListener(this);
+
         super.onDestroyView();
 
         MainActivity.getBluetoothBridge().getSmartBallScanner().removeSmartBallScannerListener(this);
@@ -125,6 +117,18 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
 //            rescanner.kill();
 //            rescanner.unblock();
 //        }
+    }
+
+    @Override
+    public void load(@NonNull Bundle bundle)
+    {
+        donutView.load(bundle);
+    }
+
+    @Override
+    public void save(@NonNull Bundle bundle)
+    {
+        donutView.save(bundle);
     }
 
     /*
@@ -146,26 +150,17 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
             scanStatusView.setText(R.string.enable_scanning);
         }
 
-        // Reset list TODO maybe reuse old adapter?
+        // Reset list
         populateScanResults(bridge);
     }
 
     /*
-     * Populates the list of ScanResults on this ScannerFragment.
+     * Populates the DonutView from the list of ScanResults.
      */
     private void populateScanResults(BluetoothBridge bridge)
     {
-        ScanResultArrayAdapter results = new ScanResultArrayAdapter();
-        resultQueue.clear();
-
         // Add results from scanner
-        resultQueue.addAll(bridge.getSmartBallScanner().getFoundResults().values());
-
-        // Add results to adapter
-        results.addAll(resultQueue);
-
-        // Set adapter
-        resultList.setAdapter(results);
+        donutView.setScanResults(bridge.getSmartBallScanner().getFoundResults().values());
     }
 
     /**
@@ -269,7 +264,7 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
     @Override
     public void onSmartBallFound(ScanResult result)
     {
-        populateScanResults(MainActivity.getBluetoothBridge()); // TODO make more efficient
+        populateScanResults(MainActivity.getBluetoothBridge());
     }
 
     /**
@@ -280,7 +275,53 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
     @Override
     public void onSmartBallLost(ScanResult result)
     {
-        populateScanResults(MainActivity.getBluetoothBridge()); // TODO make more efficient
+        populateScanResults(MainActivity.getBluetoothBridge());
+    }
+
+    /**
+     * Called when the user wants to connect to a ScanResult.
+     *
+     * @param result The ScanResult to connect to
+     */
+    @Override
+    public void onConnectTo(ScanResult result)
+    {
+        BluetoothBridge bridge = MainActivity.getBluetoothBridge();
+        SmartBall globalBall = bridge.getSmartBall();
+
+        if (globalBall != null && Utils.areEqual(result.getDevice(), globalBall.DEVICE))
+        {
+            if (globalBall.CONNECTION.getConnectionState() == SmartBallConnection.ConnectionState.CONNECTED ||
+                    globalBall.CONNECTION.getConnectionState() == SmartBallConnection.ConnectionState.CONNECTING)
+            {
+                Log.w(TAG, "Ball already connected in onConnectTo()!");
+            }
+            else
+                bridge.reconnect();
+        }
+        else
+            bridge.connect(result);
+    }
+
+    /**
+     * Called when the user wants to disconnect from a ScanResult.
+     *
+     * @param result The ScanResult to disconnect from
+     */
+    @Override
+    public void onDisconnectFrom(ScanResult result)
+    {
+        MainActivity.getBluetoothBridge().disconnect();
+    }
+
+    /**
+     * Called when the user taps a SmartBall in the Donut Hole
+     */
+    @Override
+    public void onReconnect()
+    {
+        // TODO
+//        MainActivity.getBluetoothBridge().reconnect();
     }
 
     /**

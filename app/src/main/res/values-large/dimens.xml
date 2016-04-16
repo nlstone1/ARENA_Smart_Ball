@@ -17,6 +17,9 @@
     <!-- Size of scan result smart ball icon -->
     <dimen name="scanresult_smartball_icon_size">48dp</dimen>
 
+    <!-- Donut stuff -->
+    <dimen name="donutThickness">96dp</dimen>
+
     <!-- Text sizes -->
     <dimen name="text_small">18sp</dimen>
     <dimen name="text_medium">22sp</dimen>

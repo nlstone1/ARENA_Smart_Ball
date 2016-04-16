@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -156,8 +157,8 @@ public class MainActivity extends AppCompatActivity
             int drawerIndex = savedInstanceState.getInt(DRAWER_INDEX_BUNDLE_KEY, 0);
             DrawerItem.values()[drawerIndex].openDrawer(this);
 
-            // Load the saved state
-            DrawerItem.onLoad(savedInstanceState);
+//            // Load the saved state
+//            DrawerItem.onLoad(savedInstanceState);
 
             // Select the drawer in the navigation view
             navigationView.setCheckedItem(drawerIndex);
@@ -167,6 +168,13 @@ public class MainActivity extends AppCompatActivity
             // Show the first drawer item
             DrawerItem.values()[0].openDrawer(this);
         }
+    }
+
+    @Override
+    public void onPostCreate(Bundle savedInstanceState, PersistableBundle persistentState)
+    {
+        // Load the saved state
+        DrawerItem.onLoad(savedInstanceState);
     }
 
     /**

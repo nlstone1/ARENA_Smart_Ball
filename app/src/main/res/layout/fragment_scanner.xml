@@ -47,14 +47,26 @@
 
     </RelativeLayout>
 
-    <!-- Separator -->
-    <View style="@style/verticalSeparator"/>
+    <!--&lt;!&ndash; Separator &ndash;&gt;-->
+    <!--<View style="@style/verticalSeparator"/>-->
 
-    <!-- List of found items -->
-    <ListView
-        android:id="@+id/listview_scanner_results"
+    <!--&lt;!&ndash; List of found items &ndash;&gt;-->
+    <!--<ListView-->
+        <!--android:id="@+id/listview_scanner_results"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
+    <!--</ListView>-->
+
+    <Button
+        android:text="Add Test ScanResult"
+        android:id="@+id/button_test_DA_DONUT"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </ListView>
+        android:layout_height="wrap_content"/>
+
+    <arena.arenasmartball.views.DonutView
+        android:id="@+id/da_donut"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        custom:donutThickness="@dimen/donutThickness"/>
 
 </LinearLayout>
