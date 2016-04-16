@@ -98,7 +98,8 @@ public enum DrawerItem
                     if (SAVED_FRAGMENTS.containsKey(this))
                     {
                         Log.d(TAG, "loading fragment from hashmap");
-                        currentFragment.load(SAVED_FRAGMENTS.remove(this));
+                        // TODO fixme
+//                        currentFragment.load(SAVED_FRAGMENTS.remove(this));
                     }
 //                    if (SAVED_FRAGMENTS.containsKey(this))
 //                    {
