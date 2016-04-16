@@ -24,7 +24,7 @@
             android:layout_centerVertical="true"
             android:gravity="center"
             android:background="@color/colorReadyOff"
-            android:text="@string/ready"
+            android:text="@string/readyCaps"
             android:textSize="@dimen/text_medium"
             android:textColor="@color/colorVLtGray"
             android:textStyle="bold"/>

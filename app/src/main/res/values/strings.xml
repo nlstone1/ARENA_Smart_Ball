@@ -30,6 +30,7 @@
     <string name="disconnect">Disconnect</string>
     <string name="no_device_chosen">No Device Chosen</string>
     <string name="uuid">UUID: %s</string>
+    <string name="readyCaps">READY</string>
     <string name="requesting_value">Requesting Value…</string>
     <string name="unable_to_read">Unable to Read</string>
     <string name="value_received">Value Received</string>
@@ -37,6 +38,9 @@
     <string name="reset">Reset</string>
     <string name="download">Download</string>
     <string name="capture">CAPTURE</string>
+    <string name="ready">Ready</string>
+    <string name="ball_reset">Ball Reset</string>
+    <string name="impact_detected">Impact Detected</string>
 
     <!-- Content descriptions -->
     <string name="battery_ic_content">battery_ic_content</string>

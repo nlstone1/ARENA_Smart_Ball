@@ -291,7 +291,7 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
                 @Override
                 public void run()
                 {
-                    Toast.makeText(getMainActivity(), "Ready to Kick", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getMainActivity(), getString(R.string.ready), Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -299,14 +299,29 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
         {
             countdownTimer = 0;
             timerReader.block();
-            getMainActivity().runOnUiThread(new Runnable()
+
+            if (!resetCalled)
             {
-                @Override
-                public void run()
+                getMainActivity().runOnUiThread(new Runnable()
                 {
-                    Toast.makeText(getMainActivity(), "Ball Kicked", Toast.LENGTH_SHORT).show();
-                }
-            });
+                    @Override
+                    public void run()
+                    {
+                        Toast.makeText(getMainActivity(), getString(R.string.impact_detected), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+            else
+            {
+                getMainActivity().runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Toast.makeText(getMainActivity(), getString(R.string.ball_reset), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         }
 
         // Update
