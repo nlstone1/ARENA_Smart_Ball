@@ -189,7 +189,8 @@ public class MainActivity extends AppCompatActivity
         }
         else
         {
-            super.onBackPressed();
+            if (!DrawerItem.back(this))
+                super.onBackPressed();
         }
     }
 

@@ -17,7 +17,6 @@ import java.util.UUID;
 
 import arena.arenasmartball.R;
 import arena.arenasmartball.ball.Services;
-import arena.arenasmartball.ball.SmartBall;
 
 /**
  * ExpandableListViewAdapter for showing a ball's services and characteristics.
@@ -40,9 +39,9 @@ public class ServicesListAdapter extends BaseExpandableListAdapter
 
     /**
      * Creates a ServicesListAdapter for the specified SmartBall.
-     * @param smartBall The SmartBall
+     * @param context The parent Context
      */
-    public ServicesListAdapter(Context context, SmartBall smartBall)
+    public ServicesListAdapter(Context context)
     {
         this.context = context;
         data = new ArrayList<>();

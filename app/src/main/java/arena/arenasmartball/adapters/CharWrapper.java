@@ -5,7 +5,6 @@ import android.widget.TextView;
 import arena.arenasmartball.MainActivity;
 import arena.arenasmartball.R;
 import arena.arenasmartball.ball.GattCommand;
-import arena.arenasmartball.ball.GattCommandSequence;
 import arena.arenasmartball.ball.GattCommandUtils;
 import arena.arenasmartball.ball.Services;
 import arena.arenasmartball.ball.SmartBall;
@@ -56,7 +55,7 @@ class CharWrapper
         if (value == null && !isRead)
         {
             isRead = true;
-            textView.setText(R.string.requesting_value);
+            textView.setText(R.string.blank_symbol);
 
             GattCommandUtils.executeCommand(ball, new GattCommand.ReadGattCommand<>(
                     ball.getCharacteristic(CHARACTERISTIC), null,
@@ -74,37 +73,11 @@ class CharWrapper
                                 textView.setText(new String(data));
                             }
                         });
+                        textView.postInvalidateDelayed(100L);
+                        textView.postInvalidateDelayed(1000L);
+
                     }
-                }), CHARACTERISTIC.name(), new GattCommandSequence.CommandSequenceCallback()
-                {
-                    @Override
-                    public void onCommandSequenceEvent(GattCommandSequence sequence, GattCommandSequence.Event event)
-                    {
-                        if (event == GattCommandSequence.Event.FAILED_TO_BEGIN
-                                || event == GattCommandSequence.Event.ENDED_EARLY)
-                        {
-                            textView.post(new Runnable()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    textView.setText(R.string.unable_to_read);
-                                }
-                            });
-                        }
-                        else
-                        {
-                            textView.post(new Runnable()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    textView.setText(R.string.value_received);
-                                }
-                            });
-                        }
-                    }
-                });
+                }), CHARACTERISTIC.name(), null);
         }
         else if (value != null)
         {
@@ -112,7 +85,7 @@ class CharWrapper
         }
         else
         {
-            textView.setText(R.string.requesting_value);
+            textView.setText(R.string.unable_to_read);
         }
     }
 }

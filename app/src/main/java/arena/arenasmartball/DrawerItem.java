@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import arena.arenasmartball.fragments.CaptureFragment;
@@ -50,6 +51,16 @@ public enum DrawerItem
     // Fragment represented by this drawer
     private final Class<? extends SimpleFragment> FRAGMENT_CLASS;
 
+    // Back stack for the Back button
+    private static final int BACK_STACK_SIZE = 128;
+    private static final int[] BACK_STACK = new int[BACK_STACK_SIZE];
+    private static int backStackIdx = -1;
+
+    static
+    {
+        Arrays.fill(BACK_STACK, -1);
+    }
+
     /*
      * Creates a DrawerItem.
      */
@@ -80,6 +91,8 @@ public enum DrawerItem
                 currentFragment.save(bundle);
                 currentFragment.onClose();
                 SAVED_FRAGMENTS.put(currentDrawerItem, bundle);
+
+                addToBackStack(currentDrawerItem.ordinal());
             }
 
             // Update the current Drawer reference
@@ -123,6 +136,25 @@ public enum DrawerItem
             {
                 Log.e(TAG, "Unable to open drawer for " + this + "!", e);
             }
+        }
+    }
+
+    /**
+     * Opens the drawer on the top of the back stack.
+     * @param mainActivity The MainActivity
+     * @return False if the back stack is empty, true otherwise
+     */
+    public static boolean back(MainActivity mainActivity)
+    {
+        int idx = popOffBackStack();
+
+        if (idx == -1)
+            return false;
+        else
+        {
+            values()[idx].openDrawer(mainActivity);
+            popOffBackStack();
+            return true;
         }
     }
 
@@ -174,5 +206,34 @@ public enum DrawerItem
     public static DrawerItem getCurrent()
     {
         return currentDrawerItem;
+    }
+
+    /**
+     * Adds an integer to the back stack.
+     * @param idx The integer
+     */
+    private static void addToBackStack(int idx)
+    {
+        ++backStackIdx;
+
+        BACK_STACK[backStackIdx % BACK_STACK_SIZE] = idx;
+    }
+
+    /**
+     * Pops the next value off the back stack.
+     * @return The next value or -1 for no value
+     */
+    private static int popOffBackStack()
+    {
+        if (backStackIdx < 0)
+        {
+            return -1;
+        }
+
+        int r = BACK_STACK[backStackIdx % BACK_STACK_SIZE];
+        BACK_STACK[backStackIdx % BACK_STACK_SIZE] = -1;
+        --backStackIdx;
+
+        return r;
     }
 }

@@ -420,7 +420,7 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
                 if (draggedResult != null)
                 {
                     // Check for drops in connect region
-                    if (isInConnectRegion(draggedResult))
+                    if (isInConnectRegion(draggedResult) && draggedResult.SCAN_RESULT.getDevice() != null)
                     {
                         // Check for displacing existing connections
                         if (connectedResult != null)
