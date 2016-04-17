@@ -76,6 +76,18 @@ public class Impact implements SmartBall.DataListener
     {
         if (isReading)
         {
+            if (typeOneData != null)
+            {
+                if (!typeOneData.isComplete())
+                    return typeOneData;
+            }
+
+            if (typeTwoData != null)
+            {
+                if (!typeTwoData.isComplete())
+                    return typeTwoData;
+            }
+
             return null;
         }
         else

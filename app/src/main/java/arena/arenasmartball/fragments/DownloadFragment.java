@@ -216,6 +216,13 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
         if (event == SmartBall.DataEvent.TRANSMISSION_BEGUN)
             transmissionBegun = true;
 
-        setValuesForCurrentState(MainActivity.getBluetoothBridge());
+        getMainActivity().runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                setValuesForCurrentState(MainActivity.getBluetoothBridge());
+            }
+        });
     }
 }
