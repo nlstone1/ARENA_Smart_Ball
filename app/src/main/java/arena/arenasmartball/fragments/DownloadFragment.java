@@ -31,10 +31,13 @@ import arena.arenasmartball.ball.SmartBall;
  *
  * Created by Theodore on 4/14/2016.
  */
-public class DownloadFragment extends SimpleFragment
+public class DownloadFragment extends SimpleFragment implements View.OnClickListener, SmartBall.DataListener
 {
     // The tag for this class
     private static final String TAG = "DownloadFragment";
+
+    // Denotes whether or not a data transmission was begun
+    private static boolean transmissionBegun;
 
     // Views
     private TextView titleView;
@@ -64,7 +67,12 @@ public class DownloadFragment extends SimpleFragment
         setValuesForCurrentState(MainActivity.getBluetoothBridge());
 
         // Add listeners
+        resetButton.setOnClickListener(this);
 
+        SmartBall ball = MainActivity.getBluetoothBridge().getSmartBall();
+
+        if (ball != null)
+            ball.addDataListener(this);
 
         return view;
     }
@@ -74,6 +82,10 @@ public class DownloadFragment extends SimpleFragment
     {
         super.onDestroyView();
 
+        SmartBall ball = MainActivity.getBluetoothBridge().getSmartBall();
+
+        if (ball != null)
+            ball.removeDataListener(this);
     }
 
     /*
@@ -102,6 +114,7 @@ public class DownloadFragment extends SimpleFragment
             if (ball.isDataTransmitInProgress())
             {
                 resetButton.setText(R.string.cancel_download);
+                resetButton.setEnabled(transmissionBegun);
                 statusView.setText(String.format(getString(R.string.downloading_data_with_type), ball.getDataTypeInTransit()));
             }
             else if (timeOfLastDownload == timeOfLastImpact)
@@ -147,5 +160,65 @@ public class DownloadFragment extends SimpleFragment
         }
         catch (Exception e)
         { /* Ignore */ }
+    }
+
+    /**
+     * Called when a view has been clicked.
+     *
+     * @param v The view that was clicked.
+     */
+    @Override
+    public void onClick(View v)
+    {
+        SmartBall ball = MainActivity.getBluetoothBridge().getSmartBall();
+
+        if (ball == null)
+            return;
+
+        ball.addDataListener(this);
+
+        if (v.getId() == R.id.button_download_read)
+        {
+            // Cancel the transmission if one is in progress
+            if (ball.isDataTransmitInProgress())
+                GattCommandUtils.executeEndTransmissionCommandSequence(ball, null);
+            else
+            {
+                transmissionBegun = false;
+                GattCommandUtils.executeDataTransmitCommandSequence(ball, 1096, 2, null); // TODO
+            }
+
+        }
+    }
+
+    /**
+     * Called when kick data is read.
+     *
+     * @param ball  The SmartBall
+     * @param data  The read data
+     * @param start true if this value is the data start code
+     * @param end   true if this value is the data end code
+     * @param type  The type of data read
+     */
+    @Override
+    public void onSmartBallDataRead(SmartBall ball, byte[] data, boolean start, boolean end, byte type)
+    {
+
+    }
+
+    /**
+     * Called on a data transmission event.
+     *
+     * @param ball     The SmartBall
+     * @param dataType The type of data in the transmission
+     * @param event    The DataEvent that occurred
+     */
+    @Override
+    public void onSmartBallDataTransmissionEvent(SmartBall ball, byte dataType, SmartBall.DataEvent event)
+    {
+        Log.w(TAG, "Data Transmission Event: " + event.name() + ", DataType = " + dataType);
+
+        if (event == SmartBall.DataEvent.TRANSMISSION_BEGUN)
+            transmissionBegun = true;
     }
 }

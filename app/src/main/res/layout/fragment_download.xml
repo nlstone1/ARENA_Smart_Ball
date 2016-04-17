@@ -44,7 +44,6 @@
         android:id="@+id/progressbar_download"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:progress="100"
         android:indeterminate="false"
         android:layout_above="@id/button_download_read"/>
 

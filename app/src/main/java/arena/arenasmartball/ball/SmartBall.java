@@ -29,6 +29,14 @@ public class SmartBall
         KICKED
     }
 
+    /** Represents different data transmission events. */
+    public enum DataEvent
+    {
+        TRANSMISSION_BEGUN,
+        TRANSMISSION_ENDED,
+        TRANSMISSION_CANCELLED
+    }
+
     /** The tag for this class. */
     private static final String TAG = "SmartBall";
 
@@ -172,7 +180,7 @@ public class SmartBall
         if (dataTransmitInProgress)
         {
             for (DataListener listener : dataListeners)
-                listener.onSmartBallDataCancelled(this);
+                listener.onSmartBallDataTransmissionEvent(this, dataTypeInTransit, DataEvent.TRANSMISSION_CANCELLED);
         }
         dataTransmitInProgress = false;
     }
@@ -224,26 +232,14 @@ public class SmartBall
             set.remove(listener);
     }
 
-//    /**
-//     * Method to add a SmartBallEventListener.
-//     * @param listener The SmartBallDataListener to add
-//     */
-//    public void addEventListener(FragmentIOManager listener)
-//    {
-//        if (listener == null || !(listener instanceof SmartBallEventListener))
-//            return;
-//
-//        Iterator<SmartBallEventListener> it = eventListeners.iterator();
-//
-//        // Remove old listeners that are instances of the argument
-//        while (it.hasNext())
-//        {
-//            if (it.next().getClass().isInstance(listener))
-//                it.remove();
-//        }
-//
-//        eventListeners.add((SmartBallEventListener)listener);
-//    }
+    /**
+     * Method to add a EventListener.
+     * @param listener The EventListener to add
+     */
+    public void addEventListener(EventListener listener)
+    {
+        eventListeners.add(listener);
+    }
 
     /**
      * Method to remove the given SmartBallEventListener.
@@ -254,30 +250,18 @@ public class SmartBall
         eventListeners.remove(listener);
     }
 
-//    /**
-//     * Method to add a SmartBallDataListener.
-//     * @param listener The SmartBallDataListener to add
-//     */
-//    public void addDataListener(FragmentIOManager listener)
-//    {
-//        if (listener == null || !(listener instanceof SmartBallDataListener))
-//            return;
-//
-//        Iterator<SmartBallDataListener> it = dataListeners.iterator();
-//
-//        // Remove old listeners that are instances of the argument
-//        while (it.hasNext())
-//        {
-//            if (it.next().getClass().isInstance(listener))
-//                it.remove();
-//        }
-//
-//        dataListeners.add((SmartBallDataListener)listener);
-//    }
+    /**
+     * Method to add a DataListener.
+     * @param listener The DataListener to add
+     */
+    public void addDataListener(DataListener listener)
+    {
+        dataListeners.add(listener);
+    }
 
     /**
-     * Method to remove the given SmartBallDataListener.
-     * @param listener The SmartBallDataListener to remove
+     * Method to remove the given DataListener.
+     * @param listener The DataListener to remove
      */
     public void removeDataListener(DataListener listener)
     {
@@ -569,7 +553,10 @@ public class SmartBall
                     if (value[0] == -118 && value[1] == 10 && value[2] == 0 && value[3] == 0) // Start
                     {
                         for (DataListener listener: dataListeners)
+                        {
+                            listener.onSmartBallDataTransmissionEvent(ball, dataTypeInTransit, DataEvent.TRANSMISSION_BEGUN);
                             listener.onSmartBallDataRead(ball, value, true, false, dataTypeInTransit);
+                        }
                     }
                     else if (previousLine != null && (value[0] == -102) && (previousLine[0] != -103)) // Finished
                     {
@@ -577,7 +564,10 @@ public class SmartBall
                         previousLine = null;
 
                         for (DataListener listener: dataListeners)
+                        {
                             listener.onSmartBallDataRead(ball, value, false, true, dataTypeInTransit);
+                            listener.onSmartBallDataTransmissionEvent(ball, dataTypeInTransit, DataEvent.TRANSMISSION_ENDED);
+                        }
                     }
                     else
                     {
@@ -624,10 +614,13 @@ public class SmartBall
         void onSmartBallDataRead(SmartBall ball, byte[] data, boolean start, boolean end, byte type);
 
         /**
-         * Called if the data transmission is canceled.
+         * Called on a data transmission event.
          * @param ball The SmartBall
+         * @param dataType The type of data in the transmission
+         * @param event The DataEvent that occurred
          */
-        void onSmartBallDataCancelled(SmartBall ball);
+        void onSmartBallDataTransmissionEvent(SmartBall ball, byte dataType, DataEvent event);
+
     }
 
     /**

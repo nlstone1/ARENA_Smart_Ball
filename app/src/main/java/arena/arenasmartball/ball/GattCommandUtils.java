@@ -66,7 +66,7 @@ public class GattCommandUtils
      * @param numSamples The number of samples to read, capped at 1096
      * @param dataType The type of data to request
      */
-    public static void executeDataTransmitCommandSequence(final SmartBall ball, int numSamples, byte dataType,
+    public static void executeDataTransmitCommandSequence(final SmartBall ball, int numSamples, int dataType,
                                                           GattCommandSequence.CommandSequenceCallback callback)
     {
         // Calculate the num samples
@@ -81,7 +81,7 @@ public class GattCommandUtils
                 callback);
         sequence.addCommand(new GattCommand.WriteGattCommand<>(
                 ball.getCharacteristic(Services.Characteristic.COMMAND_FIELD),
-                new byte[] {10, 0, 0, 0, 0, lower, upper, 0, 0, dataType}
+                new byte[] {10, 0, 0, 0, 0, lower, upper, 0, 0, (byte)dataType}
         ));
 
         ball.addCommandSequenceToQueue(sequence);
