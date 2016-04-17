@@ -42,11 +42,17 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
     // The amount of time to wait for the kick bit to be set before announcing an error
     private static final long KICK_BIT_RESPONSE_DELAY = 4000L;
 
+    // The capute button cooldown time
+    private static final long CAPTURE_BUTTON_COOLDOWN_TIME = 1000L;
+
     // The maximum value of the countdown timer
     private static final int MAX_COUNTDOWN_TIMER_VALUE = 90;
 
     // Reset flag
     private static boolean resetCalled;
+
+    // Hit flag
+    private static boolean ballHit;
 
     // Countdown timer
     private static int countdownTimer;
@@ -140,14 +146,30 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
             else
             {
                 readyView.setBackgroundResource(R.color.colorReadyOff);
-                captureButton.setEnabled(!ball.isDataTransmitInProgress() &&
-                        System.currentTimeMillis() - bridge.getTimeOfLastImpact() > 1000L); // TODO
+                captureButton.setEnabled(shouldEnableCaptureButton(ball, bridge));
             }
 
-            countdownView.setText("" + countdownTimer);
+            countdownView.setText(getCountdownTimerString());
             resetButton.setEnabled(true);
-            downloadButton.setEnabled(true); // TODO
+            downloadButton.setEnabled(true);
         }
+    }
+
+    /*
+     * Gets the countdown timer String representation.
+     */
+    private String getCountdownTimerString()
+    {
+        return "" + countdownTimer;
+    }
+
+    /*
+     * Determines whether or not the capture button should be enabled.
+     */
+    private boolean shouldEnableCaptureButton(SmartBall ball, BluetoothBridge bridge)
+    {
+        return !ball.isDataTransmitInProgress() &&
+                System.currentTimeMillis() - bridge.getTimeOfLastImpact() > CAPTURE_BUTTON_COOLDOWN_TIME;
     }
 
     /*
@@ -206,6 +228,7 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
             if (ball != null)
             {
                 resetCalled = false;
+                ballHit = false;
                 ball.getEventListeners().add(this);
                 ball.addCharacteristicListener(this, Services.Characteristic.TIMEOUT_COUNTER);
                 GattCommandUtils.executeKickCommandSequence(ball, this);
@@ -216,8 +239,7 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
                     @Override
                     public void run()
                     {
-                        // TODO removed a ! from in front of KickBit
-                        if (!resetCalled && ball.getKickBit() /*&& (requestedTypeTwoData || requestedTypeOneData)*/) // Error
+                        if (!ballHit && !resetCalled && !ball.getKickBit() /*&& (requestedTypeTwoData || requestedTypeOneData)*/) // Error
                         {
                             ball.flushCommandQueue();
                             ball.clearDataTransmitInProgressFlag();
@@ -276,7 +298,7 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
      * @param event The kick event
      */
     @Override
-    public void onBallKickEvent(SmartBall ball, SmartBall.KickEvent event)
+    public void onBallKickEvent(final SmartBall ball, SmartBall.KickEvent event)
     {
         Log.d(TAG, "onBallKickEvent(): Event = " + event.name());
 
@@ -296,6 +318,7 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
         else if (event == SmartBall.KickEvent.KICKED)
         {
             countdownTimer = 0;
+            ballHit = true;
             timerReader.block();
 
             if (!resetCalled)
@@ -320,6 +343,16 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
                     }
                 });
             }
+
+            // Make sure capture button is re-enabled after the cooldown time
+            captureButton.postDelayed(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    captureButton.setEnabled(shouldEnableCaptureButton(ball, MainActivity.getBluetoothBridge()));
+                }
+            }, CAPTURE_BUTTON_COOLDOWN_TIME + 1);
         }
 
         // Update
@@ -331,7 +364,6 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
                 setValuesForCurrentState(MainActivity.getBluetoothBridge());
             }
         });
-
     }
 
     /**
