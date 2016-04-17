@@ -345,7 +345,11 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
         scanResultRadius = Math.max(12, Math.min(donutWidth / 2, innerRadius));
 
         if (connectedResult != null)
+        {
             connectedResult.forcePosition(getWidth() / 2, getHeight() / 2);
+            connectedResult.cx = getWidth() / 2;
+            connectedResult.cy = getHeight() / 2;
+        }
 
         for (ScanResultWrapper result: scanResults.values())
         {
