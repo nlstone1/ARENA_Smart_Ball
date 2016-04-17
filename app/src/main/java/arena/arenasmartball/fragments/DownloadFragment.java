@@ -10,14 +10,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import arena.arenasmartball.BluetoothBridge;
 import arena.arenasmartball.MainActivity;
-import arena.arenasmartball.PeriodicUpdateThread;
 import arena.arenasmartball.R;
 import arena.arenasmartball.Utils;
-import arena.arenasmartball.ball.GattCommand;
-import arena.arenasmartball.ball.GattCommandSequence;
 import arena.arenasmartball.ball.GattCommandUtils;
-import arena.arenasmartball.ball.Services;
 import arena.arenasmartball.ball.SmartBall;
+import arena.arenasmartball.data.Impact;
 
 /**
  * Fragment for the data download screen.
@@ -31,6 +28,9 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
 
     // Denotes whether or not a data transmission was begun
     private static boolean transmissionBegun;
+
+//    // Records the time of the last data download request
+//    private static long timeOfLastDownload;
 
     // Views
     private TextView titleView;
@@ -97,12 +97,16 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
             setValuesForNoConnection();
         else
         {
-            long timeOfLastDownload = bridge.getTimeOfLastDownload();
+//            long timeOfLastDownload = bridge.getTimeOfLastDownload();
             SmartBall ball = bridge.getSmartBall();
+            Impact impact = bridge.getLastImpact();
 
-            resetButton.setEnabled(true);
+            resetButton.setEnabled(impact != null);
             resetButton.setText(R.string.download);
             statusView.setVisibility(timeOfLastImpact == 0 ? View.GONE : View.VISIBLE);
+
+            if (impact == null)
+                return;
 
             if (ball.isDataTransmitInProgress())
             {
@@ -110,12 +114,17 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
                 resetButton.setEnabled(transmissionBegun);
                 statusView.setText(String.format(getString(R.string.downloading_data_with_type), ball.getDataTypeInTransit()));
             }
-            else if (timeOfLastDownload == timeOfLastImpact)
+            else if (impact.isComplete())
                 statusView.setText(R.string.download_complete);
+            else if (impact.wasCancelled())
+                statusView.setText(R.string.download_cancelled);
             else
                 statusView.setText(R.string.no_current_download);
 
-            // TODO progress bar
+            if (impact.getDataInTransit() != null)
+                progressBar.setProgress(impact.getDataInTransit().getTransmissionProgress());
+            else
+                progressBar.setProgress(0);
         }
     }
 

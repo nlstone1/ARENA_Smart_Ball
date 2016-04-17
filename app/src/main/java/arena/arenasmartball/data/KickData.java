@@ -33,6 +33,7 @@ public abstract class KickData
      */
     protected KickData(int numSamplesAskedFor)
     {
+        isComplete = false;
         rawData = new LinkedList<>();
         data = new ArrayList<>();
         this.numSamplesAskedFor = numSamplesAskedFor;

@@ -8,12 +8,14 @@ import android.util.Log;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import arena.arenasmartball.ball.Services;
 import arena.arenasmartball.ball.SmartBall;
 import arena.arenasmartball.ball.SmartBallConnection;
 import arena.arenasmartball.ball.SmartBallScanner;
+import arena.arenasmartball.data.Impact;
 
 /**
  * A bridge from the Applications UI to the required Bluetooth Functionality.
@@ -51,11 +53,17 @@ public class BluetoothBridge implements SmartBallConnection.SmartBallConnectionL
     // The SmartBallConnection handle
     private SmartBallConnection smartBallConnection;
 
-    // Records the time of the last impact recorded by the app, in milliseconds from Jan 1 1970
-    private long timeOfLastImpact;
+//    // Records the time of the last impact recorded by the app, in milliseconds from Jan 1 1970
+//    private long timeOfLastImpact;
+//
+//    // Records the time of the last download time from app, in milliseconds from Jan 1 1970
+//    private long timeOfLastDownload;
 
-    // Records the time of the last download time from app, in milliseconds from Jan 1 1970
-    private long timeOfLastDownload;
+    // The most recent Impact
+    private Impact lastImpact;
+
+//    // The list of impacts recorded this session
+//    private List<Impact> impacts;
 
     // The BluetoothBridgeStateChangeListener attached to this BluetoothBridge
     private Set<BluetoothBridgeStateChangeListener> listeners;
@@ -81,17 +89,40 @@ public class BluetoothBridge implements SmartBallConnection.SmartBallConnectionL
      */
     public long getTimeOfLastImpact()
     {
-        return timeOfLastImpact;
+        if (lastImpact == null)
+            return 0L;
+        else
+            return lastImpact.getTime();
+
+//        return timeOfLastImpact;
     }
 
     /**
-     * Gets the time of the last download, in milliseconds from Jan 1 1970.
-     * @return The time of the last download, or 0 if no impact has been recorded yet
+     * Gets the last recorded Impact.
+     * @return The last recorded Impact
      */
-    public long getTimeOfLastDownload()
+    public Impact getLastImpact()
     {
-        return timeOfLastDownload;
+        return lastImpact;
     }
+
+//    /**
+//     * Gets the time of the last download, in milliseconds from Jan 1 1970.
+//     * @return The time of the last download, or 0 if no impact has been recorded yet
+//     */
+//    public long getTimeOfLastDownload()
+//    {
+//        return timeOfLastDownload;
+//    }
+//
+//    /**
+//     * Sets the time of the last download, in milliseconds from Jan 1 1970.
+//     * @param time The time of the last download
+//     */
+//    public void setTimeOfLastDownload(long time)
+//    {
+//        timeOfLastDownload = time;
+//    }
 
     /**
      * Gets the current state of this BluetoothBridge.
@@ -370,7 +401,13 @@ public class BluetoothBridge implements SmartBallConnection.SmartBallConnectionL
     {
         if (event == SmartBall.KickEvent.KICKED)
         {
-            timeOfLastImpact = System.currentTimeMillis();
+            if (lastImpact != null)
+                ball.removeDataListener(lastImpact);
+
+            lastImpact = new Impact();
+            ball.addDataListener(lastImpact);
+
+//            timeOfLastImpact = System.currentTimeMillis();
         }
     }
 

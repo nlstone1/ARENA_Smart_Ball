@@ -44,6 +44,7 @@
     <string name="last_impact">Last Impact:&#160;</string>
     <string name="downloading_data_with_type">Downloading type %d data…</string>
     <string name="download_complete">Download Complete</string>
+    <string name="download_cancelled">Download Cancelled</string>
     <string name="no_current_download">No Current Download</string>
 
     <!-- Content descriptions -->

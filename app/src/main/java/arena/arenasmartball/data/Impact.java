@@ -1,5 +1,7 @@
 package arena.arenasmartball.data;
 
+import android.util.Log;
+
 import arena.arenasmartball.ball.SmartBall;
 
 /**
@@ -8,11 +10,17 @@ import arena.arenasmartball.ball.SmartBall;
  */
 public class Impact implements SmartBall.DataListener
 {
+    // The tag for this class
+    private static final String TAG = "Impact";
+
     // Whether or not this Impact was cancelled
     private boolean wasCancelled;
 
     // Whether or not this Impact is currently reading data from the SmartBall
     private boolean isReading;
+
+    // Records the last data type that this Impact read
+    private int lastDataTypeRead;
 
     // The time of the impact, in milliseconds from Jan 1, 1970
     private long time;
@@ -22,6 +30,14 @@ public class Impact implements SmartBall.DataListener
 
     // The type 2 data of this Impact
     private TypeTwoData typeTwoData;
+
+    /**
+     * Creates a new Impact.
+     */
+    public Impact()
+    {
+        time = System.currentTimeMillis();
+    }
 
     /**
      * Gets whether or not this Impact was cancelled.
@@ -39,6 +55,26 @@ public class Impact implements SmartBall.DataListener
     public boolean isReading()
     {
         return isReading;
+    }
+
+    /**
+     * Gets whether or not this Impact is complete.
+     * @return Whether or not this Impact is complete
+     */
+    public boolean isComplete()
+    {
+        if (typeOneData == null && typeTwoData == null)
+            return false;
+
+        boolean complete = true;
+
+        if (typeOneData != null && !typeOneData.isComplete())
+            complete = false;
+
+        if (typeTwoData != null && !typeTwoData.isComplete())
+            complete = false;
+
+        return complete;
     }
 
     /**
@@ -76,13 +112,12 @@ public class Impact implements SmartBall.DataListener
     {
         if (isReading)
         {
-            if (typeOneData != null)
+            if (lastDataTypeRead == 1)
             {
                 if (!typeOneData.isComplete())
                     return typeOneData;
             }
-
-            if (typeTwoData != null)
+            else if (lastDataTypeRead == 2)
             {
                 if (!typeTwoData.isComplete())
                     return typeTwoData;
@@ -106,7 +141,11 @@ public class Impact implements SmartBall.DataListener
     @Override
     public void onSmartBallDataRead(SmartBall ball, byte[] data, boolean start, boolean end, byte type)
     {
+        lastDataTypeRead = type;
+        KickData idata = getDataInTransit();
 
+        if (idata != null && !idata.isComplete())
+            idata.addLine(data, start, end);
     }
 
     /**
@@ -120,6 +159,12 @@ public class Impact implements SmartBall.DataListener
     @Override
     public void onSmartBallDataTransmissionEvent(SmartBall ball, byte dataType, SmartBall.DataEvent event, int numSamples)
     {
+        if (dataType == 1 && typeOneData != null && typeOneData.isComplete())
+            return;
+
+        if (dataType == 2 && typeTwoData != null && typeTwoData.isComplete())
+            return;
+
         if (event == SmartBall.DataEvent.TRANSMISSION_REQUESTED)
             isReading = true;
         else if (event == SmartBall.DataEvent.TRANSMISSION_BEGUN)
@@ -136,16 +181,36 @@ public class Impact implements SmartBall.DataListener
             isReading = false;
 
             if (dataType == 1)
-                typeOneData.setComplete(true);
+            {
+                if (typeOneData != null)
+                    typeOneData.setComplete(true);
+                else
+                    Log.w(TAG, "Type 1 data transmit ended but type 1 data is null");
+            }
             else if (dataType == 2)
-                typeTwoData.setComplete(true);
+            {
+                if (typeTwoData != null)
+                    typeTwoData.setComplete(true);
+                else
+                    Log.w(TAG, "Type 2 data transmit ended but type 1 data is null");
+            }
         }
         else if (event == SmartBall.DataEvent.TRANSMISSION_CANCELLED)
         {
             if (dataType == 1)
-                typeOneData.setComplete(false);
+            {
+                if (typeOneData != null)
+                    typeOneData.setComplete(false);
+                else
+                    Log.w(TAG, "Type 1 data transmit cancelled but type 1 data is null");
+            }
             else if (dataType == 2)
-                typeTwoData.setComplete(false);
+            {
+                if (typeTwoData != null)
+                    typeTwoData.setComplete(false);
+                else
+                    Log.w(TAG, "Type 2 data transmit cancelled but type 1 data is null");
+            }
 
             isReading = false;
             wasCancelled = true;
