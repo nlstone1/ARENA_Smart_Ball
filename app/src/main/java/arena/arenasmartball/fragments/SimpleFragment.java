@@ -14,6 +14,9 @@ import arena.arenasmartball.MainActivity;
  */
 public class SimpleFragment extends Fragment implements BluetoothBridge.BluetoothBridgeStateChangeListener
 {
+    // Runnable to run in onResume
+    private Runnable runOnResume;
+
     /**
      * Convenience method to get this Fragment's parent Activity as a MainActivity.
      * @return This Fragment's parent Activity as a MainActivity
@@ -48,6 +51,30 @@ public class SimpleFragment extends Fragment implements BluetoothBridge.Bluetoot
      */
     public void save(@NonNull Bundle bundle)
     {   }
+
+    /**
+     * Sets the Runnable to be run in onResume.
+     * @param runnable The Runnable
+     */
+    public void runInOnResume(Runnable runnable)
+    {
+        if (runOnResume != null)
+            throw new RuntimeException("runInOnResume already called before onResume() has been called!");
+
+        runOnResume = runnable;
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+
+        if (runOnResume != null)
+        {
+            runOnResume.run();
+            runOnResume = null;
+        }
+    }
 
     /**
      * Called when the state of the BluetoothBridge changes.

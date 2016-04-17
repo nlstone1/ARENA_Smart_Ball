@@ -240,14 +240,15 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
      */
     public void load(Bundle bundle)
     {
-        Log.d(TAG, bundle.toString());
-
         scanResults.clear();
         ArrayList<Parcelable> list = bundle.getParcelableArrayList(SCAN_RESULTS_KEY);
         if (list != null)
-        for (Parcelable p: list)
         {
-            addResult((ScanResultWrapper) p);
+            Log.d(TAG, "Loading " + list.size() + " ScanResults");
+            for (Parcelable p : list)
+            {
+                addResult((ScanResultWrapper) p);
+            }
         }
 
 //        draggedResult = bundle.getParcelable(DRAGGED_RESULT_KEY);
@@ -269,10 +270,11 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
 
         moveConnected = false;
 
-        bundle.putParcelableArrayList(SCAN_RESULTS_KEY, new ArrayList<Parcelable>(scanResults.values()));
-//        bundle.putParcelable(DRAGGED_RESULT_KEY, draggedResult);
+        ArrayList<ScanResultWrapper> parcels = new ArrayList<>(scanResults.values());
+        Log.d(TAG, "Saving " + parcels);
+
+        bundle.putParcelableArrayList(SCAN_RESULTS_KEY, parcels);
         bundle.putParcelable(CONNECTED_RESULT_KEY, connectedResult);
-//        bundle.putBoolean(MOVE_CONNECTED_KEY, moveConnected);
     }
 
     /**
@@ -288,7 +290,7 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
         drawBackground(canvas);
 
         // Update ScanResultWrappers
-        Log.d(TAG, "Updating " + scanResults.size() + " scanResults");
+//        Log.d(TAG, "Updating " + scanResults.size() + " scanResults");
         synchronized (scanResults)
         {
             // Calculate forces

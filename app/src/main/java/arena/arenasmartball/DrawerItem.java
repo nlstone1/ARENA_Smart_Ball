@@ -1,5 +1,6 @@
 package arena.arenasmartball;
 
+import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
@@ -93,24 +94,22 @@ public enum DrawerItem
                 currentFragment = FRAGMENT_CLASS.newInstance();
                 currentFragment.onOpen();
                 MainActivity.getBluetoothBridge().addBluetoothBridgeStateChangeListener(currentFragment);
-//                if (SAVE_FRAGMENT)
-//                {
-                    if (SAVED_FRAGMENTS.containsKey(this))
+
+                if (SAVED_FRAGMENTS.containsKey(this))
+                {
+                    Log.d(TAG, "loading fragment from hashmap");
+
+                    final Bundle b = SAVED_FRAGMENTS.remove(this);
+
+                    currentFragment.runInOnResume(new Runnable()
                     {
-                        Log.d(TAG, "loading fragment from hashmap");
-                        // TODO fixme
-//                        currentFragment.load(SAVED_FRAGMENTS.remove(this));
-                    }
-//                    if (SAVED_FRAGMENTS.containsKey(this))
-//                    {
-//                        Log.d(TAG, "grabbed fragment from hashmap");
-//                        currentFragment = SAVED_FRAGMENTS.get(this);
-//                    }
-//                    else
-//                    {
-//                        SAVED_FRAGMENTS.put(this, currentFragment);
-//                    }
-//                }
+                        @Override
+                        public void run()
+                        {
+                            currentFragment.load(b);
+                        }
+                    });
+                }
 
                 FragmentTransaction transaction = activity.getFragmentManager().beginTransaction();
 
@@ -147,6 +146,25 @@ public enum DrawerItem
             currentFragment.save(bundle);
 
         currentDrawerItem = null;
+    }
+
+    /**
+     * Returns the Fragment for the open drawer.
+     * @return The Fragment for the open Drawer
+     */
+    public static Fragment getCurrentFragment()
+    {
+        return currentFragment;
+    }
+
+    /**
+     * Sets the current DrawerFragment.
+     * @param fragment The new Fragment
+     */
+    static void setCurrentFragment(int drawerIndex, Fragment fragment)
+    {
+        currentDrawerItem = DrawerItem.values()[drawerIndex];
+        currentFragment = (SimpleFragment) fragment;
     }
 
     /**

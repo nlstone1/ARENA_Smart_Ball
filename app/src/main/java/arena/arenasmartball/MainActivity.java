@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -49,6 +48,7 @@ public class MainActivity extends AppCompatActivity
 
     // Bundle key for saving the index of the current drawer
     private static final String DRAWER_INDEX_BUNDLE_KEY = "arena.arenasmartball.MainActivity.drawerIndex";
+    private static final String DRAWER_FRAGMENT_BUNDLE_KEY = "arena.arenasmartball.MainActivity.drawerFragment";
 
     /**
      * Gets the HUDFragment.
@@ -155,7 +155,9 @@ public class MainActivity extends AppCompatActivity
 
             // Show the saved drawer item
             int drawerIndex = savedInstanceState.getInt(DRAWER_INDEX_BUNDLE_KEY, 0);
-            DrawerItem.values()[drawerIndex].openDrawer(this);
+            DrawerItem.setCurrentFragment(drawerIndex, getFragmentManager().getFragment(savedInstanceState,
+                    DRAWER_FRAGMENT_BUNDLE_KEY));
+//            DrawerItem.values()[drawerIndex].openDrawer(this);
 
 //            // Load the saved state
 //            DrawerItem.onLoad(savedInstanceState);
@@ -168,13 +170,6 @@ public class MainActivity extends AppCompatActivity
             // Show the first drawer item
             DrawerItem.values()[0].openDrawer(this);
         }
-    }
-
-    @Override
-    public void onPostCreate(Bundle savedInstanceState, PersistableBundle persistentState)
-    {
-        // Load the saved state
-        DrawerItem.onLoad(savedInstanceState);
     }
 
     /**
@@ -226,16 +221,32 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSaveInstanceState(Bundle bundle)
     {
-        Log.d(TAG, "Saving Instance State");
+        super.onSaveInstanceState(bundle);
+
+        Log.d(TAG, "onSaveInstanceState");
 
         // Save the current drawer index
         if (DrawerItem.getCurrent() != null)
+        {
             bundle.putInt(DRAWER_INDEX_BUNDLE_KEY, DrawerItem.getCurrent().ordinal());
+            getFragmentManager().putFragment(bundle, DRAWER_FRAGMENT_BUNDLE_KEY, DrawerItem.getCurrentFragment());
+        }
         else
             Log.w(TAG, "Current drawer is null when saving instance state");
 
         // Save the current drawer
         DrawerItem.onSave(bundle);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState)
+    {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        Log.d(TAG, "onRestoreInstanceState");
+
+        // Load the saved state
+        DrawerItem.onLoad(savedInstanceState);
     }
 
     /**
