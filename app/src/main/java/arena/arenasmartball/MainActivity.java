@@ -40,11 +40,17 @@ public class MainActivity extends AppCompatActivity
     //  Constant representing the coarse location access permission request
     private static final int PERMISSIONS_REQUEST_COARSE_LOCATION = 1;
 
+    // Static reference to the MainActivity
+    private static MainActivity mainActivity;
+
     // BluetoothBridge for facilitating BT functions
     private static BluetoothBridge bluetoothBridge = new BluetoothBridge();
 
     // Used for the App Indexing API
     private GoogleApiClient client;
+
+    // The DrawerLayout
+    private DrawerLayout drawerLayout;
 
     // Bundle key for saving the index of the current drawer
     private static final String DRAWER_INDEX_BUNDLE_KEY = "arena.arenasmartball.MainActivity.drawerIndex";
@@ -69,6 +75,8 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
 
+        mainActivity = this;
+
         // Set the content view
         setContentView(R.layout.activity_main);
 
@@ -77,10 +85,10 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         // Initialize the DrawerLayout
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.setDrawerListener(toggle);
         toggle.syncState();
 
         // Initialize the NavigationView
@@ -157,10 +165,6 @@ public class MainActivity extends AppCompatActivity
             int drawerIndex = savedInstanceState.getInt(DRAWER_INDEX_BUNDLE_KEY, 0);
             DrawerItem.setCurrentFragment(drawerIndex, getFragmentManager().getFragment(savedInstanceState,
                     DRAWER_FRAGMENT_BUNDLE_KEY));
-//            DrawerItem.values()[drawerIndex].openDrawer(this);
-
-//            // Load the saved state
-//            DrawerItem.onLoad(savedInstanceState);
 
             // Select the drawer in the navigation view
             navigationView.setCheckedItem(drawerIndex);
@@ -320,12 +324,31 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
+     * Locks/Unlocks the NavigationDrawer.
+     * @param lock Whether to lock or unlock the NavigationDrawer
+     */
+    public void lockNavigationDrawer(boolean lock)
+    {
+        drawerLayout.setDrawerLockMode(lock ? DrawerLayout.LOCK_MODE_LOCKED_CLOSED:
+            DrawerLayout.LOCK_MODE_UNLOCKED);
+    }
+
+    /**
      * Sets the title for the Main Activity.
      * @param title The new title
      */
     public void setActionBarTitle(String title)
     {
         setTitle(getString(R.string.app_name) + ((title != null) ? (" ~ " + title): ""));
+    }
+
+    /**
+     * Returns the current MainActivity instance.
+     * @return The current MainActivity
+     */
+    public static MainActivity getCurrent()
+    {
+        return mainActivity;
     }
 
     /*

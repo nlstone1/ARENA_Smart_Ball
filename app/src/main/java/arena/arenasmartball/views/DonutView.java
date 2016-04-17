@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import arena.arenasmartball.MainActivity;
 import arena.arenasmartball.R;
 import arena.arenasmartball.Utils;
 
@@ -226,7 +227,8 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
                 if (connectedResult == null || !Utils.areEqual(result, connectedResult.SCAN_RESULT))
                 {
                     if (!scanResults.containsKey(result.getDevice().getAddress()))
-                        addResult(new ScanResultWrapper(getWidth() / 2, getHeight() / 2, result));
+                        addResult(new ScanResultWrapper(getWidth() / 2, getHeight() / 2,
+                                getWidth() / 2, getHeight() / 2, result));
                 }
             }
         }
@@ -248,6 +250,8 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
             for (Parcelable p : list)
             {
                 addResult((ScanResultWrapper) p);
+
+                ((ScanResultWrapper) p).snapAtFirstChance = true;
             }
         }
 
@@ -296,25 +300,25 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
             // Calculate forces
             for (ScanResultWrapper result: scanResults.values())
             {
-                result.calculateForces();
+                result.calculateForces(scanResults.values(), draggedResult, radius);
             }
 
             // Apply forces
             for (ScanResultWrapper result: scanResults.values())
             {
-                result.snapToDonut(false);
+                result.snapToDonut(false, radius);
 
-                if (result.update(canvas))
+                if (result.update(canvas, scanResultRadius, textSize))
                     viewUpdater.redraw(false);
             }
         }
 
         // Update the connectedResult
-        if (connectedResult != null && connectedResult.update(canvas))
+        if (connectedResult != null && connectedResult.update(canvas, scanResultRadius, textSize))
             viewUpdater.redraw(false);
 
         // Update the draggedResult
-        if (draggedResult != null && draggedResult.update(canvas))
+        if (draggedResult != null && draggedResult.update(canvas, scanResultRadius, textSize))
             viewUpdater.redraw(false);
 
         // Get ready to update again if necessary
@@ -338,14 +342,17 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
 
         radius = (Math.min(width, height) - donutWidth) / 2.0f;
         innerRadius = (radius - donutWidth) / 2.0f;
-        scanResultRadius = Math.min(donutWidth, innerRadius);
+        scanResultRadius = Math.max(12, Math.min(donutWidth / 2, innerRadius));
 
         if (connectedResult != null)
             connectedResult.forcePosition(getWidth() / 2, getHeight() / 2);
 
         for (ScanResultWrapper result: scanResults.values())
         {
-            result.snapToDonut(true);
+            result.snapToDonut(true, radius);
+            result.cx = getWidth() / 2;
+            result.cy = getHeight() / 2;
+            result.isCarried = false;
         }
 
         viewUpdater.redraw(true);
@@ -357,7 +364,7 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
      */
     public void addScanResult(ScanResult result)
     {
-        addResult(new ScanResultWrapper(getWidth() / 2, getHeight() / 2, result));
+        addResult(new ScanResultWrapper(getWidth() / 2, getHeight() / 2, getWidth() / 2, getHeight() / 2, result));
         Log.d(TAG, "Added new result");
 
         viewUpdater.redraw(true);
@@ -377,7 +384,7 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
                     // Find if a point is pressed
                     for (ScanResultWrapper result: scanResults.values())
                     {
-                        if (result.containsPoint(e.getX(), e.getY()))
+                        if (result.containsPoint(e.getX(), e.getY(), scanResultRadius))
                         {
                             draggedResult = result;
                         }
@@ -393,7 +400,8 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
                         r = true;
                         viewUpdater.redraw(true);
                     }
-                    else if (connectedResult != null && connectedResult.containsPoint(e.getX(), e.getY()))
+                    else if (connectedResult != null && connectedResult.containsPoint(
+                            e.getX(), e.getY(), scanResultRadius))
                     {
                         connectedResult.pickup();
                         moveConnected = true;
@@ -401,6 +409,10 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
                         r = true;
                     }
                 }
+
+                if (r)
+                    MainActivity.getCurrent().lockNavigationDrawer(true);
+
                 break;
 
             // Final finger release
@@ -431,6 +443,8 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
                     draggedResult.drop();
                     draggedResult = null;
                     viewUpdater.redraw(true);
+
+                    MainActivity.getCurrent().lockNavigationDrawer(false);
                 }
                 else if (connectedResult != null)
                 {
@@ -459,6 +473,8 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
                     }
 
                     moveConnected = false;
+
+                    MainActivity.getCurrent().lockNavigationDrawer(false);
                 }
                 break;
 
@@ -543,7 +559,7 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
     /**
      * Wrapper for ScanResults.
      */
-    private class ScanResultWrapper implements Parcelable, Comparable<ScanResultWrapper>
+    private static class ScanResultWrapper implements Parcelable, Comparable<ScanResultWrapper>
     {
         /** The wrapped ScanResult */
         public final ScanResult SCAN_RESULT;
@@ -552,6 +568,9 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
         private float x, y, dstX, dstY;
         private float dir;
         private float fx, fy;
+        private float cx, cy;
+
+        private boolean snapAtFirstChance;
 
         // Whether this ScanResultWrapper is being moved
         private boolean isCarried;
@@ -572,7 +591,7 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
          * Creator for ScanResultWrappers.
          */
         @SuppressWarnings("unused")
-        public final Creator<ScanResultWrapper> CREATOR
+        public static final Creator<ScanResultWrapper> CREATOR
                 = new Creator<DonutView.ScanResultWrapper>() {
             public DonutView.ScanResultWrapper createFromParcel(Parcel in) {
                 return new DonutView.ScanResultWrapper(in);
@@ -590,15 +609,18 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
          * @param y The y position
          * @param scanResult The ScanResult
          */
-        public ScanResultWrapper(float x, float y, @NonNull ScanResult scanResult)
+        public ScanResultWrapper(float x, float y, float cx, float cy, @NonNull ScanResult scanResult)
         {
             SCAN_RESULT = scanResult;
             RECT = new Rect();
 
-            this.x = x + (float) (Math.random() - Math.random()) * scanResultRadius;
-            this.y = y + (float) (Math.random() - Math.random()) * scanResultRadius;
+            this.x = x + (float) (Math.random() - Math.random()) * 32;
+            this.y = y + (float) (Math.random() - Math.random()) * 32;
 
-            dir = Utils.pointDirection(getWidth() / 2, getHeight() / 2, this.x, this.y);
+            this.cx = cx;
+            this.cy = cy;
+
+            dir = Utils.pointDirection(cx, cy, this.x, this.y);
 
             int level = WifiManager.calculateSignalLevel(scanResult.getRssi(), 8);
             color = 0xFF0000 >> level;
@@ -612,13 +634,15 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
             SCAN_RESULT = in.readParcelable(ScanResult.class.getClassLoader());
             RECT = new Rect();
 
-            float[] data = new float[5];
+            float[] data = new float[7];
             in.readFloatArray(data);
             x = data[0];
             y = data[1];
             dstX = data[2];
             dstY = data[3];
             dir = data[4];
+            cx = data[5];
+            cy = data[6];
             color = in.readInt();
         }
 
@@ -634,9 +658,16 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
          * @param canvas The Canvas on which to draw
          * @return True to indicate that further calls to update are needed or false if otherwise
          */
-        public boolean update(Canvas canvas)
+        public boolean update(Canvas canvas, float scanResultRadius, float textSize)
         {
             final float r = scanResultRadius * (isCarried ? 1.5f: 1.0f);
+
+            if (snapAtFirstChance)
+            {
+                snapAtFirstChance = false;
+                x = dstX;
+                y = dstY;
+            }
 
             PAINT.setColor(0x88000000 | (color & 0x00FFFFFF));
             canvas.drawCircle(x, y, r * 1.1f, PAINT);
@@ -662,23 +693,23 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
         /*
          * Calculates the repulsive force on this SoccerBall from the other SoccerBalls.
          */
-        private void calculateForces()
+        private void calculateForces(Collection<ScanResultWrapper> scanResults, ScanResultWrapper draggedResult, float radius)
         {
             fx = 0.0f;
             fy = 0.0f;
 
-            for (ScanResultWrapper result: scanResults.values())
+            for (ScanResultWrapper result: scanResults)
             {
                 if (this != result)
                 {
-                    applyForce(result);
+                    applyForce(result, radius);
                 }
             }
 
             if (draggedResult != null)
-                applyForce(draggedResult);
+                applyForce(draggedResult, radius);
 
-            dir = Utils.pointDirection(getWidth() / 2, y + fy, x + fx, getHeight() / 2);
+            dir = Utils.pointDirection(cx, y + fy, x + fx, cy);
 
 //            Log.d(TAG, "Direction: " + dir);
         }
@@ -686,7 +717,7 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
         /*
          * Applies the repulsive force of the specified ScanResultWrapper.
          */
-        private void applyForce(ScanResultWrapper result)
+        private void applyForce(ScanResultWrapper result, float radius)
         {
             float tx, ty, mag;
 
@@ -753,7 +784,7 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
          * @param y The points y position
          * @return True if this ScanResultWrapper contains the specified point
          */
-        public boolean containsPoint(float x, float y)
+        public boolean containsPoint(float x, float y, float scanResultRadius)
         {
             return Utils.distanceSquared(this.x, this.y, x, y) < scanResultRadius * scanResultRadius;
         }
@@ -781,7 +812,7 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
         public void writeToParcel(Parcel dest, int flags)
         {
             dest.writeParcelable(SCAN_RESULT, 0);
-            dest.writeFloatArray(new float[] {x, y, dstX, dstY, dir});
+            dest.writeFloatArray(new float[] {x, y, dstX, dstY, dir, cx, cy});
             dest.writeInt(color);
         }
 
@@ -810,10 +841,10 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
         /*
          * Makes this ScanResultWrapper move towards the Donut's edge.
          */
-        private void snapToDonut(boolean force)
+        private void snapToDonut(boolean force, float radius)
         {
-            dstX = getWidth() / 2 + (float) Math.cos(dir * Utils.DEG_2_RAD) * radius;
-            dstY = getHeight() / 2 + (float) Math.sin(dir * Utils.DEG_2_RAD) * radius;
+            dstX = cx + (float) Math.cos(dir * Utils.DEG_2_RAD) * radius;
+            dstY = cy + (float) Math.sin(dir * Utils.DEG_2_RAD) * radius;
 
             if (force)
             {
