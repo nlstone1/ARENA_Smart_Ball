@@ -209,7 +209,7 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
      * @param event    The DataEvent that occurred
      */
     @Override
-    public void onSmartBallDataTransmissionEvent(SmartBall ball, byte dataType, SmartBall.DataEvent event)
+    public void onSmartBallDataTransmissionEvent(SmartBall ball, byte dataType, SmartBall.DataEvent event, int numSamples)
     {
         Log.w(TAG, "Data Transmission Event: " + event.name() + ", DataType = " + dataType);
 
