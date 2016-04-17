@@ -32,6 +32,7 @@ public class SmartBall
     /** Represents different data transmission events. */
     public enum DataEvent
     {
+        TRANSMISSION_REQUESTED,
         TRANSMISSION_BEGUN,
         TRANSMISSION_ENDED,
         TRANSMISSION_CANCELLED
@@ -180,7 +181,7 @@ public class SmartBall
         if (dataTransmitInProgress)
         {
             for (DataListener listener : dataListeners)
-                listener.onSmartBallDataTransmissionEvent(this, dataTypeInTransit, DataEvent.TRANSMISSION_CANCELLED);
+                listener.onSmartBallDataTransmissionEvent(this, dataTypeInTransit, DataEvent.TRANSMISSION_CANCELLED, 0);
         }
         dataTransmitInProgress = false;
     }
@@ -459,12 +460,20 @@ public class SmartBall
                 case GattCommandUtils.DATA_TRANSMIT_SEQUENCE_1:
                     dataTransmitInProgress = true;
                     dataTypeInTransit = 1;
+
+                    for (DataListener listener: dataListeners)
+                        listener.onSmartBallDataTransmissionEvent(this, dataTypeInTransit, DataEvent.TRANSMISSION_REQUESTED, 0);
+
                     break;
 
                 // Is data 2 transmit sequence
                 case GattCommandUtils.DATA_TRANSMIT_SEQUENCE_2:
                     dataTransmitInProgress = true;
                     dataTypeInTransit = 2;
+
+                    for (DataListener listener: dataListeners)
+                        listener.onSmartBallDataTransmissionEvent(this, dataTypeInTransit, DataEvent.TRANSMISSION_REQUESTED, 0);
+
                     break;
 
                 // Is end data transmit sequence flag
@@ -554,7 +563,9 @@ public class SmartBall
                     {
                         for (DataListener listener: dataListeners)
                         {
-                            listener.onSmartBallDataTransmissionEvent(ball, dataTypeInTransit, DataEvent.TRANSMISSION_BEGUN);
+                            listener.onSmartBallDataTransmissionEvent(ball, dataTypeInTransit, DataEvent.TRANSMISSION_BEGUN,
+                                    value[6] | (value[7] << 8));
+
                             listener.onSmartBallDataRead(ball, value, true, false, dataTypeInTransit);
                         }
                     }
@@ -566,7 +577,7 @@ public class SmartBall
                         for (DataListener listener: dataListeners)
                         {
                             listener.onSmartBallDataRead(ball, value, false, true, dataTypeInTransit);
-                            listener.onSmartBallDataTransmissionEvent(ball, dataTypeInTransit, DataEvent.TRANSMISSION_ENDED);
+                            listener.onSmartBallDataTransmissionEvent(ball, dataTypeInTransit, DataEvent.TRANSMISSION_ENDED, 0);
                         }
                     }
                     else
@@ -618,8 +629,9 @@ public class SmartBall
          * @param ball The SmartBall
          * @param dataType The type of data in the transmission
          * @param event The DataEvent that occurred
+         * @param numSamples If event is TRANSMISSION_BEGUN, will contain the number of samples of data requested
          */
-        void onSmartBallDataTransmissionEvent(SmartBall ball, byte dataType, DataEvent event);
+        void onSmartBallDataTransmissionEvent(SmartBall ball, byte dataType, DataEvent event, int numSamples);
 
     }
 

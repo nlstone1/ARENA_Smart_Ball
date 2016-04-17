@@ -1,8 +1,5 @@
 package arena.arenasmartball.fragments;
 
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,10 +8,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.util.Arrays;
-
 import arena.arenasmartball.BluetoothBridge;
 import arena.arenasmartball.MainActivity;
 import arena.arenasmartball.PeriodicUpdateThread;
@@ -175,10 +168,10 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
         if (ball == null)
             return;
 
-        ball.addDataListener(this);
-
         if (v.getId() == R.id.button_download_read)
         {
+            ball.addDataListener(this);
+
             // Cancel the transmission if one is in progress
             if (ball.isDataTransmitInProgress())
                 GattCommandUtils.executeEndTransmissionCommandSequence(ball, null);
@@ -189,6 +182,8 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
             }
 
         }
+
+        setValuesForCurrentState(MainActivity.getBluetoothBridge());
     }
 
     /**
@@ -220,5 +215,7 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
 
         if (event == SmartBall.DataEvent.TRANSMISSION_BEGUN)
             transmissionBegun = true;
+
+        setValuesForCurrentState(MainActivity.getBluetoothBridge());
     }
 }
