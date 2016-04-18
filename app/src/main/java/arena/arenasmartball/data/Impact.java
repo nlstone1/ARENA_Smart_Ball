@@ -39,6 +39,16 @@ public class Impact implements SmartBall.DataListener
         time = System.currentTimeMillis();
     }
 
+//    /**
+//     * Clears the data in this Impact.
+//     */
+//    public void clearData()
+//    {
+//        wasCancelled = false;
+//        typeOneData = null;
+//        typeTwoData = null;
+//    }
+
     /**
      * Gets whether or not this Impact was cancelled.
      * @return Whether or not this Impact was cancelled
@@ -159,16 +169,17 @@ public class Impact implements SmartBall.DataListener
     @Override
     public void onSmartBallDataTransmissionEvent(SmartBall ball, byte dataType, SmartBall.DataEvent event, int numSamples)
     {
-        if (dataType == 1 && typeOneData != null && typeOneData.isComplete())
-            return;
-
-        if (dataType == 2 && typeTwoData != null && typeTwoData.isComplete())
-            return;
+//        if (dataType == 1 && typeOneData != null && typeOneData.isComplete())
+//            return;
+//
+//        if (dataType == 2 && typeTwoData != null && typeTwoData.isComplete())
+//            return;
 
         if (event == SmartBall.DataEvent.TRANSMISSION_REQUESTED)
             isReading = true;
         else if (event == SmartBall.DataEvent.TRANSMISSION_BEGUN)
         {
+            wasCancelled = false;
             isReading = true;
 
             if (dataType == 1)

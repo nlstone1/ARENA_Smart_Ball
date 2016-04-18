@@ -206,7 +206,7 @@ public class TypeTwoData extends KickData
     @Override
     public int getTransmissionProgress()
     {
-        int value = (int)((float)numLinesCollected / getNumSamplesAskedFor());
+        int value = (int)((100.0 * numLinesCollected) / getNumSamplesAskedFor());
 //        int value = (int)((600.0f * getRawData().size()) / getNumSamplesAskedFor()) + 1;
 
         if (value < 0)

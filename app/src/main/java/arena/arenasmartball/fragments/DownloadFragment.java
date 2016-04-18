@@ -97,7 +97,6 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
             setValuesForNoConnection();
         else
         {
-//            long timeOfLastDownload = bridge.getTimeOfLastDownload();
             SmartBall ball = bridge.getSmartBall();
             Impact impact = bridge.getLastImpact();
 
@@ -114,17 +113,14 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
                 resetButton.setEnabled(transmissionBegun);
                 statusView.setText(String.format(getString(R.string.downloading_data_with_type), ball.getDataTypeInTransit()));
             }
-            else if (impact.isComplete())
-                statusView.setText(R.string.download_complete);
             else if (impact.wasCancelled())
                 statusView.setText(R.string.download_cancelled);
+            else if (impact.isComplete())
+                statusView.setText(R.string.download_complete);
             else
                 statusView.setText(R.string.no_current_download);
 
-            if (impact.getDataInTransit() != null)
-                progressBar.setProgress(impact.getDataInTransit().getTransmissionProgress());
-            else
-                progressBar.setProgress(0);
+            updateDataViews(impact);
         }
     }
 
@@ -137,6 +133,17 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
         resetButton.setEnabled(false);
         resetButton.setText(R.string.download);
         progressBar.setProgress(0);
+    }
+
+    /*
+     * Updates the views in this Fragment concerning the data of the impact.
+     */
+    private void updateDataViews(Impact impact)
+    {
+        if (impact.getDataInTransit() != null)
+            progressBar.setProgress(impact.getDataInTransit().getTransmissionProgress());
+        else
+            progressBar.setProgress(0);
     }
 
     /**
@@ -207,7 +214,7 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
     @Override
     public void onSmartBallDataRead(SmartBall ball, byte[] data, boolean start, boolean end, byte type)
     {
-
+        updateDataViews(MainActivity.getBluetoothBridge().getLastImpact());
     }
 
     /**

@@ -375,6 +375,13 @@ public class BluetoothBridge implements SmartBallConnection.SmartBallConnectionL
             this.state = State.CONNECTION_CHANGING;
         }
 
+        // Delete last impact
+        if (this.state == State.DISCONNECTED && lastImpact != null)
+        {
+            connection.getSmartBall().removeDataListener(lastImpact);
+            lastImpact = null;
+        }
+
         // Notify Listeners
         for (BluetoothBridgeStateChangeListener listener: listeners)
             listener.onBluetoothBridgeStateChanged(this, this.state, oldState);
