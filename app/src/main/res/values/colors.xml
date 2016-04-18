@@ -4,6 +4,7 @@
     <!-- Color scheme colors -->
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimaryLight">#3881C7</color>
     <color name="colorAccent">#0fe81c</color>
 
     <!-- Status colors -->

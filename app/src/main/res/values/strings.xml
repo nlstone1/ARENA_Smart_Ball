@@ -39,9 +39,11 @@
     <string name="download">Download</string>
     <string name="cancel_download">Cancel Download</string>
     <string name="capture">CAPTURE</string>
+    <string name="capture_next_impact">Capture Next Impact</string>
     <string name="ready">Ready</string>
     <string name="ball_reset">Ball Reset</string>
     <string name="impact_detected">Impact Detected</string>
+    <string name="waiting_for_impact_timed_out">Waiting for Impact Timed Out</string>
     <string name="last_impact">Last Impact:&#160;</string>
     <string name="downloading_data_with_type">Downloading type %d data…</string>
     <string name="download_complete">Download Complete</string>

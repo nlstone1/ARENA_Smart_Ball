@@ -317,6 +317,7 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
         }
         else if (event == SmartBall.KickEvent.KICKED)
         {
+            final boolean timeOut = countdownTimer <= 0;
             countdownTimer = 0;
             ballHit = true;
             timerReader.block();
@@ -328,7 +329,9 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
                     @Override
                     public void run()
                     {
-                        Toast.makeText(getMainActivity(), getString(R.string.impact_detected), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getMainActivity(),
+                                timeOut ? getString(R.string.waiting_for_impact_timed_out) : getString(R.string.impact_detected),
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -507,6 +510,9 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
         @Override
         public void onUpdate()
         {
+            if (CaptureFragment.this.timerReader != this)
+                kill();
+
             --countdownTimer;
 
             if (countdownTimer < 0)

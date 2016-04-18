@@ -91,7 +91,7 @@
         android:layout_alignParentEnd="true"
         android:layout_above="@id/linearlayout_capture_footer"
         android:layout_below="@id/relativelayout_capture_header"
-        android:text="@string/capture"
+        android:text="@string/capture_next_impact"
         android:textSize="@dimen/text_xlarge"/>
 
 </RelativeLayout>
