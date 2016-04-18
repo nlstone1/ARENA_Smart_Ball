@@ -4,7 +4,7 @@ package arena.arenasmartball.data;
  * Class representation of type 1 data.
  * Created by Theodore on 5/22/2015.
  */
-public class TypeOneData extends KickData
+public class TypeOneData extends RawImpactData
 {
     /**
      * Constructor.

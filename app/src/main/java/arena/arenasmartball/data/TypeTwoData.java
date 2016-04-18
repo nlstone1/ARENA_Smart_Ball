@@ -6,7 +6,7 @@ import android.util.Log;
  * Class representation of type 2 data. Source from decompiled Adidas SmartBall app.
  * Created by Theodore on 5/22/2015.
  */
-public class TypeTwoData extends KickData
+public class TypeTwoData extends RawImpactData
 {
     /** The tag for this class */
     private static final String TAG = "TypeTwoData";

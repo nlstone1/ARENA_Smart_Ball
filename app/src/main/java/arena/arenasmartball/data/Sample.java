@@ -6,7 +6,7 @@ package arena.arenasmartball.data;
 public class Sample
 {
     /** The conversion from raw data values to gs (1 g = 9.81 m/s^2) */
-    public static final double DATA_TO_GS = 0.002;
+    public static final float DATA_TO_GS = 0.002f;
 
     /** The x, y, and z components of the Sample. */
     public short x, y, z;

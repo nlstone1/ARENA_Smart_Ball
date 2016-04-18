@@ -118,7 +118,7 @@ public class Impact implements SmartBall.DataListener
      * Gets the KickData of this Impact that is still being read from the SmartBall.
      * @return The KickData of this Impact that is still being read from the SmartBall, or null if this Impact is not reading
      */
-    public KickData getDataInTransit()
+    public RawImpactData getDataInTransit()
     {
         if (isReading)
         {
@@ -152,7 +152,7 @@ public class Impact implements SmartBall.DataListener
     public void onSmartBallDataRead(SmartBall ball, byte[] data, boolean start, boolean end, byte type)
     {
         lastDataTypeRead = type;
-        KickData idata = getDataInTransit();
+        RawImpactData idata = getDataInTransit();
 
         if (idata != null && !idata.isComplete())
             idata.addLine(data, start, end);

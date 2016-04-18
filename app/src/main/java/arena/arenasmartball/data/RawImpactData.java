@@ -14,7 +14,7 @@ import java.util.Scanner;
  * Parent class for both types of data.
  * Created by Theodore on 5/22/2015.
  */
-public abstract class KickData
+public abstract class RawImpactData
 {
     /** The tag for this class */
     private static final String TAG = "KickData";
@@ -31,7 +31,7 @@ public abstract class KickData
      * Constructs a new KickData with the given parameters.
      * @param numSamplesAskedFor The number of samples of this data type asked for before transmit
      */
-    protected KickData(int numSamplesAskedFor)
+    protected RawImpactData(int numSamplesAskedFor)
     {
         isComplete = false;
         rawData = new LinkedList<>();
