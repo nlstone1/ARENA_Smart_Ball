@@ -15,6 +15,7 @@ import arena.arenasmartball.Utils;
 import arena.arenasmartball.ball.GattCommandUtils;
 import arena.arenasmartball.ball.SmartBall;
 import arena.arenasmartball.data.Impact;
+import arena.arenasmartball.views.DataView;
 
 /**
  * Fragment for the data download screen.
@@ -37,6 +38,7 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
     private TextView statusView;
     private ProgressBar progressBar;
     private Button resetButton;
+    private DataView dataView;
 
     /**
      * Required empty public constructor.
@@ -55,6 +57,7 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
         statusView = (TextView) view.findViewById(R.id.textview_download_status);
         progressBar = (ProgressBar) view.findViewById(R.id.progressbar_download);
         resetButton = (Button) view.findViewById(R.id.button_download_read);
+        dataView = (DataView) view.findViewById(R.id.dataview_dataview);
 
         // Set defaults
         setValuesForCurrentState(MainActivity.getBluetoothBridge());
@@ -151,6 +154,9 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
             progressBar.setProgress(0);
 //            Log.d(TAG, "Progress Reset");
         }
+
+        // Invalidate the DataView
+        dataView.getViewUpdater().redraw(true);
     }
 
     /**

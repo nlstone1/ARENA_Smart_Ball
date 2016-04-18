@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Styleable for the ScannerView -->
-    <declare-styleable name="ScannerView">
+    <!-- Styleable for the DonutView -->
+    <declare-styleable name="DonutView">
         <attr name="donutThickness" format="dimension" />
         <attr name="donutColor" format="color" />
         <attr name="textSize" format="dimension" />
+    </declare-styleable>
+
+    <!-- Styleable for the DataView -->
+    <declare-styleable name="DataView">
+        <attr name="padding" format="dimension" />
     </declare-styleable>
 
 </resources>

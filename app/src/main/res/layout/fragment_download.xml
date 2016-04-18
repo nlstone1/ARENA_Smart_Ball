@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+                xmlns:custom="http://schemas.android.com/apk/res-auto"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
     <!-- Title with time of last impact -->
     <TextView
@@ -51,13 +52,15 @@
     <View style="@style/verticalSeparator"
           android:layout_below="@id/progressbar_download"/>
 
-    <FrameLayout
+    <arena.arenasmartball.views.DataView
+        android:id="@+id/dataview_dataview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/progressbar_download"
         android:layout_below="@id/textview_download_status"
-        android:background="@color/colorLtGray">
+        android:background="@color/colorLtGray"
+        custom:padding="8sp">
 
-    </FrameLayout>
+    </arena.arenasmartball.views.DataView>
 
 </RelativeLayout>

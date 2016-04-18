@@ -155,13 +155,13 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
         if (attrs != null)
         {
             TypedArray a = context.getTheme().obtainStyledAttributes(attrs,
-                    R.styleable.ScannerView, 0, 0);
+                    R.styleable.DonutView, 0, 0);
 
             try
             {
-                donutWidth = a.getDimension(R.styleable.ScannerView_donutThickness, DEF_DONUT_THICKNESS);
-                donutColor = a.getColor(R.styleable.ScannerView_donutColor, DEF_DONUT_COLOR);
-                textSize = a.getDimension(R.styleable.ScannerView_textSize, DEF_TEXT_SIZE);
+                donutWidth = a.getDimension(R.styleable.DonutView_donutThickness, DEF_DONUT_THICKNESS);
+                donutColor = a.getColor(R.styleable.DonutView_donutColor, DEF_DONUT_COLOR);
+                textSize = a.getDimension(R.styleable.DonutView_textSize, DEF_TEXT_SIZE);
             }
             finally
             {
