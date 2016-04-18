@@ -47,7 +47,7 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
     private static final long CAPTURE_BUTTON_COOLDOWN_TIME = 1000L;
 
     // The maximum value of the countdown timer
-    private static final int MAX_COUNTDOWN_TIMER_VALUE = 90;
+    private static final long MAX_COUNTDOWN_TIMER_VALUE_MILLIS = 90_000L;
 
     // Reset flag
     private static boolean resetCalled;
@@ -194,7 +194,7 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
     private String getCountdownTimerString()
     {
 //        return "" + countdownTimer;
-        return "" + Math.max(0L, MAX_COUNTDOWN_TIMER_VALUE - (System.currentTimeMillis() - timeOfImpactRequest) / 1000L);
+        return "" + Math.max(0L, (MAX_COUNTDOWN_TIMER_VALUE_MILLIS - System.currentTimeMillis() + timeOfImpactRequest) / 1000L);
     }
 
     /*
@@ -356,7 +356,7 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
         {
 //            final boolean timeOut = countdownTimer <= 0;
 //            countdownTimer = 0;
-            final boolean timeOut = System.currentTimeMillis() - timeOfImpactRequest >= MAX_COUNTDOWN_TIMER_VALUE;
+            final boolean timeOut = System.currentTimeMillis() - timeOfImpactRequest >= MAX_COUNTDOWN_TIMER_VALUE_MILLIS;
             ballHit = true;
             timerReader.block();
 
