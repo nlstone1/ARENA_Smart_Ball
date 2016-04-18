@@ -35,9 +35,19 @@ public class ViewUpdater extends Thread
      */
     public ViewUpdater(View view)
     {
+        this (view, DEFAULT_SLEEP_TIME);
+    }
+
+    /**
+     * Creates a ViewUpdater with the specified sleep time.
+     * @param view The View to update
+     * @param sleepTime The minimum amount of time between invalidates
+     */
+    public ViewUpdater(View view, long sleepTime)
+    {
         LOCK = new Object();
         VIEW = view;
-        sleepTime = DEFAULT_SLEEP_TIME;
+        this.sleepTime = sleepTime;
 
         RUNNABLE = new Runnable()
         {

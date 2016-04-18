@@ -51,6 +51,9 @@ public class DataView extends View
     // Temporary arrays used for drawing the curves
     private float[] pt, prevPt;
 
+    // Draws every nth point
+    private static final int N = 2;
+
     // Log tag String
     private static final String TAG = "DataView";
 
@@ -114,7 +117,7 @@ public class DataView extends View
             padding = DEF_PADDING;
         }
 
-        viewUpdater = new ViewUpdater(this);
+        viewUpdater = new ViewUpdater(this, 33L);
         viewUpdater.start();
 
         pt = new float[NUM_CURVES];
@@ -224,7 +227,7 @@ public class DataView extends View
             prevPt[2] = samples.get(0).z * Sample.DATA_TO_GS;
 
             // Draw the curves
-            for (int i = 1; i < samples.size(); ++i)
+            for (int i = N; i < samples.size(); i += N)
             {
                 pt[0] = samples.get(i).x * Sample.DATA_TO_GS;
                 pt[1] = samples.get(i).y * Sample.DATA_TO_GS;
@@ -234,7 +237,7 @@ public class DataView extends View
                 for (int j = 0; j < NUM_CURVES; ++j)
                 {
                     PAINT.setColor(COLORS[j]);
-                    canvas.drawLine((i - 1) * xScale + padding, prevPt[j] * yScale + getHeight() / 2,
+                    canvas.drawLine((i - N) * xScale + padding, prevPt[j] * yScale + getHeight() / 2,
                             i * xScale + padding, pt[j] * yScale + getHeight() / 2, PAINT);
 
                     // Set the previous point

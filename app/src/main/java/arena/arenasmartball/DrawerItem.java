@@ -98,6 +98,9 @@ public enum DrawerItem
             // Update the current Drawer reference
             currentDrawerItem = this;
 
+            // Update the selected navigation drawer icon
+            MainActivity.getCurrent().selectNavigationBarIcon(ordinal());
+
             // Create and commit the new DrawerItem's fragment
             try
             {

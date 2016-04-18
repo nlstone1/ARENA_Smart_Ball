@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -168,8 +169,8 @@ public class MainActivity extends AppCompatActivity
             DrawerItem.setCurrentFragment(drawerIndex, getFragmentManager().getFragment(savedInstanceState,
                     DRAWER_FRAGMENT_BUNDLE_KEY));
 
-            // Select the drawer in the navigation view
-            navigationView.setCheckedItem(drawerIndex);
+//            // Select the drawer in the navigation view
+//            navigationView.setCheckedItem(drawerIndex);
         }
         else
         {
@@ -185,7 +186,7 @@ public class MainActivity extends AppCompatActivity
     public void onBackPressed()
     {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START))
+        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START))
         {
             drawer.closeDrawer(GravityCompat.START);
         }
@@ -193,10 +194,10 @@ public class MainActivity extends AppCompatActivity
         {
             if (!DrawerItem.back(this))
                 super.onBackPressed();
-            else
-            {
-                navigationView.setCheckedItem(DrawerItem.getCurrent().ordinal());
-            }
+//            else
+//            {
+//                navigationView.setCheckedItem(DrawerItem.getCurrent().ordinal());
+//            }
         }
     }
 
@@ -286,7 +287,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        if (drawer != null)
+            drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -303,7 +305,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
     {
         switch (requestCode)
         {
@@ -338,6 +340,15 @@ public class MainActivity extends AppCompatActivity
     {
         drawerLayout.setDrawerLockMode(lock ? DrawerLayout.LOCK_MODE_LOCKED_CLOSED:
             DrawerLayout.LOCK_MODE_UNLOCKED);
+    }
+
+    /**
+     * Sets the checked item on the NavigationView.
+     * @param id The index of the item to check
+     */
+    public void selectNavigationBarIcon(int id)
+    {
+        navigationView.setCheckedItem(id);
     }
 
     /**
