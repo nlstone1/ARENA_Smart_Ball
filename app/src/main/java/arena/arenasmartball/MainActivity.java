@@ -51,6 +51,8 @@ public class MainActivity extends AppCompatActivity
 
     // The DrawerLayout
     private DrawerLayout drawerLayout;
+    // The NavigationView
+    private NavigationView navigationView;
 
     // Bundle key for saving the index of the current drawer
     private static final String DRAWER_INDEX_BUNDLE_KEY = "arena.arenasmartball.MainActivity.drawerIndex";
@@ -92,7 +94,7 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         // Initialize the NavigationView
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         // Populate the Drawer items
         populateNavigationDrawer(navigationView);
@@ -191,6 +193,10 @@ public class MainActivity extends AppCompatActivity
         {
             if (!DrawerItem.back(this))
                 super.onBackPressed();
+            else
+            {
+                navigationView.setCheckedItem(DrawerItem.getCurrent().ordinal());
+            }
         }
     }
 

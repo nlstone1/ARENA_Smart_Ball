@@ -141,9 +141,16 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
     private void updateDataViews(Impact impact)
     {
         if (impact.getDataInTransit() != null)
+        {
             progressBar.setProgress(impact.getDataInTransit().getTransmissionProgress());
+
+//            Log.d(TAG, "Progress: " + impact.getDataInTransit().getTransmissionProgress());
+        }
         else
+        {
             progressBar.setProgress(0);
+//            Log.d(TAG, "Progress Reset");
+        }
     }
 
     /**

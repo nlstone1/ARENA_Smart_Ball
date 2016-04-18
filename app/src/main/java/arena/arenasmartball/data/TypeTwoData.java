@@ -3,7 +3,7 @@ package arena.arenasmartball.data;
 import android.util.Log;
 
 /**
- * Class representation of type 2 data.
+ * Class representation of type 2 data. Source from decompiled Adidas SmartBall app.
  * Created by Theodore on 5/22/2015.
  */
 public class TypeTwoData extends KickData
@@ -47,6 +47,7 @@ public class TypeTwoData extends KickData
             this.e += (short)array[n];
             this.f += (short)array[n + 1];
             this.g += (short)array[n + 2];
+
             if (this.e())
             {
                 this.e += (short)array[n + 3];

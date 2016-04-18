@@ -45,6 +45,10 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
     // The DonutView
     private DonutView donutView;
 
+    // Used for creating Test Scan Results
+    private long lastClick1, lastClick2;
+    private static final long CLICK_DELAY = 300L;
+
 //    // The Thread to handle periodic rescanning
 //    private PeriodicRescanner rescanner;
 
@@ -86,11 +90,28 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
         donutView = (DonutView) view.findViewById(R.id.da_donut);
         donutView.addDonutViewListener(this);
 
-        view.findViewById(R.id.button_test_DA_DONUT).setOnClickListener(new View.OnClickListener()
+        scanStatusView.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
+
+                long time = System.currentTimeMillis();
+
+                if (time - lastClick1 > CLICK_DELAY * 2)
+                {
+                    lastClick1 = time;
+                    return;
+                }
+                else if (time - lastClick2 > CLICK_DELAY)
+                {
+                    lastClick2 = time;
+                    return;
+                }
+
+                lastClick1 = 0L;
+                lastClick2 = 0L;
+
                 Log.d(TAG, "onClick");
                 donutView.addScanResult(new ScanResult(null, null, 101, System.nanoTime()));
             }
@@ -327,6 +348,7 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
     /**
      * Implementation of an ArrayAdapter containing views for displaying ScanResults.
      */
+    @Deprecated @Stupid
     public class ScanResultArrayAdapter extends ArrayAdapter<ScanResult> implements View.OnClickListener
     {
         /**
@@ -424,6 +446,12 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
                 bridge.connect(item);
         }
     }
+
+    /**
+     * Annotation for stupid code.
+     */
+    public @interface Stupid
+    {   }
 
 //    /**
 //     * Thread for periodically rescanning.
