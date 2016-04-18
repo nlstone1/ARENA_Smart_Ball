@@ -35,6 +35,7 @@
     <string name="unable_to_read">Unable to Read</string>
     <string name="value_received">Value Received</string>
     <string name="reset">Reset</string>
+    <string name="goto_download">To Download</string>
     <string name="download">Download</string>
     <string name="cancel_download">Cancel Download</string>
     <string name="capture">CAPTURE</string>

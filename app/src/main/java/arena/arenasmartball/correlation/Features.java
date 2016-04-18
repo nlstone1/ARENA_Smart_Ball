@@ -308,7 +308,6 @@ public class Features
 	
 	/**
 	 * Successive differences between intervals.
-	 * @author Nathaniel
 	 */
 	public static final Feature RMSSD = new SingleAxisFeature("RMSSD")
 	{
@@ -319,7 +318,7 @@ public class Features
 			double[] vals = data.timeSeries();
 			
 			// List of peak locations
-			ArrayList<Integer> peaks = new ArrayList<Integer>();
+			ArrayList<Integer> peaks = new ArrayList<>();
 			
 			for (int i = 1; i < vals.length - 1; ++i)
 			{
@@ -342,9 +341,7 @@ public class Features
 	};
 	
 	/**
-	 * Mean of the absolute values of the first differences.
-	 * @author Nathaniel
-	 *
+	 * Mean of the absolute values of the first differences.	 *
 	 */
 	public static final Feature MeanFirstDifferences = new SingleAxisFeature("Mean_of_First_difference")
 	{
@@ -369,7 +366,6 @@ public class Features
 	
 	/**
 	 * Mean of the absolute values of the second differences.
-	 * @author Nathaniel
 	 *
 	 */
 	public static final Feature MeanSecondDifferences = new SingleAxisFeature("Mean_of_Second_differences")
@@ -403,8 +399,6 @@ public class Features
 	
 	/**
 	 * The Zero Crossing Rate.
-	 * @author Nathaniel
-	 *
 	 */
 	public static final Feature ZeroCrossingRate = new SingleAxisFeature("Zero_Crossing_Rate")
 	{

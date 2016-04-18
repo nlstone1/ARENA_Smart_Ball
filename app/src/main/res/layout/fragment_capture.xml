@@ -62,7 +62,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/reset"/>
+            android:text="@string/reset"
+            android:textSize="@dimen/text_large"/>
 
         <!-- Download Button -->
         <Button style="?android:attr/buttonBarButtonStyle"
@@ -70,7 +71,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/download"/>
+            android:text="@string/goto_download"
+            android:textSize="@dimen/text_large"/>
 
     </LinearLayout>
 

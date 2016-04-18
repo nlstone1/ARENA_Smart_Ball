@@ -27,23 +27,32 @@ public class FeatureSet
 	 */
 	public FeatureSet()
 	{
-		featureArray = new ArrayList<Double>();
-		featureMap = new HashMap<String, Integer>();
+		featureArray = new ArrayList<>();
+		featureMap = new HashMap<>();
 	}
+
+    /**
+     * Gets the ArrayList containing the feature values of this FeatureSet.
+     * @return The ArrayList containing the feature values of this FeatureSet
+     */
+	public ArrayList<Double> getFeatureArray()
+    {
+        return featureArray;
+    }
 	
-	/**
-	 * Gets an array containing the features of this FeatureSet.
-	 * @return An array containing the features of this FeatureSet
-	 */
-	public double[] toArray()
-	{
-		double[] array = new double[featureArray.size()];
-		
-		for (int i = 0; i < array.length; ++i)
-			array[i] = featureArray.get(i);
-		
-		return array;
-	}
+//	/**
+//	 * Gets an array containing the features of this FeatureSet.
+//	 * @return An array containing the features of this FeatureSet
+//	 */
+//	public double[] toArray()
+//	{
+//		double[] array = new double[featureArray.size()];
+//
+//		for (int i = 0; i < array.length; ++i)
+//			array[i] = featureArray.get(i);
+//
+//		return array;
+//	}
 	
 	/**
 	 * Gets the feature of the given name in this FeatureSet.
