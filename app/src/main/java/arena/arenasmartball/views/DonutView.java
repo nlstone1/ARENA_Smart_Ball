@@ -394,12 +394,10 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
                         }
                     }
 
-                    if (draggedResult != null)
-                        scanResults.remove(getKey(draggedResult));
-
                     // Remove the point from the list
                     if (draggedResult != null)
                     {
+                        scanResults.remove(getKey(draggedResult));
                         draggedResult.pickup();
                         r = true;
                         viewUpdater.redraw(true);
