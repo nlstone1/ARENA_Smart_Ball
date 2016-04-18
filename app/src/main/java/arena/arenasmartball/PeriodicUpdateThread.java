@@ -126,7 +126,7 @@ public class PeriodicUpdateThread extends Thread
      */
     public void kill()
     {
-        isDead = false;
+        isDead = true;
 
         synchronized (LOCK)
         {

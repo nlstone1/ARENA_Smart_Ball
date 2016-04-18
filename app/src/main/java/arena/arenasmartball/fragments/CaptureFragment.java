@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,13 +32,13 @@ import arena.arenasmartball.ball.SmartBall;
  * Created by Theodore on 4/14/2016.
  */
 public class CaptureFragment extends SimpleFragment implements View.OnClickListener, SmartBall.EventListener,
-        GattCommandSequence.CommandSequenceCallback, SmartBall.CharacteristicListener
+        GattCommandSequence.CommandSequenceCallback//, SmartBall.CharacteristicListener
 {
     // The tag for this class
     private static final String TAG = "CaptureFragment";
 
-    // The name of the command sequence used to read the SmartBall countdown timer
-    private static final String READ_BALL_COUNTDOWN_COM_SEQ_NAME = "CaptureFragReadBallInfo";
+//    // The name of the command sequence used to read the SmartBall countdown timer
+//    private static final String READ_BALL_COUNTDOWN_COM_SEQ_NAME = "CaptureFragReadBallInfo";
 
     // The amount of time to wait for the kick bit to be set before announcing an error
     private static final long KICK_BIT_RESPONSE_DELAY = 4000L;
@@ -54,8 +55,11 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
     // Hit flag
     private static boolean ballHit;
 
-    // Countdown timer
-    private static int countdownTimer;
+    // Records the time of the last impact request
+    private static long timeOfImpactRequest;
+
+//    // Countdown timer
+//    private static int countdownTimer;
 
     // Time of last button press
 //    private static long timeOfLastCapture = System.currentTimeMillis();
@@ -122,9 +126,38 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
 
         if (MainActivity.getBluetoothBridge().getSmartBall() != null)
         {
-            MainActivity.getBluetoothBridge().getSmartBall().removeCharacteristicListener(this);
+//            MainActivity.getBluetoothBridge().getSmartBall().removeCharacteristicListener(this);
             MainActivity.getBluetoothBridge().getSmartBall().removeEventListener(this);
         }
+    }
+
+    /**
+     * Load any saved instance state here.
+     * @param bundle The Bundle from which to load
+     */
+    @Override
+    public void load(@NonNull Bundle bundle)
+    {
+        // Create timer reader
+        if (timerReader == null)
+        {
+            timerReader = new TimerReader();
+            timerReader.start();
+        }
+
+        if (timerReader != null)
+            timerReader.unblock();
+    }
+
+    /**
+     * Save any state information here.
+     * @param bundle The Bundle to which to save
+     */
+    @Override
+    public void save(@NonNull Bundle bundle)
+    {
+        if (timerReader != null)
+            timerReader.block();
     }
 
     /*
@@ -160,7 +193,8 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
      */
     private String getCountdownTimerString()
     {
-        return "" + countdownTimer;
+//        return "" + countdownTimer;
+        return "" + Math.max(0L, MAX_COUNTDOWN_TIMER_VALUE - (System.currentTimeMillis() - timeOfImpactRequest) / 1000L);
     }
 
     /*
@@ -227,10 +261,11 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
 
             if (ball != null)
             {
+                timeOfImpactRequest = 0L;
                 resetCalled = false;
                 ballHit = false;
                 ball.getEventListeners().add(this);
-                ball.addCharacteristicListener(this, Services.Characteristic.TIMEOUT_COUNTER);
+//                ball.addCharacteristicListener(this, Services.Characteristic.TIMEOUT_COUNTER);
                 GattCommandUtils.executeKickCommandSequence(ball, this);
 
                 // Check after KICK_BIT_RESPONSE_DELAY ms whether the kick bit has been set. If not, cancel: there is an error.
@@ -277,7 +312,8 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
             if (ball != null)
             {
                 resetCalled = true;
-                countdownTimer = 0;
+                timeOfImpactRequest = 0L;
+//                countdownTimer = 0;
                 ball.getEventListeners().add(this);
                 GattCommandUtils.executeEndTransmissionCommandSequence(ball, null);
             }
@@ -304,7 +340,8 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
 
         if (event == SmartBall.KickEvent.READY_TO_KICK)
         {
-            countdownTimer = MAX_COUNTDOWN_TIMER_VALUE;
+//            countdownTimer = MAX_COUNTDOWN_TIMER_VALUE;
+            timeOfImpactRequest = System.currentTimeMillis();
             timerReader.unblock();
             getMainActivity().runOnUiThread(new Runnable()
             {
@@ -317,8 +354,9 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
         }
         else if (event == SmartBall.KickEvent.KICKED)
         {
-            final boolean timeOut = countdownTimer <= 0;
-            countdownTimer = 0;
+//            final boolean timeOut = countdownTimer <= 0;
+//            countdownTimer = 0;
+            final boolean timeOut = System.currentTimeMillis() - timeOfImpactRequest >= MAX_COUNTDOWN_TIMER_VALUE;
             ballHit = true;
             timerReader.block();
 
@@ -355,7 +393,7 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
                 {
                     captureButton.setEnabled(shouldEnableCaptureButton(ball, MainActivity.getBluetoothBridge()));
                 }
-            }, CAPTURE_BUTTON_COOLDOWN_TIME + 1);
+            }, CAPTURE_BUTTON_COOLDOWN_TIME + 5L);
         }
 
         // Update
@@ -390,19 +428,19 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
 //        GattCommandSequence.Event.
     }
 
-    /**
-     * Called when the Characteristic for which this CharacteristicListener is listening changes.
-     *
-     * @param gatt           The BluetoothGatt
-     * @param characteristic The changed Characteristic
-     */
-    @Override
-    public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
-    {
-        byte[] data = characteristic.getValue();
-        Log.d(TAG, "Countdown Timer Characteristic changed: " + Arrays.toString(data));
-        countdownTimer = MAX_COUNTDOWN_TIMER_VALUE - 10 * (data[0] - 1);
-    }
+//    /**
+//     * Called when the Characteristic for which this CharacteristicListener is listening changes.
+//     *
+//     * @param gatt           The BluetoothGatt
+//     * @param characteristic The changed Characteristic
+//     */
+//    @Override
+//    public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)
+//    {
+//        byte[] data = characteristic.getValue();
+//        Log.d(TAG, "Countdown Timer Characteristic changed: " + Arrays.toString(data));
+////        countdownTimer = MAX_COUNTDOWN_TIMER_VALUE - 10 * (data[0] - 1);
+//    }
 
 //    /**
 //     * Called when the requested value is read.
@@ -449,7 +487,7 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
                 @Override
                 public void run()
                 {
-                    countdownView.setText("" + countdownTimer);
+                    countdownView.setText(getCountdownTimerString());
                 }
             });
         }
@@ -511,12 +549,15 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
         public void onUpdate()
         {
             if (CaptureFragment.this.timerReader != this)
+            {
                 kill();
+                return;
+            }
 
-            --countdownTimer;
-
-            if (countdownTimer < 0)
-                countdownTimer = 0;
+//            --countdownTimer;
+//
+//            if (countdownTimer < 0)
+//                countdownTimer = 0;
 
             updateTimerView();
         }
