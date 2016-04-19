@@ -5,14 +5,18 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import arena.arenasmartball.MainActivity;
 import arena.arenasmartball.R;
+import arena.arenasmartball.data.ImpactRegionExtractor;
 import arena.arenasmartball.data.RawImpactData;
 import arena.arenasmartball.data.Sample;
 
@@ -50,6 +54,10 @@ public class DataView extends View
 
     // Temporary arrays used for drawing the curves
     private float[] pt, prevPt;
+
+    // Impact regions
+    private ArrayList<ImpactRegionExtractor.ImpactRegion> impactRegions;
+    private boolean requestedImpactRegions;
 
     // Draws every nth point
     private static final int N = 2;
@@ -142,6 +150,26 @@ public class DataView extends View
         if (data != null)
         {
             drawData(canvas, data);
+
+            // Check for finished transmission
+            if (data.isComplete() && !requestedImpactRegions)
+            {
+                requestedImpactRegions = true;
+
+                // Run the region extractor
+                new RegionExtractor().execute(data);
+            }
+            else if (!data.isComplete())
+            {
+                requestedImpactRegions = false;
+                impactRegions = null;
+            }
+
+            // Draw impact regions
+            if (impactRegions != null)
+            {
+                drawImpactRegions(canvas);
+            }
         }
     }
 
@@ -248,6 +276,21 @@ public class DataView extends View
     }
 
     /*
+     * Draws the impact regions.
+     */
+    private void drawImpactRegions(Canvas canvas)
+    {
+        PAINT.setStrokeWidth(4.0f);
+        PAINT.setColor(Color.WHITE);
+
+        for (ImpactRegionExtractor.ImpactRegion r: impactRegions)
+        {
+            canvas.drawLine(r.START * xScale, padding, r.START * xScale, getHeight() - padding, PAINT);
+            canvas.drawLine(r.END * xScale, padding, r.END * xScale, getHeight() - padding, PAINT);
+        }
+    }
+
+    /*
      * Returns the Data to draw or null.
      * // TODO won't always want Type 2 Data
      */
@@ -259,4 +302,31 @@ public class DataView extends View
             return null;
     }
 
+    /*
+     * Async task for doing region extraction.
+     */
+    private class RegionExtractor extends AsyncTask<RawImpactData, Void, ArrayList<ImpactRegionExtractor.ImpactRegion>>
+    {
+        @Override
+        protected ArrayList<ImpactRegionExtractor.ImpactRegion> doInBackground(RawImpactData... params)
+        {
+            if (params.length == 0)
+            {
+                Log.w(TAG, "No ImpactData provided to DataView for region extraction!");
+                return new ArrayList<>(0);
+            }
+
+            return ImpactRegionExtractor.findImpactRegions(params[0]);
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<ImpactRegionExtractor.ImpactRegion> impactRegions)
+        {
+            DataView.this.impactRegions = impactRegions;
+
+            Log.d(TAG, "Found " + impactRegions.size() + " Impact Regions");
+
+            invalidate();
+        }
+    };
 }
