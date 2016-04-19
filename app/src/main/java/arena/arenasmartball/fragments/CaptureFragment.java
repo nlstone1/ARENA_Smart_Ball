@@ -393,7 +393,7 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
                 {
                     captureButton.setEnabled(shouldEnableCaptureButton(ball, MainActivity.getBluetoothBridge()));
                 }
-            }, CAPTURE_BUTTON_COOLDOWN_TIME + 5L);
+            }, CAPTURE_BUTTON_COOLDOWN_TIME + 500L);
         }
 
         // Update
