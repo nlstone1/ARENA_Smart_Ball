@@ -23,6 +23,15 @@ public class Sample
     }
 
     /**
+     * Returns this Sample as a float array in G's.
+     * @return This Sample as a float array in G's
+     */
+    public float[] toFloatArray()
+    {
+        return new float[] {x * DATA_TO_GS, y * DATA_TO_GS, z * DATA_TO_GS};
+    }
+
+    /**
      * Method to get a String representation of this Sample.
      * @return A String representation of this Sample
      */

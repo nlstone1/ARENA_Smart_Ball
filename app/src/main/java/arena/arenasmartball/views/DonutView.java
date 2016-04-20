@@ -300,7 +300,7 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
             // Calculate forces
             for (ScanResultWrapper result: scanResults.values())
             {
-                result.calculateForces(scanResults.values(), draggedResult, radius);
+                result.calculateForces(scanResults.values(), draggedResult, connectedResult, radius);
             }
 
             // Apply forces
@@ -592,14 +592,15 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
         /**
          * Creator for ScanResultWrappers.
          */
-        @SuppressWarnings("unused")
-        public static final Creator<ScanResultWrapper> CREATOR
-                = new Creator<DonutView.ScanResultWrapper>() {
-            public DonutView.ScanResultWrapper createFromParcel(Parcel in) {
+        public static final Creator<ScanResultWrapper> CREATOR = new Creator<DonutView.ScanResultWrapper>()
+        {
+            public DonutView.ScanResultWrapper createFromParcel(Parcel in)
+            {
                 return new DonutView.ScanResultWrapper(in);
             }
 
-            public DonutView.ScanResultWrapper[] newArray(int size) {
+            public DonutView.ScanResultWrapper[] newArray(int size)
+            {
                 return new DonutView.ScanResultWrapper[size];
             }
         };
@@ -695,7 +696,8 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
         /*
          * Calculates the repulsive force on this SoccerBall from the other SoccerBalls.
          */
-        private void calculateForces(Collection<ScanResultWrapper> scanResults, ScanResultWrapper draggedResult, float radius)
+        private void calculateForces(Collection<ScanResultWrapper> scanResults,
+                                     ScanResultWrapper draggedResult, ScanResultWrapper connectedResult, float radius)
         {
             fx = 0.0f;
             fy = 0.0f;
@@ -710,6 +712,9 @@ public class DonutView extends View// implements SmartBallScanner.SmartBallScann
 
             if (draggedResult != null)
                 applyForce(draggedResult, radius);
+
+            if (connectedResult != null && connectedResult.isCarried)
+                applyForce(connectedResult, radius);
 
             dir = Utils.pointDirection(cx, y + fy, x + fx, cy);
 
