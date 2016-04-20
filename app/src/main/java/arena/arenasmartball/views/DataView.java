@@ -6,9 +6,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.AsyncTask;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -16,6 +19,9 @@ import java.util.List;
 
 import arena.arenasmartball.MainActivity;
 import arena.arenasmartball.R;
+import arena.arenasmartball.correlation.Correlator;
+import arena.arenasmartball.correlation.FeatureExtractor;
+import arena.arenasmartball.correlation.SensorData;
 import arena.arenasmartball.data.ImpactRegionExtractor;
 import arena.arenasmartball.data.RawImpactData;
 import arena.arenasmartball.data.Sample;
@@ -56,7 +62,7 @@ public class DataView extends View
     private float[] pt, prevPt;
 
     // Impact regions
-    private ArrayList<ImpactRegionExtractor.ImpactRegion> impactRegions;
+    private ArrayList<ImpactRegionWrapper> impactRegions;
     private boolean requestedImpactRegions;
 
     // Draws every nth point
@@ -173,6 +179,28 @@ public class DataView extends View
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event)
+    {
+        // Test for impact region clicks
+        if (impactRegions != null && event.getActionIndex() == MotionEvent.ACTION_DOWN)
+        {
+            int idx = (int) (event.getX() / xScale);
+
+            for (ImpactRegionWrapper region: impactRegions)
+            {
+                if (region.impactRegion.collision(idx))
+                {
+                    Log.d(TAG, "Clicked region " + region);
+                    region.requestForce();
+                    break;
+                }
+            }
+        }
+
+        return super.onTouchEvent(event);
+    }
+
     /**
      * Called when this View is resized.
      * @param w The new width
@@ -283,10 +311,13 @@ public class DataView extends View
         PAINT.setStrokeWidth(4.0f);
         PAINT.setColor(Color.WHITE);
 
-        for (ImpactRegionExtractor.ImpactRegion r: impactRegions)
+        ImpactRegionExtractor.ImpactRegion r;
+
+        for (ImpactRegionWrapper rw: impactRegions)
         {
-            canvas.drawLine(r.START * xScale, padding, r.START * xScale, getHeight() - padding, PAINT);
-            canvas.drawLine(r.END * xScale, padding, r.END * xScale, getHeight() - padding, PAINT);
+            r = rw.impactRegion;
+            canvas.drawLine(r.getStart() * xScale, padding, r.getStart() * xScale, getHeight() - padding, PAINT);
+            canvas.drawLine(r.getEnd() * xScale, padding, r.getEnd() * xScale, getHeight() - padding, PAINT);
         }
     }
 
@@ -322,11 +353,167 @@ public class DataView extends View
         @Override
         protected void onPostExecute(ArrayList<ImpactRegionExtractor.ImpactRegion> impactRegions)
         {
-            DataView.this.impactRegions = impactRegions;
+            DataView.this.impactRegions = new ArrayList<>(impactRegions.size());
+
+            for (ImpactRegionExtractor.ImpactRegion region: impactRegions)
+            {
+                DataView.this.impactRegions.add(new ImpactRegionWrapper(region));
+            }
 
             Log.d(TAG, "Found " + impactRegions.size() + " Impact Regions");
 
             invalidate();
         }
-    };
+    }
+
+    /**
+     * Wrapper for an impact region in the data.
+     */
+    public static class ImpactRegionWrapper implements Parcelable
+    {
+        // The Impact Region
+        private ImpactRegionExtractor.ImpactRegion impactRegion;
+
+        // The force
+        private float force;
+
+        // Whether the force has been requested
+        private boolean forceRequested;
+
+        /**
+         * Creates an ImpactRegionWrapper.
+         * @param impactRegion The wrapped ImpactRegion
+         */
+        public ImpactRegionWrapper(ImpactRegionExtractor.ImpactRegion impactRegion)
+        {
+            this.impactRegion = impactRegion;
+        }
+
+        /**
+         * Creates this ImpactRegion from the specified Parcel.
+         * @param in The Parcel
+         */
+        public ImpactRegionWrapper(Parcel in)
+        {
+            this.impactRegion = in.readParcelable(ImpactRegionExtractor.ImpactRegion.class.getClassLoader());
+            force = in.readFloat();
+            forceRequested = in.readByte() == 1;
+        }
+
+        /**
+         * Creator for ImpactRegionWrappers.
+         */
+        public static final Creator<ImpactRegionWrapper> CREATOR = new Creator<ImpactRegionWrapper>()
+        {
+            public ImpactRegionWrapper createFromParcel(Parcel in)
+            {
+                return new ImpactRegionWrapper(in);
+            }
+
+            public ImpactRegionWrapper[] newArray(int size)
+            {
+                return new ImpactRegionWrapper[size];
+            }
+        };
+
+        /**
+         * Requests the force for this ImpactRegion to be calculated.
+         */
+        public void requestForce()
+        {
+            if (!forceRequested)
+            {
+                forceRequested = true;
+
+                new AsyncTask<ImpactRegionExtractor.ImpactRegion, Void, Float>()
+                {
+                    /**
+                     * Performs the force calculation on the background Thread.
+                     *
+                     * @param params The parameters of the task.
+                     * @return A result, defined by the subclass of this task.
+                     */
+                    @Override
+                    protected Float doInBackground(ImpactRegionExtractor.ImpactRegion... params)
+                    {
+                        int l = params[0].getEnd() - params[0].getStart() + 1;
+                        final double[] x = new double[l];
+                        final double[] y = new double[l];
+                        final double[] z = new double[l];
+                        float[] sample = new float[3];
+                        RawImpactData data = getDataToDraw();
+
+                        if (data == null)
+                        {
+                            Log.e(TAG, "No data to calculate the force for!");
+                            return -1.0f;
+                        }
+
+                        for (int i = 0; i < l; ++i)
+                        {
+                            data.getData().get(i + params[0].getStart()).toFloatArray(sample);
+
+                            x[i] = sample[0];
+                            y[i] = sample[1];
+                            z[i] = sample[2];
+                        }
+
+                        return (float) Correlator.evaluate(new FeatureExtractor.DataSeriesFeaturable()
+                        {
+                            /**
+                             * Gets an array of SensorData objects for each axis of data of this Featurable.
+                             *
+                             * @return An array of SensorData objects for each axis of data of this Featurable
+                             */
+                            @Override
+                            public SensorData[] getAxes()
+                            {
+                                return new SensorData[] {new SensorData(x), new SensorData(y), new SensorData(z)};
+                            }
+                        });
+                    }
+
+                    @Override
+                    protected void onPostExecute(Float force)
+                    {
+                        ImpactRegionWrapper.this.force = force;
+
+                        Log.d(TAG, "Force is: " + force + " N");
+                    }
+                }.execute(impactRegion);
+            }
+            else
+            {
+                Log.d(TAG, "Force is: " + force + " N");
+            }
+        }
+
+        /**
+         * Describe the kinds of special objects contained in this Parcelable's
+         * marshalled representation.
+         *
+         * @return a bitmask indicating the set of special object types marshalled
+         * by the Parcelable.
+         */
+        @Override
+        public int describeContents()
+        {
+            return 0;
+        }
+
+        /**
+         * Flatten this object in to a Parcel.
+         *
+         * @param dest  The Parcel in which the object should be written.
+         * @param flags Additional flags about how the object should be written.
+         *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
+         */
+        @Override
+        public void writeToParcel(Parcel dest, int flags)
+        {
+            dest.writeParcelable(impactRegion, 0);
+            dest.writeFloat(force);
+            dest.writeByte((byte) (forceRequested ? 1: 0));
+        }
+    }
 }

@@ -240,8 +240,15 @@ public class MainActivity extends AppCompatActivity
         // Save the current drawer index
         if (DrawerItem.getCurrent() != null)
         {
-            bundle.putInt(DRAWER_INDEX_BUNDLE_KEY, DrawerItem.getCurrent().ordinal());
-            getFragmentManager().putFragment(bundle, DRAWER_FRAGMENT_BUNDLE_KEY, DrawerItem.getCurrentFragment());
+            try
+            {
+                bundle.putInt(DRAWER_INDEX_BUNDLE_KEY, DrawerItem.getCurrent().ordinal());
+                getFragmentManager().putFragment(bundle, DRAWER_FRAGMENT_BUNDLE_KEY, DrawerItem.getCurrentFragment());
+            }
+            catch (NullPointerException e)
+            {
+                Log.e(TAG, "Error saving the current drawer fragment!", e);
+            }
         }
         else
             Log.w(TAG, "Current drawer is null when saving instance state");

@@ -32,6 +32,17 @@ public class Sample
     }
 
     /**
+     * Same as above but the specified float array is used.
+     * @param arr The float array. Must be of length at least 3
+     */
+    public void toFloatArray(float[] arr)
+    {
+        arr[0] = x * DATA_TO_GS;
+        arr[1] = y * DATA_TO_GS;
+        arr[2] = z * DATA_TO_GS;
+    }
+
+    /**
      * Method to get a String representation of this Sample.
      * @return A String representation of this Sample
      */

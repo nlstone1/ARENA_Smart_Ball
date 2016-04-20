@@ -70,6 +70,52 @@ public class ImpactRegionExtractor
             regions.add(new ImpactRegion(start, data.size() - 1));
         }
 
+        // Adjust the bounds on the found impact regions
+        for (ImpactRegion region: regions)
+        {
+            // Backtrack on start
+            for (int i = region.getStart(); i >= 0; --i)
+            {
+                if (data.get(i)[0] < max / 10.0f)
+                {
+                    region.start = i;
+                    i = -1;
+                }
+            }
+
+            // Find the end
+            float avg;
+            int j;
+            final int N = 16;
+            for (int i = region.getEnd(); i < data.size(); ++i)
+            {
+                avg = 0.0f;
+                for (j = Math.max(0, i - N / 2); j < Math.min(i + N / 2, data.size()); ++j)
+                {
+                    avg += data.get(i)[0];
+                }
+                avg /= N;
+
+                if (avg < max / 10.0f)
+                {
+                    region.end = i;
+                    i = data.size();
+                }
+            }
+
+            region.end += region.getEnd() - region.getStart();
+        }
+
+        // Combine overlapping impact regions
+        for (int i = regions.size() - 1; i > 0; --i)
+        {
+            if (regions.get(i - 1).getEnd() >= regions.get(i).getStart())
+            {
+                regions.get(i - 1).end = regions.get(i).getEnd();
+                regions.remove(i);
+            }
+        }
+
         return regions;
     }
 
@@ -164,7 +210,7 @@ public class ImpactRegionExtractor
     public static class ImpactRegion implements Parcelable
     {
         // The start and end points of this ImpactRegion
-        public final int START, END;
+        private int start, end;
 
         /**
          * Creates an ImpactRegion.
@@ -173,8 +219,8 @@ public class ImpactRegionExtractor
          */
         public ImpactRegion(int start, int end)
         {
-            START = start;
-            END = end;
+            this.start = start;
+            this.end = end;
         }
 
         /**
@@ -186,8 +232,36 @@ public class ImpactRegionExtractor
             int[] intData = new int[2];
             in.readIntArray(intData);
 
-            START = intData[0];
-            END = intData[1];
+            start = intData[0];
+            end = intData[1];
+        }
+
+        /**
+         * Returns the end index.
+         * @return The end index
+         */
+        public int getEnd()
+        {
+            return end;
+        }
+
+        /**
+         * Returns the start index.
+         * @return The start index
+         */
+        public int getStart()
+        {
+            return start;
+        }
+
+        /**
+         * Tests whether the given point falls within this ImpactRegion.
+         * @param pt The point
+         * @return True if pt falls in the range [start, end] and false otherwise
+         */
+        public boolean collision(int pt)
+        {
+            return pt >= start && pt <= end;
         }
 
         /**
@@ -227,7 +301,13 @@ public class ImpactRegionExtractor
         @Override
         public void writeToParcel(Parcel dest, int flags)
         {
-            dest.writeIntArray(new int[] {START, END});
+            dest.writeIntArray(new int[] {start, end});
+        }
+
+        @Override
+        public String toString()
+        {
+            return "[" + start + ", " + end + "]";
         }
     }
 }

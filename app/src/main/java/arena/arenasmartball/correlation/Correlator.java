@@ -78,6 +78,16 @@ public class Correlator
         return force;
     }
 
+    /**
+     * Calculates the force for the given DataSeriesFeaturable.
+     * @param dataSeriesFeaturable The DataSeriesFeaturable
+     * @return The calculated force
+     */
+    public static double evaluate(FeatureExtractor.DataSeriesFeaturable dataSeriesFeaturable)
+    {
+        return evaluate(FeatureExtractor.getFeatureValues(dataSeriesFeaturable, FEATURES_TO_USE));
+    }
+
 //    /**
 //     * Calculates the value from the given feature array using the MLR coefficients of this class.
 //     * @param features The feature array
