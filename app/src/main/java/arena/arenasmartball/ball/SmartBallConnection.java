@@ -209,8 +209,13 @@ public class SmartBallConnection extends BluetoothGattCallback
             return;
 
         // Begin disconnecting
+        ConnectionState oldState = getConnectionState();
         setConnectionState(ConnectionState.DISCONNECTING);
         bluetoothGatt.disconnect();
+
+        // Set to disconnected if was not previously connected
+        if (oldState != ConnectionState.CONNECTED)
+            setConnectionState(ConnectionState.NOT_CONNECTED);
     }
 
     /**

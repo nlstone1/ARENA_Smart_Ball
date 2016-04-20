@@ -102,7 +102,7 @@ public class FeatureExtractor
 	
 	/**
 	 * Calculates the energy of the fft, where energy is the sum of the square discrete fft component magnitudes.
-	 * @param DFT The DFT
+	 * @param dft The DFT
 	 * @return The energy of the given plot in the frequency domain
 	 */
 	public static double calculateEnergy(DFT dft)
@@ -188,7 +188,7 @@ public class FeatureExtractor
 	 * Interface for objects that will have a predefined set of Features calculated.
 	 * @author Theodore Stone
 	 */
-	public static interface PredefinedFeaturable
+	public interface PredefinedFeaturable
 	{
 		/**
 		 * Gets an array of Features for this Featurable.
@@ -201,7 +201,7 @@ public class FeatureExtractor
 	 * Interface for objects that will have Features calculated from a data series.
 	 * @author Theodore Stone
 	 */
-	public static interface DataSeriesFeaturable
+	public interface DataSeriesFeaturable
 	{
 		/**
 		 * Gets an array of SensorData objects for each axis of data of this Featurable.

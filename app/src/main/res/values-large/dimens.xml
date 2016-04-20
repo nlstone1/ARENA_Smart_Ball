@@ -20,6 +20,9 @@
     <!-- Donut stuff -->
     <dimen name="donutThickness">96dp</dimen>
 
+    <!-- HUD bottom border padding -->
+    <dimen name="hud_bottom_padding">8dp</dimen>
+
     <!-- Text sizes -->
     <dimen name="text_small">18sp</dimen>
     <dimen name="text_medium">22sp</dimen>

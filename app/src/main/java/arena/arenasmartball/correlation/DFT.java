@@ -39,12 +39,11 @@ public class DFT
 		DoubleFFT_1D fftDo = new DoubleFFT_1D(timeSeries.length);
 		System.arraycopy(timeSeries, 0, fft, 0, timeSeries.length);
 		fftDo.realForwardFull(fft);
-		fftDo = null;
 		
 		// Copy to arrays
 		for (int i = 0; i < length; ++i)
 		{
-			mags[i] = Math.abs(fft[i * 2]); // TODO this might be wrong
+			mags[i] = Math.abs(fft[i * 2]);
 			freqs[i] = Math.abs(fft[i * 2 + 1]);
 		}
 	}

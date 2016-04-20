@@ -23,6 +23,9 @@
     <!-- Donut stuff -->
     <dimen name="donutThickness">64dp</dimen>
 
+    <!-- HUD bottom border padding -->
+    <dimen name="hud_bottom_padding">4dp</dimen>
+
     <!--&lt;!&ndash; Height of data download progress bar &ndash;&gt;-->
     <!--<dimen name="download_progress_height">48dp</dimen>-->
 
