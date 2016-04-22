@@ -207,7 +207,7 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
             else
             {
                 transmissionBegun = false;
-                GattCommandUtils.executeDataTransmitCommandSequence(ball, 1096, 2, null); // TODO
+                GattCommandUtils.executeDataTransmitCommandSequence(ball, 768, 2, null); // TODO, 1096 is max
             }
 
         }
