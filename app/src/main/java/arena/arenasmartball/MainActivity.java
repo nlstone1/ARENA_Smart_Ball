@@ -24,6 +24,7 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import arena.arenasmartball.correlation.Correlator;
 import arena.arenasmartball.fragments.AboutFragment;
 import arena.arenasmartball.fragments.HUDFragment;
 
@@ -177,6 +178,9 @@ public class MainActivity extends AppCompatActivity
             // Show the first drawer item
             DrawerItem.values()[0].openDrawer(this);
         }
+
+        // TODO Init Correlator
+        Correlator.initialize(this);
     }
 
     /**

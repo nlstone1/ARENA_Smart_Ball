@@ -82,6 +82,9 @@ public enum DrawerItem
 
         activity.setActionBarTitle(activity.getString(NAME_RES_ID));
 
+        if (currentDrawerItem == null)
+            Log.w(TAG, "currentDrawerItem is null");
+
         if (FRAGMENT_CLASS != null && currentDrawerItem != this)
         {
             // Save the old fragment
@@ -90,9 +93,12 @@ public enum DrawerItem
                 Bundle bundle = new Bundle();
                 currentFragment.save(bundle);
                 currentFragment.onClose();
-                SAVED_FRAGMENTS.put(currentDrawerItem, bundle);
 
-                addToBackStack(currentDrawerItem.ordinal());
+                if (currentDrawerItem != null)
+                {
+                    SAVED_FRAGMENTS.put(currentDrawerItem, bundle);
+                    addToBackStack(currentDrawerItem.ordinal());
+                }
             }
 
             // Update the current Drawer reference
