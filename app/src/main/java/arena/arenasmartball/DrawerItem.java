@@ -27,10 +27,10 @@ public enum DrawerItem
 {
     CONNECT_DRAWER (R.string.connect_drawer_name, R.drawable.ic_drawer_connect, ScannerFragment.class),
     DETAILS_DRAWER (R.string.details_drawer_name, R.drawable.ic_drawer_details, DetailsFragment.class),
-    COMMAND_DRAWER (R.string.command_drawer_name, R.drawable.ic_drawer_commands, null),
+//    COMMAND_DRAWER (R.string.command_drawer_name, R.drawable.ic_drawer_commands, null),
     CAPTURE_DRAWER (R.string.capture_drawer_name, R.drawable.ic_drawer_capture, CaptureFragment.class),
-    DOWNLOAD_DRAWER(R.string.download_drawer_name, R.drawable.ic_drawer_download, DownloadFragment.class),
-    DATA_DRAWER (R.string.data_drawer_name, R.drawable.ic_drawer_data, null);
+    DOWNLOAD_DRAWER(R.string.download_drawer_name, R.drawable.ic_drawer_download, DownloadFragment.class);
+//    DATA_DRAWER (R.string.data_drawer_name, R.drawable.ic_drawer_data, null);
 
     // Log tag String
     private static final String TAG = "DrawerItem";

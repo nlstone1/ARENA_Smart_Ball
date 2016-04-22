@@ -106,7 +106,7 @@ public class Correlator
      * @param featureSet The feature set to evaluate
      * @return The calculated value
      */
-    public static double evaluate(FeatureSet featureSet)
+    public static double[] evaluate(FeatureSet featureSet)
     {
         ArrayList<Double> features = featureSet.getFeatureArray();
 
@@ -133,7 +133,7 @@ public class Correlator
         Log.w(TAG, "Hit/Drop Value = " + hitDropValue[0]);
         Log.w(TAG, "Hard/Soft = " + hardSoftValue[0]);
 
-        return hardSoftValue[0];
+        return new double[] {hardSoftValue[0], hitDropValue[0]};
     }
 
     /**
@@ -141,7 +141,7 @@ public class Correlator
      * @param dataSeriesFeaturable The DataSeriesFeaturable
      * @return The calculated force
      */
-    public static double evaluate(FeatureExtractor.DataSeriesFeaturable dataSeriesFeaturable)
+    public static double[] evaluate(FeatureExtractor.DataSeriesFeaturable dataSeriesFeaturable)
     {
         return evaluate(FeatureExtractor.getFeatureValues(dataSeriesFeaturable, FEATURES_TO_USE));
     }
