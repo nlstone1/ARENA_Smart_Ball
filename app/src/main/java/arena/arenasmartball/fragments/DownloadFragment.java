@@ -1,6 +1,7 @@
 package arena.arenasmartball.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +46,18 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
      */
     public DownloadFragment()
     {    }
+
+    @Override
+    public void load(@NonNull Bundle bundle)
+    {
+        dataView.load(bundle);
+    }
+
+    @Override
+    public void save(@NonNull Bundle bundle)
+    {
+        dataView.save(bundle);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)

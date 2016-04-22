@@ -243,6 +243,8 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
         }
         catch (Exception e)
         { /* Ignore */ }
+
+//        getMainActivity().speak("Scanning for devices...", true);
     }
 
     /**
@@ -275,6 +277,8 @@ public class ScannerFragment extends SimpleFragment implements CompoundButton.On
         }
         catch (Exception e)
         { /* Ignore */ }
+
+//        getMainActivity().speak("Scanning aborted", true);
     }
 
     /**

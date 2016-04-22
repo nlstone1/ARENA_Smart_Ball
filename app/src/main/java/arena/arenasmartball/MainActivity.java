@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -47,6 +48,11 @@ public class MainActivity extends AppCompatActivity
 
     // BluetoothBridge for facilitating BT functions
     private static BluetoothBridge bluetoothBridge = new BluetoothBridge();
+
+    // TextToSpeech for speech synthesis
+    private TextToSpeech textToSpeech;
+    private volatile boolean speechReady;
+    private static int utteranceNum = 0;
 
     // Used for the App Indexing API
     private GoogleApiClient client;
@@ -97,7 +103,11 @@ public class MainActivity extends AppCompatActivity
 
         // Initialize the NavigationView
         navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        if (navigationView != null)
+            navigationView.setNavigationItemSelectedListener(this);
+        else
+            Log.w(TAG, "NavigationView could not be found!");
+
         // Populate the Drawer items
         populateNavigationDrawer(navigationView);
 
@@ -429,6 +439,39 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onResume()
+    {
+        super.onResume();
+
+        // Create the TextToSpeech
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener()
+        {
+            @Override
+            public void onInit(int status)
+            {
+                speechReady = status == TextToSpeech.SUCCESS;
+            }
+        });
+
+        textToSpeech.setPitch(0.4f);
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+
+        // Destroy the TextToSpeech
+        if (textToSpeech != null)
+        {
+            speechReady = false;
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+            textToSpeech = null;
+        }
+    }
+
+    @Override
     public void onStop()
     {
         super.onStop();
@@ -442,5 +485,19 @@ public class MainActivity extends AppCompatActivity
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
+    }
+
+    /**
+     * Attempts to speak the specified text.
+     * @param text The text to speak
+     * @param flush Whether to flush the queue of text
+     */
+    public void speak(String text, boolean flush)
+    {
+        if (speechReady)
+        {
+            textToSpeech.speak(text, flush ? TextToSpeech.QUEUE_FLUSH: TextToSpeech.QUEUE_ADD,
+                    null, "utterance" + ++utteranceNum);
+        }
     }
 }

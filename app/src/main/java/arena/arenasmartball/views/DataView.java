@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -65,8 +66,15 @@ public class DataView extends View
     private ArrayList<ImpactRegionWrapper> impactRegions;
     private boolean requestedImpactRegions;
 
+    // Bundle ids
+    private static final String IMPACT_REGIONS_BUNDLE_ID = "arena.arenasmartball.views.DataView.impactRegions";
+    private static final String REQUESTED_IMPACT_REGIONS_BUNDLE_ID = "arena.arenasmartball.views.DataView.requestedImpactRegions";
+
     // Draws every nth point
     private static final int N = 2;
+
+    // TODO temporary just for DDay
+    private static DataView dataView;
 
     // Log tag String
     private static final String TAG = "DataView";
@@ -136,6 +144,8 @@ public class DataView extends View
 
         pt = new float[NUM_CURVES];
         prevPt = new float[NUM_CURVES];
+
+        dataView = this;
     }
 
     /**
@@ -199,6 +209,28 @@ public class DataView extends View
         }
 
         return super.onTouchEvent(event);
+    }
+
+    public void load(Bundle bundle)
+    {
+        this.requestedImpactRegions = bundle.getBoolean(REQUESTED_IMPACT_REGIONS_BUNDLE_ID, false);
+
+        ArrayList<Parcelable> list = bundle.getParcelableArrayList(IMPACT_REGIONS_BUNDLE_ID);
+
+        if (list != null)
+        {
+            impactRegions = new ArrayList<>();
+            for (Parcelable p : list)
+            {
+                impactRegions.add((ImpactRegionWrapper) p);
+            }
+        }
+    }
+
+    public void save(Bundle bundle)
+    {
+        bundle.putBoolean(REQUESTED_IMPACT_REGIONS_BUNDLE_ID, requestedImpactRegions);
+        bundle.putParcelableArrayList(IMPACT_REGIONS_BUNDLE_ID, impactRegions);
     }
 
     /**
@@ -311,13 +343,44 @@ public class DataView extends View
         PAINT.setStrokeWidth(4.0f);
         PAINT.setColor(Color.WHITE);
 
+        PAINT.setTextSize(32.0f);
+
         ImpactRegionExtractor.ImpactRegion r;
+
+        float x;
 
         for (ImpactRegionWrapper rw: impactRegions)
         {
             r = rw.impactRegion;
             canvas.drawLine(r.getStart() * xScale, padding, r.getStart() * xScale, getHeight() - padding, PAINT);
-            canvas.drawLine(r.getEnd() * xScale, padding, r.getEnd() * xScale, getHeight() - padding, PAINT);
+            canvas.drawLine(x = (r.getEnd() * xScale), padding, r.getEnd() * xScale, getHeight() - padding, PAINT);
+
+            if (rw.forceReceived)
+            {
+//                canvas.drawText("HardSoft: " + rw.hardSoft, x + 16.0f, padding + 48.0f, PAINT);
+//                canvas.drawText("HitDrop: " + rw.hitDrop, x + 16.0f, padding + 72.0f, PAINT);
+                boolean hit = rw.hitDrop < 0.5f;
+                boolean hard = rw.hardSoft > 0.5f;
+
+                float hitP, hardP;
+
+                if (hit)
+                    hitP = (1.0f - rw.hitDrop) * 100.0f;
+                else
+                    hitP = rw.hitDrop * 100.0f;
+
+                if (hard)
+                    hardP = rw.hardSoft * 100.0f;
+                else
+                    hardP = (1.0f - rw.hardSoft) * 100.0f;
+
+//                canvas.drawText((hit ? "Hit": "Drop") + " (certainty: " + (int) hitP + " %)", x + 16.0f,
+//                        padding + 48.0f, PAINT);
+//                canvas.drawText((hard ? "Hard": "Soft") + " (certainty: " + (int) hardP + " %)", x + 16.0f,
+//                        padding + 96.0f, PAINT);
+                canvas.drawText((hard ? "Hard": "Soft") + " " + (hit ? "Hit": "Drop") + " (" + (int) (hitP * hardP / 100.0f) + "%)",
+                        x + 16.0F, padding + 48.0f, PAINT);
+            }
         }
     }
 
@@ -377,8 +440,15 @@ public class DataView extends View
         // The force
         private float force;
 
+        // hit / drop
+        private float hitDrop;
+        // hard / soft
+        private float hardSoft;
+
         // Whether the force has been requested
         private boolean forceRequested;
+        // Whether the force has been received
+        private boolean forceReceived;
 
         /**
          * Creates an ImpactRegionWrapper.
@@ -396,8 +466,19 @@ public class DataView extends View
         public ImpactRegionWrapper(Parcel in)
         {
             this.impactRegion = in.readParcelable(ImpactRegionExtractor.ImpactRegion.class.getClassLoader());
-            force = in.readFloat();
-            forceRequested = in.readByte() == 1;
+
+            float[] arr = new float[3];
+            in.readFloatArray(arr);
+            force = arr[0];
+            hardSoft = arr[1];
+            hitDrop = arr[2];
+            byte[] bytes = new byte[2];
+            in.readByteArray(bytes);
+            forceRequested = bytes[0] == 1;
+            forceReceived = bytes[1] == 1;
+
+            Log.d(TAG, "Hard Soft: " + hardSoft);
+            Log.d(TAG, "Hit Drop: " + hitDrop);
         }
 
         /**
@@ -424,8 +505,9 @@ public class DataView extends View
             if (!forceRequested)
             {
                 forceRequested = true;
+                forceReceived = false;
 
-                new AsyncTask<ImpactRegionExtractor.ImpactRegion, Void, Float>()
+                new AsyncTask<ImpactRegionExtractor.ImpactRegion, Void, double[]>()
                 {
                     /**
                      * Performs the force calculation on the background Thread.
@@ -434,7 +516,7 @@ public class DataView extends View
                      * @return A result, defined by the subclass of this task.
                      */
                     @Override
-                    protected Float doInBackground(ImpactRegionExtractor.ImpactRegion... params)
+                    protected double[] doInBackground(ImpactRegionExtractor.ImpactRegion... params)
                     {
                         int l = params[0].getEnd() - params[0].getStart() + 1;
                         final double[] x = new double[l];
@@ -446,7 +528,7 @@ public class DataView extends View
                         if (data == null)
                         {
                             Log.e(TAG, "No data to calculate the force for!");
-                            return -1.0f;
+                            return null;
                         }
 
                         for (int i = 0; i < l; ++i)
@@ -458,7 +540,7 @@ public class DataView extends View
                             z[i] = sample[2];
                         }
 
-                        return (float) Correlator.evaluate(new FeatureExtractor.DataSeriesFeaturable()
+                        return Correlator.evaluate(new FeatureExtractor.DataSeriesFeaturable()
                         {
                             /**
                              * Gets an array of SensorData objects for each axis of data of this Featurable.
@@ -474,11 +556,23 @@ public class DataView extends View
                     }
 
                     @Override
-                    protected void onPostExecute(Float force)
+                    protected void onPostExecute(double[] vals)
                     {
-                        ImpactRegionWrapper.this.force = force;
+                        if (vals != null)
+                        {
+                            hardSoft = (float) vals[0];
+                            hitDrop = (float) vals[1];
+                            forceReceived = true;
+                        }
 
                         Log.d(TAG, "Force is: " + force + " N");
+                        Log.d(TAG, "Hard Soft: " + hardSoft);
+                        Log.d(TAG, "Hit Drop: " + hitDrop);
+
+                        if (dataView != null)
+                        {
+                            dataView.postInvalidate();
+                        }
                     }
                 }.execute(impactRegion);
             }
@@ -512,8 +606,8 @@ public class DataView extends View
         public void writeToParcel(Parcel dest, int flags)
         {
             dest.writeParcelable(impactRegion, 0);
-            dest.writeFloat(force);
-            dest.writeByte((byte) (forceRequested ? 1: 0));
+            dest.writeFloatArray(new float[] {force, hardSoft, hitDrop});
+            dest.writeByteArray(new byte[] {(byte) (forceRequested ? 1: 0), (byte) (forceReceived ? 1: 0)});
         }
     }
 }
