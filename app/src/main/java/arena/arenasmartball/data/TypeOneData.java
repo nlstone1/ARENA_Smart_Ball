@@ -1,11 +1,24 @@
 package arena.arenasmartball.data;
 
+import android.util.Log;
+
+import java.io.File;
+
 /**
  * Class representation of type 1 data.
  * Created by Theodore on 5/22/2015.
  */
 public class TypeOneData extends RawImpactData
 {
+    /** The tag for this class */
+    private static final String TAG = "TypeOneData";
+
+    /** The save name of the type 1 data file. */
+    public static final String TYPE1_DATA_FILE_NAME = "data1.csv";
+
+    /** The save name of the type 1 raw data file. */
+    public static final String TYPE1_RAW_DATA_FILE_NAME = "data1_raw.txt";
+
     /**
      * Constructor.
      * @param numSamples  The number of samples asked for
@@ -67,20 +80,39 @@ public class TypeOneData extends RawImpactData
             return value;
     }
 
-//    /**
-//     * Saves this KickData in the given directory.
-//     * @param dir The File in which to save this KickData
-//     */
-//    @Override
-//    public void save(File dir)
-//    {
-//        File dataFile = new File(dir, TYPE1_DATA_FILE_NAME);
-//        File rawDataFile = new File(dir, TYPE1_RAW_DATA_FILE_NAME);
-//
-//        writeData(dataFile);
-//        writeRawData(rawDataFile);
-//    }
-//
+    /**
+     * Saves this KickData in the given directory.
+     * @param dir The File in which to save this KickData
+     * @return The number of files that were saved successfully
+     */
+    public int save(File dir)
+    {
+        File dataFile = new File(dir, TYPE1_DATA_FILE_NAME);
+        File rawDataFile = new File(dir, TYPE1_RAW_DATA_FILE_NAME);
+
+        int numSaved = 0;
+        boolean rawDataSaved = writeData(dataFile);
+        boolean dataSaved = writeRawData(rawDataFile);
+
+        if (rawDataSaved)
+        {
+            Log.d(TAG, "Saved raw data to " + rawDataFile.getAbsolutePath());
+            ++numSaved;
+        }
+        else
+            Log.e(TAG, "Error saving raw data to " + rawDataFile.getAbsolutePath());
+
+        if (dataSaved)
+        {
+            Log.d(TAG, "Saved data to " + dataFile.getAbsolutePath());
+            ++numSaved;
+        }
+        else
+            Log.e(TAG, "Error saving data to " + dataFile.getAbsolutePath());
+
+        return numSaved;
+    }
+
 //    /**
 //     * Helper method to read in raw data.
 //     * @param file The file from which to read the data

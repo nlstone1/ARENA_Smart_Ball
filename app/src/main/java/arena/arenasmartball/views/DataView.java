@@ -21,6 +21,7 @@ import java.util.List;
 import arena.arenasmartball.MainActivity;
 import arena.arenasmartball.R;
 import arena.arenasmartball.correlation.Correlator;
+import arena.arenasmartball.correlation.CorrelatorMLR;
 import arena.arenasmartball.correlation.FeatureExtractor;
 import arena.arenasmartball.correlation.SensorData;
 import arena.arenasmartball.data.ImpactRegionExtractor;
@@ -359,26 +360,29 @@ public class DataView extends View
             {
 //                canvas.drawText("HardSoft: " + rw.hardSoft, x + 16.0f, padding + 48.0f, PAINT);
 //                canvas.drawText("HitDrop: " + rw.hitDrop, x + 16.0f, padding + 72.0f, PAINT);
-                boolean hit = rw.hitDrop < 0.5f;
-                boolean hard = rw.hardSoft > 0.5f;
-
-                float hitP, hardP;
-
-                if (hit)
-                    hitP = (1.0f - rw.hitDrop) * 100.0f;
-                else
-                    hitP = rw.hitDrop * 100.0f;
-
-                if (hard)
-                    hardP = rw.hardSoft * 100.0f;
-                else
-                    hardP = (1.0f - rw.hardSoft) * 100.0f;
+//                boolean hit = rw.hitDrop < 0.5f;
+//                boolean hard = rw.hardSoft > 0.5f;
+//
+//                float hitP, hardP;
+//
+//                if (hit)
+//                    hitP = (1.0f - rw.hitDrop) * 100.0f;
+//                else
+//                    hitP = rw.hitDrop * 100.0f;
+//
+//                if (hard)
+//                    hardP = rw.hardSoft * 100.0f;
+//                else
+//                    hardP = (1.0f - rw.hardSoft) * 100.0f;
 
 //                canvas.drawText((hit ? "Hit": "Drop") + " (certainty: " + (int) hitP + " %)", x + 16.0f,
 //                        padding + 48.0f, PAINT);
 //                canvas.drawText((hard ? "Hard": "Soft") + " (certainty: " + (int) hardP + " %)", x + 16.0f,
 //                        padding + 96.0f, PAINT);
-                canvas.drawText((hard ? "Hard": "Soft") + " " + (hit ? "Hit": "Drop") + " (" + (int) (hitP * hardP / 100.0f) + "%)",
+//                canvas.drawText((hard ? "Hard": "Soft") + " " + (hit ? "Hit": "Drop") + " (" + (int) (hitP * hardP / 100.0f) + "%)",
+//                        x + 16.0F, padding + 48.0f, PAINT);
+
+                canvas.drawText("Force = " + rw.force + " N",
                         x + 16.0F, padding + 48.0f, PAINT);
             }
         }
@@ -440,10 +444,10 @@ public class DataView extends View
         // The force
         private float force;
 
-        // hit / drop
-        private float hitDrop;
-        // hard / soft
-        private float hardSoft;
+//        // hit / drop
+//        private float hitDrop;
+//        // hard / soft
+//        private float hardSoft;
 
         // Whether the force has been requested
         private boolean forceRequested;
@@ -470,15 +474,15 @@ public class DataView extends View
             float[] arr = new float[3];
             in.readFloatArray(arr);
             force = arr[0];
-            hardSoft = arr[1];
-            hitDrop = arr[2];
+//            hardSoft = arr[1];
+//            hitDrop = arr[2];
             byte[] bytes = new byte[2];
             in.readByteArray(bytes);
             forceRequested = bytes[0] == 1;
             forceReceived = bytes[1] == 1;
 
-            Log.d(TAG, "Hard Soft: " + hardSoft);
-            Log.d(TAG, "Hit Drop: " + hitDrop);
+//            Log.d(TAG, "Hard Soft: " + hardSoft);
+//            Log.d(TAG, "Hit Drop: " + hitDrop);
         }
 
         /**
@@ -507,7 +511,7 @@ public class DataView extends View
                 forceRequested = true;
                 forceReceived = false;
 
-                new AsyncTask<ImpactRegionExtractor.ImpactRegion, Void, double[]>()
+                new AsyncTask<ImpactRegionExtractor.ImpactRegion, Void, Double>()
                 {
                     /**
                      * Performs the force calculation on the background Thread.
@@ -516,7 +520,7 @@ public class DataView extends View
                      * @return A result, defined by the subclass of this task.
                      */
                     @Override
-                    protected double[] doInBackground(ImpactRegionExtractor.ImpactRegion... params)
+                    protected Double doInBackground(ImpactRegionExtractor.ImpactRegion... params)
                     {
                         int l = params[0].getEnd() - params[0].getStart() + 1;
                         final double[] x = new double[l];
@@ -540,7 +544,7 @@ public class DataView extends View
                             z[i] = sample[2];
                         }
 
-                        return Correlator.evaluate(new FeatureExtractor.DataSeriesFeaturable()
+                        return CorrelatorMLR.evaluate(new FeatureExtractor.DataSeriesFeaturable()
                         {
                             /**
                              * Gets an array of SensorData objects for each axis of data of this Featurable.
@@ -556,18 +560,19 @@ public class DataView extends View
                     }
 
                     @Override
-                    protected void onPostExecute(double[] vals)
+                    protected void onPostExecute(Double vals)
                     {
                         if (vals != null)
                         {
-                            hardSoft = (float) vals[0];
-                            hitDrop = (float) vals[1];
+//                            hardSoft = (float) vals[0];
+//                            hitDrop = (float) vals[1];
+                            force = vals.floatValue();
                             forceReceived = true;
                         }
 
                         Log.d(TAG, "Force is: " + force + " N");
-                        Log.d(TAG, "Hard Soft: " + hardSoft);
-                        Log.d(TAG, "Hit Drop: " + hitDrop);
+//                        Log.d(TAG, "Hard Soft: " + hardSoft);
+//                        Log.d(TAG, "Hit Drop: " + hitDrop);
 
                         if (dataView != null)
                         {
@@ -606,7 +611,8 @@ public class DataView extends View
         public void writeToParcel(Parcel dest, int flags)
         {
             dest.writeParcelable(impactRegion, 0);
-            dest.writeFloatArray(new float[] {force, hardSoft, hitDrop});
+//            dest.writeFloatArray(new float[] {force, hardSoft, hitDrop});
+            dest.writeFloatArray(new float[] {force, 0.0f, 0.0f});
             dest.writeByteArray(new byte[] {(byte) (forceRequested ? 1: 0), (byte) (forceReceived ? 1: 0)});
         }
     }

@@ -1,6 +1,7 @@
 package arena.arenasmartball;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -42,6 +43,9 @@ public class MainActivity extends AppCompatActivity
 
     //  Constant representing the coarse location access permission request
     private static final int PERMISSIONS_REQUEST_COARSE_LOCATION = 1;
+
+    //  Constant representing the external storage permission request
+    private static final int PERMISSIONS_REQUEST_STORAGE = 2;
 
     // Static reference to the MainActivity
     private static MainActivity mainActivity;
@@ -167,6 +171,34 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            {
+                // Show explanation explaining why the app needs to access coarse location
+                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                alertDialog.setTitle(getString(R.string.write_ext_storage_permission));
+                alertDialog.setMessage(getString(R.string.write_ext_storage_explanation));
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {}
+                        });
+                alertDialog.show();
+            }
+            else
+            {
+                // No explanation needed, we can request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        PERMISSIONS_REQUEST_STORAGE);
+            }
+        }
+
         // Implement the App Indexing API
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
@@ -190,7 +222,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         // TODO Init Correlator
-        Correlator.initialize(this);
+//        Correlator.initialize(this);
     }
 
     /**
@@ -350,8 +382,45 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
             }
+
+            case PERMISSIONS_REQUEST_STORAGE:
+            {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length == 0 || (grantResults[0] != PackageManager.PERMISSION_GRANTED))
+                {
+                    // Explain to the user that the app will not work without the permissions
+                    AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                    alertDialog.setTitle(getString(R.string.write_ext_storage_permission));
+                    alertDialog.setMessage(getString(R.string.write_ext_storage_denied_explanation));
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                            new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which)
+                                {}
+                            });
+                    alertDialog.show();
+                }
+                break;
+            }
         }
     }
+// TODO
+//    /**
+//     * Tests whether writing to external storage is permitted.
+//     * @return Whether or not writing to external storage is permitted
+//     */
+//    public boolean storagePermitted()
+//    {
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+//                ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+//            return true;
+//
+//        ActivityCompat.requestPermissions(this,
+//                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+//                PERMISSIONS_REQUEST_STORAGE);
+//        return false;
+//    }
 
     /**
      * Locks/Unlocks the NavigationDrawer.

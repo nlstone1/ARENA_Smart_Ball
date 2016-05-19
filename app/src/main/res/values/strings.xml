@@ -14,6 +14,7 @@
     <!-- Text Strings -->
     <string name="text_about">About</string>
     <string name="location_permission">Location Permission</string>
+    <string name="write_ext_storage_permission">Write Permission</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_settings">Settings</string>
@@ -41,6 +42,7 @@
     <string name="capture">CAPTURE</string>
     <string name="capture_next_impact">Capture Next Impact</string>
     <string name="ready">Ready</string>
+    <string name="save">Save</string>
     <string name="ball_reset">Ball Reset</string>
     <string name="impact_detected">Impact Detected</string>
     <string name="waiting_for_impact_timed_out">Waiting for Impact Timed Out</string>
@@ -60,6 +62,9 @@
     <!-- Dialog Strings -->
     <string name="access_location_explanation">"This application needs to access the location of the device in order to scan for Smart Balls."</string>
     <string name="access_location_denied_explanation">"This application will not be able to scan for Smart Balls without knowing the device's location."</string>
+    <string name="write_ext_storage_explanation">"This application needs to write to the external storage in order to save impact data collected from Smart Balls."</string>
+    <string name="write_ext_storage_denied_explanation">"This application will not be able to save impact data without permission to write to external storage."</string>
+
 
     <!-- Service names -->
     <string name="generic_access">Generic Access</string>

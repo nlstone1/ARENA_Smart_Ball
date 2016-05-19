@@ -140,8 +140,9 @@ public abstract class RawImpactData
     /**
      * Helper method to write the raw data to a file in a human readable format.
      * @param file The file to which to write the data
+     * @return True if the operation completed successfully
      */
-    protected void writeRawData(File file)
+    protected boolean writeRawData(File file)
     {
         PrintWriter out;
 
@@ -152,7 +153,7 @@ public abstract class RawImpactData
         catch (FileNotFoundException e)
         {
             Log.e(TAG, "Error writing raw data to file " + file.getName() + ": " + e.getMessage());
-            return;
+            return false;
         }
 
         int i;
@@ -166,6 +167,8 @@ public abstract class RawImpactData
 
         out.flush();
         out.close();
+
+        return true;
     }
 
     /**
@@ -208,8 +211,9 @@ public abstract class RawImpactData
     /**
      * Helper method to write the data to a file in a human readable format.
      * @param file The file to which to write the data
+     * @return True if the operation completed successfully
      */
-    protected void writeData(File file)
+    protected boolean writeData(File file)
     {
         PrintWriter out;
 
@@ -220,7 +224,7 @@ public abstract class RawImpactData
         catch (FileNotFoundException e)
         {
             Log.e(TAG, "Error writing data to file " + file.getName() + ": " + e.getMessage());
-            return;
+            return false;
         }
 
         for (Sample v: data)
@@ -230,6 +234,7 @@ public abstract class RawImpactData
 
         out.flush();
         out.close();
+        return true;
     }
 
     /**
