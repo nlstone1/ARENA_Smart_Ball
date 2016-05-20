@@ -5,11 +5,14 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 
+import arena.arenasmartball.old_data.Sample;
+
 /**
  * Contains functionality for identifying and isolating impact regions from Impact Data.
  *
  * Created by Nathaniel on 4/18/2016.
  */
+@Deprecated
 public class ImpactRegionExtractor
 {
     // Log Tag String
@@ -20,103 +23,105 @@ public class ImpactRegionExtractor
      * @param rdata The ImpactData
      * @return A list containing the impact regions. Will be empty if none are found.
      */
-    public static ArrayList<ImpactRegion> findImpactRegions(RawImpactData rdata)
+    public static ArrayList<ImpactRegion> findImpactRegions(ImpactData rdata)
     {
-        ArrayList<ImpactRegion> regions = new ArrayList<>();
+//        ArrayList<ImpactRegion> regions = new ArrayList<>();
+//
+//        if (rdata.getData().size() <= 1)
+//            return regions;
+//
+//        // Create local copy of the data to work with
+//        ArrayList<float[]> data = new ArrayList<>(rdata.getData().size());
+//        for (Sample sample: rdata.getData())
+//        {
+//            data.add(sample.toFloatArray());
+//
+////            // T0DO DEBUG
+////            Log.d(TAG, "\t" + sample.x * Sample.DATA_TO_GS + "\t" +
+////                sample.y * Sample.DATA_TO_GS + "\t" + sample.z * Sample.DATA_TO_GS);
+//        }
+//
+//        // Run the NAT filter on the data
+//        float max = filter(data) / 2.0f;
+//
+//        // Find the impact regions. Assume any peak larger than half the max is one
+//        int start = -1;
+//
+//        for (int i = 0; i < data.size(); ++i)
+//        {
+//            if (start == -1) // Look for the start
+//            {
+//                // Found the start of an impact regions
+//                if (data.get(i)[0] > max)
+//                    start = i - 1;
+//            }
+//            else // Look for the end
+//            {
+//                if (data.get(i)[0] < max)
+//                {
+//                    // Create the ImpactRegion
+//                    regions.add(new ImpactRegion(start, i));
+//
+//                    start = -1;
+//                }
+//            }
+//        }
+//
+//        // Make sure an impact region isn't cutoff
+//        if (start > -1)
+//        {
+//            regions.add(new ImpactRegion(start, data.size() - 1));
+//        }
+//
+//        // Adjust the bounds on the found impact regions
+//        for (ImpactRegion region: regions)
+//        {
+//            // Backtrack on start
+//            for (int i = region.getStart(); i >= 0; --i)
+//            {
+//                if (data.get(i)[0] < max / 10.0f)
+//                {
+//                    region.start = i;
+//                    i = -1;
+//                }
+//            }
+//
+//            // Find the end
+//            float avg;
+//            int j;
+//            final int N = 16;
+//            for (int i = region.getEnd(); i < data.size(); ++i)
+//            {
+//                avg = 0.0f;
+//                for (j = Math.max(0, i - N / 2); j < Math.min(i + N / 2, data.size()); ++j)
+//                {
+//                    avg += data.get(i)[0];
+//                }
+//                avg /= N;
+//
+//                if (avg < max / 10.0f)
+//                {
+//                    region.end = i;
+//                    i = data.size();
+//                }
+//            }
+//
+//            region.end += region.getEnd() - region.getStart();
+//        }
+//
+//        // Combine overlapping impact regions
+//        for (int i = regions.size() - 1; i > 0; --i)
+//        {
+//            if (regions.get(i - 1).getEnd() >= regions.get(i).getStart())
+//            {
+//                regions.get(i - 1).end = regions.get(i).getEnd();
+//                regions.remove(i);
+//            }
+//        }
+//
+//        return regions;
 
-        if (rdata.getData().size() <= 1)
-            return regions;
-
-        // Create local copy of the data to work with
-        ArrayList<float[]> data = new ArrayList<>(rdata.getData().size());
-        for (Sample sample: rdata.getData())
-        {
-            data.add(sample.toFloatArray());
-
-//            // T0DO DEBUG
-//            Log.d(TAG, "\t" + sample.x * Sample.DATA_TO_GS + "\t" +
-//                sample.y * Sample.DATA_TO_GS + "\t" + sample.z * Sample.DATA_TO_GS);
-        }
-
-        // Run the NAT filter on the data
-        float max = filter(data) / 2.0f;
-
-        // Find the impact regions. Assume any peak larger than half the max is one
-        int start = -1;
-
-        for (int i = 0; i < data.size(); ++i)
-        {
-            if (start == -1) // Look for the start
-            {
-                // Found the start of an impact regions
-                if (data.get(i)[0] > max)
-                    start = i - 1;
-            }
-            else // Look for the end
-            {
-                if (data.get(i)[0] < max)
-                {
-                    // Create the ImpactRegion
-                    regions.add(new ImpactRegion(start, i));
-
-                    start = -1;
-                }
-            }
-        }
-
-        // Make sure an impact region isn't cutoff
-        if (start > -1)
-        {
-            regions.add(new ImpactRegion(start, data.size() - 1));
-        }
-
-        // Adjust the bounds on the found impact regions
-        for (ImpactRegion region: regions)
-        {
-            // Backtrack on start
-            for (int i = region.getStart(); i >= 0; --i)
-            {
-                if (data.get(i)[0] < max / 10.0f)
-                {
-                    region.start = i;
-                    i = -1;
-                }
-            }
-
-            // Find the end
-            float avg;
-            int j;
-            final int N = 16;
-            for (int i = region.getEnd(); i < data.size(); ++i)
-            {
-                avg = 0.0f;
-                for (j = Math.max(0, i - N / 2); j < Math.min(i + N / 2, data.size()); ++j)
-                {
-                    avg += data.get(i)[0];
-                }
-                avg /= N;
-
-                if (avg < max / 10.0f)
-                {
-                    region.end = i;
-                    i = data.size();
-                }
-            }
-
-            region.end += region.getEnd() - region.getStart();
-        }
-
-        // Combine overlapping impact regions
-        for (int i = regions.size() - 1; i > 0; --i)
-        {
-            if (regions.get(i - 1).getEnd() >= regions.get(i).getStart())
-            {
-                regions.get(i - 1).end = regions.get(i).getEnd();
-                regions.remove(i);
-            }
-        }
-
-        return regions;
+        return null;
     }
 
     /**

@@ -1,4 +1,4 @@
-package arena.arenasmartball.data;
+package arena.arenasmartball.old_data;
 
 import android.util.Log;
 
@@ -216,7 +216,7 @@ public class TypeTwoData extends RawImpactData
     public int getTransmissionProgress()
     {
         int value = (int)((100.0 * numLinesCollected) / getNumSamplesAskedFor());
-//        int value = (int)((600.0f * getRawData().size()) / getNumSamplesAskedFor()) + 1;
+//        int value = (int)((600.0f * getRawData().size()) / getNumSamples()) + 1;
 
         if (value < 0)
             return 0;

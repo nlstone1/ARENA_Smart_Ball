@@ -2,6 +2,11 @@ package arena.arenasmartball.data;
 
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Calendar;
+import java.util.Locale;
+
 import arena.arenasmartball.ball.SmartBall;
 
 /**
@@ -19,17 +24,29 @@ public class Impact implements SmartBall.DataListener
     // Whether or not this Impact is currently reading data from the SmartBall
     private boolean isReading;
 
-    // Records the last data type that this Impact read
-    private int lastDataTypeRead;
+//    // Records the number of lines that have been read
+//    private int numLinesRead;
+
+//    // The number of lines of data that were requested
+//    private int numLinesAskedFor;
+
+//    // Records the last data type that this Impact read
+//    private int lastDataTypeRead;
 
     // The time of the impact, in milliseconds from Jan 1, 1970
     private long time;
 
-    // The type 1 data of this Impact
-    private TypeOneData typeOneData;
+    // The name of the SmartBall that recorded this Impact
+    private String ballName;
 
-    // The type 2 data of this Impact
-    private TypeTwoData typeTwoData;
+    // The ImpactData of this Impact
+    private ImpactData impactData;
+
+//    // The type 1 data of this Impact
+//    private TypeOneData typeOneData;
+//
+//    // The type 2 data of this Impact
+//    private TypeTwoData typeTwoData;
 
     /**
      * Creates a new Impact.
@@ -73,18 +90,19 @@ public class Impact implements SmartBall.DataListener
      */
     public boolean isComplete()
     {
-        if (typeOneData == null && typeTwoData == null)
-            return false;
-
-        boolean complete = true;
-
-        if (typeOneData != null && !typeOneData.isComplete())
-            complete = false;
-
-        if (typeTwoData != null && !typeTwoData.isComplete())
-            complete = false;
-
-        return complete;
+        return impactData != null;
+//        if (typeOneData == null && typeTwoData == null)
+//            return false;
+//
+//        boolean complete = true;
+//
+//        if (typeOneData != null && !typeOneData.isComplete())
+//            complete = false;
+//
+//        if (typeTwoData != null && !typeTwoData.isComplete())
+//            complete = false;
+//
+//        return complete;
     }
 
     /**
@@ -97,47 +115,57 @@ public class Impact implements SmartBall.DataListener
     }
 
     /**
-     * Gets the TypeOneData of this Impact, may be null.
-     * @return The TypeOneData of this Impact, may be null
+     * Gets the ImpactData of this Impact, may be null.
+     * @return The ImpactData of this Impact, may be null
      */
-    public TypeOneData getTypeOneData()
+    public ImpactData getImpactData()
     {
-        return typeOneData;
+        return impactData;
     }
 
-    /**
-     * Gets the TypeTwoData of this Impact, may be null.
-     * @return The TypeTwoData of this Impact, may be null
-     */
-    public TypeTwoData getTypeTwoData()
-    {
-        return typeTwoData;
-    }
+//    /**
+//     * Gets the TypeOneData of this Impact, may be null.
+//     * @return The TypeOneData of this Impact, may be null
+//     */
+//    public TypeOneData getTypeOneData()
+//    {
+//        return typeOneData;
+//    }
+//
+//    /**
+//     * Gets the TypeTwoData of this Impact, may be null.
+//     * @return The TypeTwoData of this Impact, may be null
+//     */
+//    public TypeTwoData getTypeTwoData()
+//    {
+//        return typeTwoData;
+//    }
 
-    /**
-     * Gets the KickData of this Impact that is still being read from the SmartBall.
-     * @return The KickData of this Impact that is still being read from the SmartBall, or null if this Impact is not reading
-     */
-    public RawImpactData getDataInTransit()
-    {
-        if (isReading)
-        {
-            if (lastDataTypeRead == 1)
-            {
-                if (!typeOneData.isComplete())
-                    return typeOneData;
-            }
-            else if (lastDataTypeRead == 2)
-            {
-                if (!typeTwoData.isComplete())
-                    return typeTwoData;
-            }
-
-            return null;
-        }
-        else
-            return null;
-    }
+//    /**
+//     * Gets the KickData of this Impact that is still being read from the SmartBall.
+//     * @return The KickData of this Impact that is still being read from the SmartBall, or null if this Impact is not reading
+//     */
+//    public ImpactData getDataInTransit()
+//    {
+//        if (isReading)
+//        {
+//            return impactData;
+////            if (lastDataTypeRead == 1)
+////            {
+////                if (!typeOneData.isComplete())
+////                    return typeOneData;
+////            }
+////            else if (lastDataTypeRead == 2)
+////            {
+////                if (!typeTwoData.isComplete())
+////                    return typeTwoData;
+////            }
+////
+////            return null;
+//        }
+//        else
+//            return null;
+//    }
 
     /**
      * Called when kick data is read.
@@ -151,11 +179,24 @@ public class Impact implements SmartBall.DataListener
     @Override
     public void onSmartBallDataRead(SmartBall ball, byte[] data, boolean start, boolean end, byte type)
     {
-        lastDataTypeRead = type;
-        RawImpactData idata = getDataInTransit();
+        // Only type 2 data is considered
+        if (type != 2)
+        {
+            Log.e(TAG, "Reading a data type other than 2: " + type);
+            return;
+        }
 
-        if (idata != null && !idata.isComplete())
-            idata.addLine(data, start, end);
+        // Otherwise add the new line to the ImpactData if it is non-null
+        if (impactData == null)
+            Log.w(TAG, "Reading data but ImpactData is null");
+        else if (!start && !end)
+            impactData.addLine(data);
+
+//        lastDataTypeRead = type;
+//        ImpactData idata = getDataInTransit();
+//
+//        if (idata != null && !idata.isComplete())
+//            idata.addLine(data, start, end);
     }
 
     /**
@@ -169,12 +210,6 @@ public class Impact implements SmartBall.DataListener
     @Override
     public void onSmartBallDataTransmissionEvent(SmartBall ball, byte dataType, SmartBall.DataEvent event, int numSamples)
     {
-//        if (dataType == 1 && typeOneData != null && typeOneData.isComplete())
-//            return;
-//
-//        if (dataType == 2 && typeTwoData != null && typeTwoData.isComplete())
-//            return;
-
         if (event == SmartBall.DataEvent.TRANSMISSION_REQUESTED)
             isReading = true;
         else if (event == SmartBall.DataEvent.TRANSMISSION_BEGUN)
@@ -182,49 +217,105 @@ public class Impact implements SmartBall.DataListener
             wasCancelled = false;
             isReading = true;
 
-            if (dataType == 1)
-                typeOneData = new TypeOneData(numSamples);
-            else if (dataType == 2)
-                typeTwoData = new TypeTwoData(numSamples);
+            // Set the ball name
+            ballName = ball.DEVICE.getName();
+
+            // Create a new ImpactData object to hold the data
+            if (dataType == 2)
+                impactData = new ImpactData(numSamples);
+            else
+                Log.w(TAG, "Data Transmission begun with a data type other than 2: " + dataType);
+
+//            if (dataType == 1)
+//                typeOneData = new TypeOneData(numSamples);
+//            else if (dataType == 2)
+//                typeTwoData = new TypeTwoData(numSamples);
         }
         else if (event == SmartBall.DataEvent.TRANSMISSION_ENDED)
         {
             isReading = false;
-
-            if (dataType == 1)
-            {
-                if (typeOneData != null)
-                    typeOneData.setComplete(true);
-                else
-                    Log.w(TAG, "Type 1 data transmit ended but type 1 data is null");
-            }
-            else if (dataType == 2)
-            {
-                if (typeTwoData != null)
-                    typeTwoData.setComplete(true);
-                else
-                    Log.w(TAG, "Type 2 data transmit ended but type 1 data is null");
-            }
+//            if (dataType == 1)
+//            {
+//                if (typeOneData != null)
+//                    typeOneData.setComplete(true);
+//                else
+//                    Log.w(TAG, "Type 1 data transmit ended but type 1 data is null");
+//            }
+//            else if (dataType == 2)
+//            {
+//                if (typeTwoData != null)
+//                    typeTwoData.setComplete(true);
+//                else
+//                    Log.w(TAG, "Type 2 data transmit ended but type 1 data is null");
+//            }
         }
         else if (event == SmartBall.DataEvent.TRANSMISSION_CANCELLED)
         {
-            if (dataType == 1)
-            {
-                if (typeOneData != null)
-                    typeOneData.setComplete(false);
-                else
-                    Log.w(TAG, "Type 1 data transmit cancelled but type 1 data is null");
-            }
-            else if (dataType == 2)
-            {
-                if (typeTwoData != null)
-                    typeTwoData.setComplete(false);
-                else
-                    Log.w(TAG, "Type 2 data transmit cancelled but type 1 data is null");
-            }
+//            if (dataType == 1)
+//            {
+//                if (typeOneData != null)
+//                    typeOneData.setComplete(false);
+//                else
+//                    Log.w(TAG, "Type 1 data transmit cancelled but type 1 data is null");
+//            }
+//            else if (dataType == 2)
+//            {
+//                if (typeTwoData != null)
+//                    typeTwoData.setComplete(false);
+//                else
+//                    Log.w(TAG, "Type 2 data transmit cancelled but type 1 data is null");
+//            }
 
             isReading = false;
             wasCancelled = true;
         }
+    }
+
+    /**
+     * Writes this Impact to the given directory. A new File will be created for this Impact in the given directory.
+     * @param dir The directory to write to
+     * @return Whether or not this Impact was successfully saved
+     */
+    public boolean save(File dir)
+    {
+        if (impactData == null)
+        {
+            Log.e(TAG, "Could not save Impact: ImpactData is null");
+            return false;
+        }
+        else if (!dir.isDirectory())
+        {
+            Log.e(TAG, "Could not save Impact: Save directory is not valid");
+            return false;
+        }
+        else
+        {
+            try
+            {
+                File file = new File(dir, createFileName());
+                impactData.toCSVFile(file);
+            }
+            catch (FileNotFoundException e)
+            {
+                Log.e(TAG, "Error saving Impact: " + e.getMessage());
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    /**
+     * Creates a file name for this Impact. Names are formatted SBDATA_BallId_DateYYYYDDMMHHMMSS.
+     * @return The file name
+     */
+    private String createFileName()
+    {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(getTime());
+
+        return "SBDATA_" + ballName + String.format(Locale.ENGLISH, "_%04d%02d%02d_%02d%02d%02d.csv", c.get(Calendar.YEAR),
+                c.get(Calendar.DAY_OF_MONTH), 1 + c.get(Calendar.MONTH),
+                c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
     }
 }

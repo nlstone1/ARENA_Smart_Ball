@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 import arena.arenasmartball.BluetoothBridge;
@@ -58,20 +59,20 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
     public DownloadFragment()
     {    }
 
-    /**
-     * Creates a file name for the given Impact.
-     * @param impact The Impact for which to get a file name
-     * @return The file name
-     */
-    public static String createFileName(Impact impact)
-    {
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(impact.getTime());
-
-        return String.format(Locale.ENGLISH, "SBDATA_%04d%02d%02d_%02d%02d%02d", c.get(Calendar.YEAR),
-                c.get(Calendar.DAY_OF_MONTH), 1 + c.get(Calendar.MONTH),
-                c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
-    }
+//    /**
+//     * Creates a file name for the given Impact.
+//     * @param impact The Impact for which to get a file name
+//     * @return The file name
+//     */
+//    public static String createFileName(Impact impact)
+//    {
+//        Calendar c = Calendar.getInstance();
+//        c.setTimeInMillis(impact.getTime());
+//
+//        return String.format(Locale.ENGLISH, "SBDATA_%04d%02d%02d_%02d%02d%02d", c.get(Calendar.YEAR),
+//                c.get(Calendar.DAY_OF_MONTH), 1 + c.get(Calendar.MONTH),
+//                c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
+//    }
 
     @Override
     public void load(@NonNull Bundle bundle)
@@ -189,17 +190,23 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
      */
     private void updateDataViews(Impact impact)
     {
-        if (impact.getDataInTransit() != null)
-        {
-            progressBar.setProgress(impact.getDataInTransit().getTransmissionProgress());
-
-//            Log.d(TAG, "Progress: " + impact.getDataInTransit().getTransmissionProgress());
-        }
+        // Set the progress
+        if (impact.getImpactData() != null)
+            progressBar.setProgress(impact.getImpactData().getPercentComplete());
         else
-        {
             progressBar.setProgress(0);
-//            Log.d(TAG, "Progress Reset");
-        }
+
+//        if (impact.getDataInTransit() != null)
+//        {
+//            progressBar.setProgress(impact.getDataInTransit().getTransmissionProgress());
+//
+////            Log.d(TAG, "Progress: " + impact.getDataInTransit().getTransmissionProgress());
+//        }
+//        else
+//        {
+//            progressBar.setProgress(0);
+////            Log.d(TAG, "Progress Reset");
+//        }
 
         // Invalidate the DataView
         dataView.getViewUpdater().redraw(true);
@@ -269,7 +276,7 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
                 return;
             }
 
-            //Check SD card state
+            // Check SD card state
             String state = Environment.getExternalStorageState();
             if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state) || !Environment.MEDIA_MOUNTED.equals(state))
                 Log.e(TAG, "Error: external storage is read only or unavailable");
@@ -283,23 +290,29 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
             if (!file.mkdirs() && !file.isDirectory())
                 Log.w(TAG, "Error making smart ball data directory: " + file.getAbsolutePath());
 
-            // Create the directory in which to save the impact data
-            File impactDir = new File(file, createFileName(impact));
+            // Save the data and print a Toast
+            if (impact.save(file))
+                Toast.makeText(getMainActivity(), "Saved impact to " + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(getMainActivity(), "Error saving impact", Toast.LENGTH_SHORT).show();
 
-            if (!impactDir.mkdirs() && !file.isDirectory())
-                Log.w(TAG, "Error making smart ball data impacy directory: " + impactDir.getAbsolutePath());
-
-            // Save the data
-            int numSaved = 0;
-            if (impact.getTypeOneData() != null)
-                numSaved += impact.getTypeOneData().save(impactDir);
-
-
-            if (impact.getTypeTwoData() != null)
-                numSaved += impact.getTypeTwoData().save(impactDir);
-
-            // Print Toast
-            Toast.makeText(getMainActivity(), "Saved " + numSaved + " file(s) to " + impactDir.getName(), Toast.LENGTH_SHORT).show();
+//            // Create the directory in which to save the impact data
+//            File impactDir = new File(file, createFileName(impact));
+//
+//            if (!impactDir.mkdirs() && !file.isDirectory())
+//                Log.w(TAG, "Error making smart ball data impacy directory: " + impactDir.getAbsolutePath());
+//
+//            // Save the data
+//            int numSaved = 0;
+//            if (impact.getTypeOneData() != null)
+//                numSaved += impact.getTypeOneData().save(impactDir);
+//
+//
+//            if (impact.getTypeTwoData() != null)
+//                numSaved += impact.getTypeTwoData().save(impactDir);
+//
+//            // Print Toast
+//            Toast.makeText(getMainActivity(), "Saved " + numSaved + " file(s) to " + impactDir.getName(), Toast.LENGTH_SHORT).show();
         }
 
         setValuesForCurrentState(MainActivity.getBluetoothBridge());

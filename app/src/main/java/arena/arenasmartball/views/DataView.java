@@ -20,12 +20,8 @@ import java.util.List;
 
 import arena.arenasmartball.MainActivity;
 import arena.arenasmartball.R;
-import arena.arenasmartball.correlation.Correlator;
-import arena.arenasmartball.correlation.CorrelatorMLR;
-import arena.arenasmartball.correlation.FeatureExtractor;
-import arena.arenasmartball.correlation.SensorData;
 import arena.arenasmartball.data.ImpactRegionExtractor;
-import arena.arenasmartball.data.RawImpactData;
+import arena.arenasmartball.data.ImpactData;
 import arena.arenasmartball.data.Sample;
 
 /**
@@ -162,55 +158,55 @@ public class DataView extends View
         drawAxes(canvas);
 
         // Draw the data
-        RawImpactData data = getDataToDraw();
+        ImpactData data = getDataToDraw();
 
         if (data != null)
         {
             drawData(canvas, data);
 
-            // Check for finished transmission
-            if (data.isComplete() && !requestedImpactRegions)
-            {
-                requestedImpactRegions = true;
+//            // Check for finished transmission
+//            if (data.isComplete() && !requestedImpactRegions)
+//            {
+//                requestedImpactRegions = true;
+//
+//                // Run the region extractor
+//                new RegionExtractor().execute(data);
+//            }
+//            else if (!data.isComplete())
+//            {
+//                requestedImpactRegions = false;
+//                impactRegions = null;
+//            }
 
-                // Run the region extractor
-                new RegionExtractor().execute(data);
-            }
-            else if (!data.isComplete())
-            {
-                requestedImpactRegions = false;
-                impactRegions = null;
-            }
-
-            // Draw impact regions
-            if (impactRegions != null)
-            {
-                drawImpactRegions(canvas);
-            }
+//            // Draw impact regions
+//            if (impactRegions != null)
+//            {
+//                drawImpactRegions(canvas);
+//            }
         }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
-        // Test for impact region clicks
-        if (impactRegions != null && event.getActionIndex() == MotionEvent.ACTION_DOWN)
-        {
-            int idx = (int) (event.getX() / xScale);
-
-            for (ImpactRegionWrapper region: impactRegions)
-            {
-                if (region.impactRegion.collision(idx))
-                {
-                    Log.d(TAG, "Clicked region " + region);
-                    region.requestForce();
-                    break;
-                }
-            }
-        }
-
-        return super.onTouchEvent(event);
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event)
+//    {
+//        // Test for impact region clicks
+//        if (impactRegions != null && event.getActionIndex() == MotionEvent.ACTION_DOWN)
+//        {
+//            int idx = (int) (event.getX() / xScale);
+//
+//            for (ImpactRegionWrapper region: impactRegions)
+//            {
+//                if (region.impactRegion.collision(idx))
+//                {
+//                    Log.d(TAG, "Clicked region " + region);
+//                    region.requestForce();
+//                    break;
+//                }
+//            }
+//        }
+//
+//        return super.onTouchEvent(event);
+//    }
 
     public void load(Bundle bundle)
     {
@@ -247,7 +243,7 @@ public class DataView extends View
         super.onSizeChanged(w, h, oldW, oldH);
 
         // Set the X scale
-        RawImpactData data = getDataToDraw();
+        ImpactData data = getDataToDraw();
 
         if (data == null)
         {
@@ -255,7 +251,7 @@ public class DataView extends View
         }
         else
         {
-            xScale = (w - 2.0f * (padding + 2.0f)) / (data.getNumSamplesAskedFor());
+            xScale = (w - 2.0f * (padding + 2.0f)) / (data.getNumSamples());
         }
 
         // Set the Y scale
@@ -299,28 +295,28 @@ public class DataView extends View
     /*
      * Draws the specified RawImpactData.
      */
-    private void drawData(Canvas canvas, @NonNull RawImpactData data)
+    private void drawData(Canvas canvas, @NonNull ImpactData data)
     {
-        List<Sample> samples = data.getData();
+        List<Sample> samples = data.SAMPLES;
 
         if (samples.size() > 1)
         {
             PAINT.setStrokeWidth(4.0f);
 
             // Reset the scale // TODO shouldn't have to happen every frame
-            xScale = (getWidth() - 2.0f * (padding + 2.0f)) / (data.getNumSamplesAskedFor());
+            xScale = (getWidth() - 2.0f * (padding + 2.0f)) / (data.getNumSamples());
 
             // Initialize prevPt
-            prevPt[0] = samples.get(0).x * Sample.DATA_TO_GS;
-            prevPt[1] = samples.get(0).y * Sample.DATA_TO_GS;
-            prevPt[2] = samples.get(0).z * Sample.DATA_TO_GS;
+            prevPt[0] = (float)(samples.get(0).x * Sample.SAMPLE_TO_G);
+            prevPt[1] = (float)(samples.get(0).y * Sample.SAMPLE_TO_G);
+            prevPt[2] = (float)(samples.get(0).z * Sample.SAMPLE_TO_G);
 
             // Draw the curves
             for (int i = N; i < samples.size(); i += N)
             {
-                pt[0] = samples.get(i).x * Sample.DATA_TO_GS;
-                pt[1] = samples.get(i).y * Sample.DATA_TO_GS;
-                pt[2] = samples.get(i).z * Sample.DATA_TO_GS;
+                pt[0] = (float)(samples.get(i).x * Sample.SAMPLE_TO_G);
+                pt[1] = (float)(samples.get(i).y * Sample.SAMPLE_TO_G);
+                pt[2] = (float)(samples.get(i).z * Sample.SAMPLE_TO_G);
 
                 // Draw the line segment
                 for (int j = 0; j < NUM_CURVES; ++j)
@@ -392,10 +388,10 @@ public class DataView extends View
      * Returns the Data to draw or null.
      * // TODO won't always want Type 2 Data
      */
-    private static RawImpactData getDataToDraw()
+    private static ImpactData getDataToDraw()
     {
         if (MainActivity.getBluetoothBridge().getLastImpact() != null)
-            return MainActivity.getBluetoothBridge().getLastImpact().getTypeTwoData();
+            return MainActivity.getBluetoothBridge().getLastImpact().getImpactData();
         else
             return null;
     }
@@ -403,10 +399,10 @@ public class DataView extends View
     /*
      * Async task for doing region extraction.
      */
-    private class RegionExtractor extends AsyncTask<RawImpactData, Void, ArrayList<ImpactRegionExtractor.ImpactRegion>>
+    private class RegionExtractor extends AsyncTask<ImpactData, Void, ArrayList<ImpactRegionExtractor.ImpactRegion>>
     {
         @Override
-        protected ArrayList<ImpactRegionExtractor.ImpactRegion> doInBackground(RawImpactData... params)
+        protected ArrayList<ImpactRegionExtractor.ImpactRegion> doInBackground(ImpactData... params)
         {
             if (params.length == 0)
             {
@@ -501,91 +497,91 @@ public class DataView extends View
             }
         };
 
-        /**
-         * Requests the force for this ImpactRegion to be calculated.
-         */
-        public void requestForce()
-        {
-            if (!forceRequested)
-            {
-                forceRequested = true;
-                forceReceived = false;
-
-                new AsyncTask<ImpactRegionExtractor.ImpactRegion, Void, Double>()
-                {
-                    /**
-                     * Performs the force calculation on the background Thread.
-                     *
-                     * @param params The parameters of the task.
-                     * @return A result, defined by the subclass of this task.
-                     */
-                    @Override
-                    protected Double doInBackground(ImpactRegionExtractor.ImpactRegion... params)
-                    {
-                        int l = params[0].getEnd() - params[0].getStart() + 1;
-                        final double[] x = new double[l];
-                        final double[] y = new double[l];
-                        final double[] z = new double[l];
-                        float[] sample = new float[3];
-                        RawImpactData data = getDataToDraw();
-
-                        if (data == null)
-                        {
-                            Log.e(TAG, "No data to calculate the force for!");
-                            return null;
-                        }
-
-                        for (int i = 0; i < l; ++i)
-                        {
-                            data.getData().get(i + params[0].getStart()).toFloatArray(sample);
-
-                            x[i] = sample[0];
-                            y[i] = sample[1];
-                            z[i] = sample[2];
-                        }
-
-                        return CorrelatorMLR.evaluate(new FeatureExtractor.DataSeriesFeaturable()
-                        {
-                            /**
-                             * Gets an array of SensorData objects for each axis of data of this Featurable.
-                             *
-                             * @return An array of SensorData objects for each axis of data of this Featurable
-                             */
-                            @Override
-                            public SensorData[] getAxes()
-                            {
-                                return new SensorData[] {new SensorData(x), new SensorData(y), new SensorData(z)};
-                            }
-                        });
-                    }
-
-                    @Override
-                    protected void onPostExecute(Double vals)
-                    {
-                        if (vals != null)
-                        {
-//                            hardSoft = (float) vals[0];
-//                            hitDrop = (float) vals[1];
-                            force = vals.floatValue();
-                            forceReceived = true;
-                        }
-
-                        Log.d(TAG, "Force is: " + force + " N");
-//                        Log.d(TAG, "Hard Soft: " + hardSoft);
-//                        Log.d(TAG, "Hit Drop: " + hitDrop);
-
-                        if (dataView != null)
-                        {
-                            dataView.postInvalidate();
-                        }
-                    }
-                }.execute(impactRegion);
-            }
-            else
-            {
-                Log.d(TAG, "Force is: " + force + " N");
-            }
-        }
+//        /**
+//         * Requests the force for this ImpactRegion to be calculated.
+//         */
+//        public void requestForce()
+//        {
+//            if (!forceRequested)
+//            {
+//                forceRequested = true;
+//                forceReceived = false;
+//
+//                new AsyncTask<ImpactRegionExtractor.ImpactRegion, Void, Double>()
+//                {
+//                    /**
+//                     * Performs the force calculation on the background Thread.
+//                     *
+//                     * @param params The parameters of the task.
+//                     * @return A result, defined by the subclass of this task.
+//                     */
+//                    @Override
+//                    protected Double doInBackground(ImpactRegionExtractor.ImpactRegion... params)
+//                    {
+//                        int l = params[0].getEnd() - params[0].getStart() + 1;
+//                        final double[] x = new double[l];
+//                        final double[] y = new double[l];
+//                        final double[] z = new double[l];
+//                        float[] sample = new float[3];
+//                        ImpactData data = getDataToDraw();
+//
+//                        if (data == null)
+//                        {
+//                            Log.e(TAG, "No data to calculate the force for!");
+//                            return null;
+//                        }
+//
+//                        for (int i = 0; i < l; ++i)
+//                        {
+//                            data.getData().get(i + params[0].getStart()).toFloatArray(sample);
+//
+//                            x[i] = sample[0];
+//                            y[i] = sample[1];
+//                            z[i] = sample[2];
+//                        }
+//
+//                        return CorrelatorMLR.evaluate(new FeatureExtractor.DataSeriesFeaturable()
+//                        {
+//                            /**
+//                             * Gets an array of SensorData objects for each axis of data of this Featurable.
+//                             *
+//                             * @return An array of SensorData objects for each axis of data of this Featurable
+//                             */
+//                            @Override
+//                            public SensorData[] getAxes()
+//                            {
+//                                return new SensorData[] {new SensorData(x), new SensorData(y), new SensorData(z)};
+//                            }
+//                        });
+//                    }
+//
+//                    @Override
+//                    protected void onPostExecute(Double vals)
+//                    {
+//                        if (vals != null)
+//                        {
+////                            hardSoft = (float) vals[0];
+////                            hitDrop = (float) vals[1];
+//                            force = vals.floatValue();
+//                            forceReceived = true;
+//                        }
+//
+//                        Log.d(TAG, "Force is: " + force + " N");
+////                        Log.d(TAG, "Hard Soft: " + hardSoft);
+////                        Log.d(TAG, "Hit Drop: " + hitDrop);
+//
+//                        if (dataView != null)
+//                        {
+//                            dataView.postInvalidate();
+//                        }
+//                    }
+//                }.execute(impactRegion);
+//            }
+//            else
+//            {
+//                Log.d(TAG, "Force is: " + force + " N");
+//            }
+//        }
 
         /**
          * Describe the kinds of special objects contained in this Parcelable's
