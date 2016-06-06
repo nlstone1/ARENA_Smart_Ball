@@ -112,7 +112,7 @@ public class FeatureExtractor
 		
 		for (int i = 0; i < dft.length; ++i)
 		{
-			fftMag = Math.pow(dft.mags[i], 2) + Math.pow(dft.freqs[i], 2);
+			fftMag = Math.pow(dft.reals[i], 2) + Math.pow(dft.imags[i], 2);
 			energy += fftMag;
 		}
 		
