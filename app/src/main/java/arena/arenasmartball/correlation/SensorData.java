@@ -1,6 +1,5 @@
 package arena.arenasmartball.correlation;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -43,10 +42,9 @@ public class SensorData
 	{
 		int i = 0;
 		double[] array = new double[values.size()];
-		Iterator<Double> it = values.iterator();
-		
-		while (it.hasNext())
-			array[i++] = it.next();
+
+		for (Double value : values)
+			array[i++] = value;
 		
 		return array;
 	}

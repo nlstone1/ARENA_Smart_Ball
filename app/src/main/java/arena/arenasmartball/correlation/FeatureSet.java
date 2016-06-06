@@ -1,13 +1,8 @@
 package arena.arenasmartball.correlation;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.Map.Entry;
 
 /**
  * Class representing a set of Features.
@@ -66,7 +61,7 @@ public class FeatureSet
 		if (featureIndex == null)
 			return 0.0;
 		else
-			return featureArray.get(featureIndex.intValue());
+			return featureArray.get(featureIndex);
 	}
 	
 //	/**
