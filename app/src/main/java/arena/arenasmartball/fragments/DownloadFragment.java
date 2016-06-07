@@ -291,7 +291,7 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
                 Log.w(TAG, "Error making smart ball data directory: " + file.getAbsolutePath());
 
             // Save the data and print a Toast
-            if (impact.save(file))
+            if (impact.save(file, true, false))
                 Toast.makeText(getMainActivity(), "Saved impact to " + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
             else
                 Toast.makeText(getMainActivity(), "Error saving impact", Toast.LENGTH_SHORT).show();

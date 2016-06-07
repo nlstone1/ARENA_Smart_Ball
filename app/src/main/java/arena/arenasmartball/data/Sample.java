@@ -116,4 +116,9 @@ public class Sample
 	{
 		return time + ", "+ (x * SAMPLE_TO_G) + ", " + (y * SAMPLE_TO_G) + ", " + (z * SAMPLE_TO_G);
 	}
+
+	public String toRawString()
+	{
+		return time + ", "+ x + ", " + y + ", " + z;
+	}
 }

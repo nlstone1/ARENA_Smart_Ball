@@ -90,12 +90,17 @@ public class ImpactData implements DataDecompressor.DecompressedDataCallback
 	 * Writes this Data to a comma separated values file.
 	 * @param dst The File to which to write
 	 */
-	public void toCSVFile(File dst) throws FileNotFoundException
+	public void toCSVFile(File dst, boolean raw) throws FileNotFoundException
 	{
         PrintWriter out = new PrintWriter(dst);
 
         for (Sample s: SAMPLES)
-            out.println(s);
+        {
+            if (raw)
+                out.println(s.toRawString());
+            else
+                out.println(s.toString());
+        }
 
         out.close();
 	}
