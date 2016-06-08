@@ -88,6 +88,24 @@ public class Services
             _UUID = createSmartBallUUID(charUUID);
             NAME_RES_ID = nameResId;
         }
+
+        /**
+         * Finds a Characteristic by UUID.
+         * @param uuid The UUID
+         * @return The Characteristic with the specified UUID or null if none could be found
+         */
+        public static Characteristic findByUUID(UUID uuid)
+        {
+            for (Characteristic characteristic: values())
+            {
+                if (characteristic._UUID.equals(uuid))
+                {
+                    return characteristic;
+                }
+            }
+
+            return null;
+        }
     }
 
     /**
