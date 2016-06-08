@@ -151,11 +151,11 @@ public class Features
 		public double calculate(SensorData data)
 		{
 			DFT dft = data.frequencySeries();
-			double magSum = new Sum().evaluate(dft.mags);
+			double magSum = new Sum().evaluate(dft.reals);
 			double specStdDev = 0.0;
 			
 			for (int i = 0; i < dft.length; ++i)
-				specStdDev += Math.pow(dft.freqs[i], 2.0) * (dft.mags[i]);
+				specStdDev += Math.pow(dft.imags[i], 2.0) * (dft.reals[i]);
 			
 			return Math.sqrt(specStdDev / magSum);
 		}
@@ -167,11 +167,11 @@ public class Features
 		public double calculate(SensorData data)
 		{
 			DFT dft = data.frequencySeries();
-			double magSum = new Sum().evaluate(dft.mags);
+			double magSum = new Sum().evaluate(dft.reals);
 			double specCen = 0.0;
 			
 			for (int i = 0; i < dft.length; ++i)
-				specCen += dft.freqs[i] * dft.mags[i];
+				specCen += dft.imags[i] * dft.reals[i];
 			
 			return specCen / Math.abs(magSum);
 		}
@@ -189,7 +189,7 @@ public class Features
 			
 			double value = 0.0;
 			for (int i = 0; i < dft.length; ++i)
-				value += Math.pow(dft.mags[i] - specCen, 3.0) * dft.mags[i];
+				value += Math.pow(dft.reals[i] - specCen, 3.0) * dft.reals[i];
 			
 			return value / Math.pow(specStdDev, 3.0);
 		}
@@ -207,7 +207,7 @@ public class Features
 			
 			double value = 0.0;
 			for (int i = 0; i < dft.length; ++i)
-				value += Math.pow(dft.mags[i] - specCen, 4.0) * dft.mags[i];
+				value += Math.pow(dft.reals[i] - specCen, 4.0) * dft.reals[i];
 			
 			return value / Math.pow(specStdDev, 4.0) - 3.0;
 		}
@@ -221,7 +221,7 @@ public class Features
 			double specCen = SPEC_CENTROID.calculate(data);
 			DFT dft = data.frequencySeries();
 			
-			return FeatureExtractor.max(dft.mags) / specCen;
+			return FeatureExtractor.max(dft.reals) / specCen;
 		}
 	};
 	
@@ -234,7 +234,7 @@ public class Features
 			
 			double value = 0.0;
 			for (int i = 1; i < dft.length - 1; ++i)
-				value += Math.abs(dft.mags[i] - (dft.mags[i-1] + dft.mags[i] + dft.mags[i+1]) / 3.0);
+				value += Math.abs(dft.reals[i] - (dft.reals[i-1] + dft.reals[i] + dft.reals[i+1]) / 3.0);
 			return value;
 		}
 	};
@@ -250,8 +250,8 @@ public class Features
 			
 			for (int i = 1; i < dft.length - 1; ++i)
 			{
-				num += Math.pow(dft.mags[i] - dft.mags[i+1], 2.0);
-				den += Math.pow(dft.mags[i], 2.0);
+				num += Math.pow(dft.reals[i] - dft.reals[i+1], 2.0);
+				den += Math.pow(dft.reals[i], 2.0);
 			}
 			
 			return num / den;
@@ -269,8 +269,8 @@ public class Features
 			
 			for (int i = 1; i < dft.length - 1; ++i)
 			{
-				value += 20.0 * Math.abs(Math.log(dft.mags[i]) - 
-						(Math.log(dft.mags[i-1]) + Math.log(dft.mags[i]) + Math.log(dft.mags[i+1])) / 3.0);
+				value += 20.0 * Math.abs(Math.log(dft.reals[i]) -
+						(Math.log(dft.reals[i-1]) + Math.log(dft.reals[i]) + Math.log(dft.reals[i+1])) / 3.0);
 			}
 			
 			return value;
@@ -289,11 +289,11 @@ public class Features
 			for (int i = 0; i < dft.length; ++i)
 			{
 				if (i == 0)
-					num = dft.mags[i];
+					num = dft.reals[i];
 				else
-					num *= dft.mags[i];
+					num *= dft.reals[i];
 				
-				den += dft.mags[i];
+				den += dft.reals[i];
 			}
 			
 			num = Math.pow(num, 1.0 / dft.length);

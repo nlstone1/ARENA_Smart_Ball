@@ -274,9 +274,11 @@ public class Impact implements SmartBall.DataListener
     /**
      * Writes this Impact to the given directory. A new File will be created for this Impact in the given directory.
      * @param dir The directory to write to
+     * @param saveGs Whether or not to save the data converted to Gs
+     * @param saveRaw Whether or not to save the raw data values
      * @return Whether or not this Impact was successfully saved
      */
-    public boolean save(File dir)
+    public boolean save(File dir, boolean saveGs, boolean saveRaw)
     {
         if (impactData == null)
         {
@@ -292,8 +294,19 @@ public class Impact implements SmartBall.DataListener
         {
             try
             {
-                File file = new File(dir, createFileName());
-                impactData.toCSVFile(file);
+                File file;
+
+                if (saveGs)
+                {
+                    file = new File(dir, createFileName(false));
+                    impactData.toCSVFile(file, false);
+                }
+
+                if (saveRaw)
+                {
+                    file = new File(dir, createFileName(true));
+                    impactData.toCSVFile(file, true);
+                }
             }
             catch (FileNotFoundException e)
             {
@@ -307,14 +320,16 @@ public class Impact implements SmartBall.DataListener
 
     /**
      * Creates a file name for this Impact. Names are formatted SBDATA_BallId_DateYYYYDDMMHHMMSS.
+     * @param raw Whether or not the file name will refer to a file containing raw data
      * @return The file name
      */
-    private String createFileName()
+    private String createFileName(boolean raw)
     {
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(getTime());
+        String name = (raw ? "RAW_" : "");
 
-        return "SBDATA_" + ballName + String.format(Locale.ENGLISH, "_%04d%02d%02d_%02d%02d%02d.csv", c.get(Calendar.YEAR),
+        return name + "SBDATA_" + ballName + String.format(Locale.ENGLISH, "_%04d%02d%02d_%02d%02d%02d.csv", c.get(Calendar.YEAR),
                 c.get(Calendar.DAY_OF_MONTH), 1 + c.get(Calendar.MONTH),
                 c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
     }

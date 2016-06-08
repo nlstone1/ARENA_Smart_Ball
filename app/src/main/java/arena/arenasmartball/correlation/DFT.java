@@ -11,11 +11,11 @@ public class DFT
 	/** The number of frequency samples */
 	public final int length;
 	
-	/** The magnitude array of this DFT */
-	public double[] mags; 
+	/** The real component array of this DFT */
+	public double[] reals;
 	
-	/** The frequency array of this DFT */
-	public double[] freqs; 
+	/** The imaginary component array of this DFT */
+	public double[] imags;
 	
 	/**
 	 * Constructs a new DFT from the given time series.
@@ -24,8 +24,8 @@ public class DFT
 	public DFT(double[] timeSeries)
 	{
 		length = timeSeries.length;
-		mags = new double[length];
-		freqs = new double[length];
+		reals = new double[length];
+		imags = new double[length];
 		
 		// Calculate
 		double[] fft = new double[length * 2];
@@ -43,8 +43,8 @@ public class DFT
 		// Copy to arrays
 		for (int i = 0; i < length; ++i)
 		{
-			mags[i] = Math.abs(fft[i * 2]);
-			freqs[i] = Math.abs(fft[i * 2 + 1]);
+			reals[i] = Math.abs(fft[i * 2]);
+			imags[i] = Math.abs(fft[i * 2 + 1]);
 		}
 	}
 }
