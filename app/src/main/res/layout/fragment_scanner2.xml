@@ -1,0 +1,57 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             xmlns:custom="http://schemas.android.com/apk/res-auto"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:orientation="vertical"
+             tools:context="arena.arenasmartball.fragments.ScannerFragment">
+
+    <!-- Discover Title -->
+    <TextView style="@style/TextTitle"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/discover"
+              android:textSize="@dimen/text_large"/>
+
+    <!-- Separator -->
+    <View style="@style/verticalSeparator"/>
+
+    <!-- Switch and status string -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Switch -->
+        <Switch
+            android:id="@+id/switch_scanner_scan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:padding="8dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"/>
+
+        <!-- Text -->
+        <TextView
+            android:id="@+id/textview_scanner_scan_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/switch_scanner_scan"
+            android:text="@string/enable_scanning"
+            android:textSize="@dimen/text_medium"
+            android:singleLine="true"
+            android:ellipsize="end"/>
+
+    </RelativeLayout>
+
+    <!-- List view containing found balls -->
+    <ListView
+        android:id="@+id/listview_scan_results"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </ListView>
+
+</LinearLayout>

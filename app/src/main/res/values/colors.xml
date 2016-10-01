@@ -12,6 +12,8 @@
     <color name="colorStatusFailure">#EE3311</color>
     <color name="colorStatusNeutral">#949494</color>
 
+    <color name="colorSelected">#3311EE</color>
+
     <color name="colorReadyOn">#33EE11</color>
     <color name="colorReadyOff">#A9A9A9</color>
 

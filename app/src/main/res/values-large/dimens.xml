@@ -9,7 +9,7 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <!-- Fragment Sizes -->
-    <dimen name="hud_fragment_height">72dp</dimen>
+    <dimen name="hud_fragment_height">80dp</dimen>
 
     <!-- Size of main smart ball icon -->
     <dimen name="main_smartball_icon_size">64dp</dimen>

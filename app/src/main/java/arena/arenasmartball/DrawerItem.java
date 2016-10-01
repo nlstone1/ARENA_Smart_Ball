@@ -15,6 +15,7 @@ import arena.arenasmartball.fragments.CaptureFragment;
 import arena.arenasmartball.fragments.DetailsFragment;
 import arena.arenasmartball.fragments.DownloadFragment;
 import arena.arenasmartball.fragments.ScannerFragment;
+import arena.arenasmartball.fragments.ScannerFragment2;
 import arena.arenasmartball.fragments.SimpleFragment;
 
 /**
@@ -25,7 +26,7 @@ import arena.arenasmartball.fragments.SimpleFragment;
  */
 public enum DrawerItem
 {
-    CONNECT_DRAWER (R.string.connect_drawer_name, R.drawable.ic_drawer_connect, ScannerFragment.class),
+    CONNECT_DRAWER (R.string.connect_drawer_name, R.drawable.ic_drawer_connect, ScannerFragment2.class),
     DETAILS_DRAWER (R.string.details_drawer_name, R.drawable.ic_drawer_details, DetailsFragment.class),
 //    COMMAND_DRAWER (R.string.command_drawer_name, R.drawable.ic_drawer_commands, null),
     CAPTURE_DRAWER (R.string.capture_drawer_name, R.drawable.ic_drawer_capture, CaptureFragment.class),

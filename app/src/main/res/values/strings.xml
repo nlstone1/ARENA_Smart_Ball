@@ -51,6 +51,10 @@
     <string name="download_complete">Download Complete</string>
     <string name="download_cancelled">Download Cancelled</string>
     <string name="no_current_download">No Current Download</string>
+    <string name="in_range">In range</string>
+    <string name="out_of_range">Out of range</string>
+    <string name="tap_to_connect">Tap to Connect</string>
+    <string name="tap_to_disconnect">Tap to Disconnect</string>
 
     <!-- Content descriptions -->
     <string name="battery_ic_content">battery_ic_content</string>
