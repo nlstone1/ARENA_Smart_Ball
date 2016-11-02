@@ -16,8 +16,8 @@ public class Sample
 	/** Constant through which to convert samples to Gs */
 	public static final double SAMPLE_TO_G = 0.002;
 
-    /** The sample frequency. */
-	public static final double SAMPLE_FREQUENCY = 0.001;
+    /** The sample period. */
+	public static final double SAMPLE_PERIOD = 0.001;
 	
 //	// Denotes an unset-time stamp
 //	private static double NULL_TIME = Double.MIN_VALUE;
@@ -99,7 +99,26 @@ public class Sample
 //		out[5] = (byte) ((z >> 8) & 0xFF);
 //		out[4] = (byte) (z & 0xFF);
 //	}
-	
+
+	/**
+	 * Returns this Sample as a float array in G's.
+	 * @return This Sample as a float array in G's
+	 */
+	public float[] toFloatArray()
+	{
+		return new float[] {(float)(x * SAMPLE_TO_G), (float)(y * SAMPLE_TO_G), (float)(z * SAMPLE_TO_G)};
+	}
+
+    /**
+     * Puts this Sample into a double array in G's.
+     */
+    public void toDoubleArray(double[] sample)
+    {
+        sample[0] = x * SAMPLE_TO_G;
+        sample[1] = y * SAMPLE_TO_G;
+        sample[2] = z * SAMPLE_TO_G;
+    }
+
 	/**
 	 * Sets this Sample from the specified byte array.
 	 * @param in The array from which to read the byte values

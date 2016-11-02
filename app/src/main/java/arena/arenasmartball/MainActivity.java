@@ -26,6 +26,8 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.util.Random;
+
 import arena.arenasmartball.correlation.Correlator;
 import arena.arenasmartball.fragments.AboutFragment;
 import arena.arenasmartball.fragments.HUDFragment;
@@ -222,7 +224,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         // TODO Init Correlator
-//        Correlator.initialize(this);
+        Correlator.initialize(this);
     }
 
     /**

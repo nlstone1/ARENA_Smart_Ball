@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import arena.arenasmartball.fragments.CaptureFragment;
+import arena.arenasmartball.fragments.ContinuousReadFragment;
 import arena.arenasmartball.fragments.DetailsFragment;
 import arena.arenasmartball.fragments.DownloadFragment;
 import arena.arenasmartball.fragments.ScannerFragment;
@@ -30,7 +31,8 @@ public enum DrawerItem
     DETAILS_DRAWER (R.string.details_drawer_name, R.drawable.ic_drawer_details, DetailsFragment.class),
 //    COMMAND_DRAWER (R.string.command_drawer_name, R.drawable.ic_drawer_commands, null),
     CAPTURE_DRAWER (R.string.capture_drawer_name, R.drawable.ic_drawer_capture, CaptureFragment.class),
-    DOWNLOAD_DRAWER(R.string.download_drawer_name, R.drawable.ic_drawer_download, DownloadFragment.class);
+    DOWNLOAD_DRAWER(R.string.download_drawer_name, R.drawable.ic_drawer_download, DownloadFragment.class),
+    CONTINUOUS_READ_DRAWER(R.string.continuous_read, R.drawable.ic_drawer_continuousread, ContinuousReadFragment.class);
 //    DATA_DRAWER (R.string.data_drawer_name, R.drawable.ic_drawer_data, null);
 
     // Log tag String

@@ -4,10 +4,14 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
 import arena.arenasmartball.ball.SmartBall;
+import arena.arenasmartball.correlation.Correlator;
+
+import static arena.arenasmartball.data.ImpactRegionExtractor.*;
 
 /**
  * Class representing a SmartBall impact.
@@ -54,6 +58,13 @@ public class Impact implements SmartBall.DataListener
     public Impact()
     {
         time = System.currentTimeMillis();
+    }
+
+    public Impact(ImpactData data, long time, String ballName)
+    {
+        this.impactData = data;
+        this.time = time;
+        this.ballName = ballName;
     }
 
 //    /**
@@ -234,6 +245,9 @@ public class Impact implements SmartBall.DataListener
         else if (event == SmartBall.DataEvent.TRANSMISSION_ENDED)
         {
             isReading = false;
+
+//            classifyImpacts();
+
 //            if (dataType == 1)
 //            {
 //                if (typeOneData != null)
@@ -329,8 +343,31 @@ public class Impact implements SmartBall.DataListener
         c.setTimeInMillis(getTime());
         String name = (raw ? "RAW_" : "");
 
+        if (impactData.NUM_SAMPLES_REQUESTED < 0)
+            name = "CONT_" + name;
+
         return name + "SBDATA_" + ballName + String.format(Locale.ENGLISH, "_%04d%02d%02d_%02d%02d%02d.csv", c.get(Calendar.YEAR),
                 c.get(Calendar.DAY_OF_MONTH), 1 + c.get(Calendar.MONTH),
                 c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
     }
+
+//    private void classifyImpacts()
+//    {
+//        if (impactData == null)
+//            return;
+//
+//        ArrayList<ImpactRegion> regions = findImpactRegions(impactData);
+//
+//        Log.d(TAG, String.format(Locale.ENGLISH, "Found %d regions", regions.size()));
+//
+//        // hardSoftValue, hitDropValue
+//        double[] result;
+//
+//        for (ImpactRegion region: regions)
+//        {
+//            result = Correlator.evaluate(impactData.toDataSeriesFeaturable(region));
+//
+//            Log.d(TAG, String.format(Locale.ENGLISH, "Hard Soft = %f, Hit Drop = %f", result[0], result[1]));
+//        }
+//    }
 }

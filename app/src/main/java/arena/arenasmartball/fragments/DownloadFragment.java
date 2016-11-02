@@ -74,17 +74,17 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
 //                c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
 //    }
 
-    @Override
-    public void load(@NonNull Bundle bundle)
-    {
-        dataView.load(bundle);
-    }
-
-    @Override
-    public void save(@NonNull Bundle bundle)
-    {
-        dataView.save(bundle);
-    }
+//    @Override
+//    public void load(@NonNull Bundle bundle)
+//    {
+//        dataView.load(bundle);
+//    }
+//
+//    @Override
+//    public void save(@NonNull Bundle bundle)
+//    {
+//        dataView.save(bundle);
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -276,25 +276,7 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
                 return;
             }
 
-            // Check SD card state
-            String state = Environment.getExternalStorageState();
-            if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state) || !Environment.MEDIA_MOUNTED.equals(state))
-                Log.e(TAG, "Error: external storage is read only or unavailable");
-            else
-                Log.d(TAG, "External storage is not read only or unavailable");
-
-            // Get the parent directory in which to save impacts, which will contain folders for each impact
-            File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-            file = new File(file, DATA_SAVE_DIRECTORY);
-
-            if (!file.mkdirs() && !file.isDirectory())
-                Log.w(TAG, "Error making smart ball data directory: " + file.getAbsolutePath());
-
-            // Save the data and print a Toast
-            if (impact.save(file, true, false))
-                Toast.makeText(getMainActivity(), "Saved impact to " + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(getMainActivity(), "Error saving impact", Toast.LENGTH_SHORT).show();
+            saveImpact(impact);
 
 //            // Create the directory in which to save the impact data
 //            File impactDir = new File(file, createFileName(impact));
@@ -316,6 +298,32 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
         }
 
         setValuesForCurrentState(MainActivity.getBluetoothBridge());
+    }
+
+    /**
+     * Saves an Impact.
+     */
+    public static void saveImpact(Impact impact)
+    {
+        // Check SD card state
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state) || !Environment.MEDIA_MOUNTED.equals(state))
+            Log.e(TAG, "Error: external storage is read only or unavailable");
+        else
+            Log.d(TAG, "External storage is not read only or unavailable");
+
+        // Get the parent directory in which to save impacts, which will contain folders for each impact
+        File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        file = new File(file, DATA_SAVE_DIRECTORY);
+
+        if (!file.mkdirs() && !file.isDirectory())
+            Log.w(TAG, "Error making smart ball data directory: " + file.getAbsolutePath());
+
+        // Save the data and print a Toast
+        if (impact.save(file, true, false))
+            Toast.makeText(MainActivity.getCurrent(), "Saved impact to " + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(MainActivity.getCurrent(), "Error saving impact", Toast.LENGTH_SHORT).show();
     }
 
     /**

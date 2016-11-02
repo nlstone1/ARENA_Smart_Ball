@@ -5,37 +5,40 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import arena.arenasmartball.MainActivity;
 import arena.arenasmartball.R;
-import arena.arenasmartball.data.ImpactRegionExtractor;
+import arena.arenasmartball.correlation.Correlator;
 import arena.arenasmartball.data.ImpactData;
+import arena.arenasmartball.data.ImpactRegionExtractor;
 import arena.arenasmartball.data.Sample;
+
+import static arena.arenasmartball.data.ImpactRegionExtractor.findImpactRegions;
 
 /**
  * View for showing impact data graphically.
  *
  * Created by Nathaniel on 4/17/2016.
  */
-public class DataView extends View
+public class DataView extends View// implements View.OnClickListener
 {
     // Static Paint for painting
     private static final Paint PAINT = new Paint();
 
     // Plus and minus G extents for the graph
     private static final float G_RANGE = 5.0f;
+
+    // Only draw the most recent number of samples
+    private static final int MAX_SAMPLES_TO_DRAW = 1096;
 
     // X and Y scales
     private float xScale, yScale;
@@ -59,19 +62,35 @@ public class DataView extends View
     // Temporary arrays used for drawing the curves
     private float[] pt, prevPt;
 
+    // Supplies impact data to draw
+    private Supplier<ImpactData> dataSupplier;
+
+    // Default Supplier
+    private static final Supplier<ImpactData> DEFAULT_SUPPLIER = new Supplier<ImpactData>()
+    {
+        @Override
+        public ImpactData get()
+        {
+            if (MainActivity.getBluetoothBridge().getLastImpact() != null)
+                return MainActivity.getBluetoothBridge().getLastImpact().getImpactData();
+            else
+                return null;
+        }
+    };
+
     // Impact regions
-    private ArrayList<ImpactRegionWrapper> impactRegions;
+//    private ArrayList<ImpactRegionWrapper> impactRegions;
     private boolean requestedImpactRegions;
 
     // Bundle ids
-    private static final String IMPACT_REGIONS_BUNDLE_ID = "arena.arenasmartball.views.DataView.impactRegions";
-    private static final String REQUESTED_IMPACT_REGIONS_BUNDLE_ID = "arena.arenasmartball.views.DataView.requestedImpactRegions";
+//    private static final String IMPACT_REGIONS_BUNDLE_ID = "arena.arenasmartball.views.DataView.impactRegions";
+//    private static final String REQUESTED_IMPACT_REGIONS_BUNDLE_ID = "arena.arenasmartball.views.DataView.requestedImpactRegions";
 
     // Draws every nth point
     private static final int N = 2;
 
-    // TODO temporary just for DDay
-    private static DataView dataView;
+//    // TODO temporary just for DDay
+//    private static DataView dataView;
 
     // Log tag String
     private static final String TAG = "DataView";
@@ -142,8 +161,70 @@ public class DataView extends View
         pt = new float[NUM_CURVES];
         prevPt = new float[NUM_CURVES];
 
-        dataView = this;
+        dataSupplier = DEFAULT_SUPPLIER;
+
+//        dataView = this;
+//        setOnClickListener(this);
     }
+
+    /**
+     * Sets the Supplier for ImpactData to draw.
+     * @param supplier The Supplier
+     */
+    public void setDataSupplier(Supplier<ImpactData> supplier)
+    {
+        Log.w(TAG, "Data Supplier Set: " + supplier);
+        this.dataSupplier = supplier;
+    }
+
+//    /**
+//     * Called when a view has been clicked.
+//     *
+//     * @param v The view that was clicked.
+//     */
+//    @Override
+//    public void onClick(View v)
+//    {
+//        // Get the ImpactData
+//        ImpactData data = dataSupplier.get();
+//
+//        if (data == null || data.SAMPLES.size() < 800) // TODO very temporary
+//            return;
+//
+//        // Get the first impact region
+//        ArrayList<ImpactRegionExtractor.ImpactRegion> regions = findImpactRegions(dataSupplier.get());
+//
+//        Log.d(TAG, String.format(Locale.ENGLISH, "Found %d regions", regions.size()));
+//
+//        // hardSoftValue, hitDropValue
+//        double[] result = Correlator.evaluate(dataSupplier.get().toDataSeriesFeaturable(regions.get(0)));
+//
+//        Log.d(TAG, String.format(Locale.ENGLISH, "Hard Soft = %f, Hit Drop = %f", result[0], result[1]));
+//
+//        // Launch an alert dialog showing the results
+//        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+//
+//        boolean hit = result[0] > 0.5f;
+//        boolean hard = result[1] > 0.5f;
+//        double hitP, hardP;
+//
+//        if (hit)
+//            hitP = result[0] * 100.0;
+//        else
+//            hitP = (1.0 - result[0]) * 100.0;
+//
+//        if (hard)
+//            hardP = result[1] * 100.0;
+//        else
+//            hardP = (1.0 - result[1]) * 100.0;
+//
+//        String msg = (hard ? "Hard": "Soft") + " " + (hit ? "Hit": "Drop") + " (" + (int) (hitP * hardP / 100.0f) + "%)";
+//
+//        builder.setMessage(msg)
+//                .setTitle("Prediction");
+//
+//        builder.create().show();
+//    }
 
     /**
      * Called when the view is rendered.
@@ -158,7 +239,9 @@ public class DataView extends View
         drawAxes(canvas);
 
         // Draw the data
-        ImpactData data = getDataToDraw();
+        ImpactData data = dataSupplier.get();
+
+        Log.d(TAG, "Drawing " + (data != null ? data.SAMPLES.size() + " samples": "NULL"));
 
         if (data != null)
         {
@@ -208,27 +291,27 @@ public class DataView extends View
 //        return super.onTouchEvent(event);
 //    }
 
-    public void load(Bundle bundle)
-    {
-        this.requestedImpactRegions = bundle.getBoolean(REQUESTED_IMPACT_REGIONS_BUNDLE_ID, false);
+//    public void load(Bundle bundle)
+//    {
+//        this.requestedImpactRegions = bundle.getBoolean(REQUESTED_IMPACT_REGIONS_BUNDLE_ID, false);
+//
+//        ArrayList<Parcelable> list = bundle.getParcelableArrayList(IMPACT_REGIONS_BUNDLE_ID);
+//
+//        if (list != null)
+//        {
+//            impactRegions = new ArrayList<>();
+//            for (Parcelable p : list)
+//            {
+//                impactRegions.add((ImpactRegionWrapper) p);
+//            }
+//        }
+//    }
 
-        ArrayList<Parcelable> list = bundle.getParcelableArrayList(IMPACT_REGIONS_BUNDLE_ID);
-
-        if (list != null)
-        {
-            impactRegions = new ArrayList<>();
-            for (Parcelable p : list)
-            {
-                impactRegions.add((ImpactRegionWrapper) p);
-            }
-        }
-    }
-
-    public void save(Bundle bundle)
-    {
-        bundle.putBoolean(REQUESTED_IMPACT_REGIONS_BUNDLE_ID, requestedImpactRegions);
-        bundle.putParcelableArrayList(IMPACT_REGIONS_BUNDLE_ID, impactRegions);
-    }
+//    public void save(Bundle bundle)
+//    {
+//        bundle.putBoolean(REQUESTED_IMPACT_REGIONS_BUNDLE_ID, requestedImpactRegions);
+//        bundle.putParcelableArrayList(IMPACT_REGIONS_BUNDLE_ID, impactRegions);
+//    }
 
     /**
      * Called when this View is resized.
@@ -243,7 +326,7 @@ public class DataView extends View
         super.onSizeChanged(w, h, oldW, oldH);
 
         // Set the X scale
-        ImpactData data = getDataToDraw();
+        ImpactData data = dataSupplier.get();
 
         if (data == null)
         {
@@ -251,7 +334,7 @@ public class DataView extends View
         }
         else
         {
-            xScale = (w - 2.0f * (padding + 2.0f)) / (data.getNumSamples());
+            xScale = (w - 2.0f * (padding + 2.0f)) / Math.min(MAX_SAMPLES_TO_DRAW, data.getNumSamples());
         }
 
         // Set the Y scale
@@ -299,24 +382,33 @@ public class DataView extends View
     {
         List<Sample> samples = data.SAMPLES;
 
+        double dt;
+        float x;
+
         if (samples.size() > 1)
         {
+            int start = samples.size() - MAX_SAMPLES_TO_DRAW;
+            int size = Math.min(MAX_SAMPLES_TO_DRAW, samples.size());
+
+            if (start < 0)
+                start = 0;
+
             PAINT.setStrokeWidth(4.0f);
 
             // Reset the scale // TODO shouldn't have to happen every frame
-            xScale = (getWidth() - 2.0f * (padding + 2.0f)) / (data.getNumSamples());
+            xScale = (getWidth() - 2.0f * (padding + 2.0f)) / (size);
 
             // Initialize prevPt
-            prevPt[0] = (float)(samples.get(0).x * Sample.SAMPLE_TO_G);
-            prevPt[1] = (float)(samples.get(0).y * Sample.SAMPLE_TO_G);
-            prevPt[2] = (float)(samples.get(0).z * Sample.SAMPLE_TO_G);
+            prevPt[0] = (float)(samples.get(start).x * Sample.SAMPLE_TO_G);
+            prevPt[1] = (float)(samples.get(start).y * Sample.SAMPLE_TO_G);
+            prevPt[2] = (float)(samples.get(start).z * Sample.SAMPLE_TO_G);
 
             // Draw the curves
-            for (int i = N; i < samples.size(); i += N)
+            for (int i = N; i < size; i += N)
             {
-                pt[0] = (float)(samples.get(i).x * Sample.SAMPLE_TO_G);
-                pt[1] = (float)(samples.get(i).y * Sample.SAMPLE_TO_G);
-                pt[2] = (float)(samples.get(i).z * Sample.SAMPLE_TO_G);
+                pt[0] = (float)(samples.get(i + start).x * Sample.SAMPLE_TO_G);
+                pt[1] = (float)(samples.get(i + start).y * Sample.SAMPLE_TO_G);
+                pt[2] = (float)(samples.get(i + start).z * Sample.SAMPLE_TO_G);
 
                 // Draw the line segment
                 for (int j = 0; j < NUM_CURVES; ++j)
@@ -328,174 +420,177 @@ public class DataView extends View
                     // Set the previous point
                     prevPt[j] = pt[j];
                 }
+
+                // Check for large temporal gap in data
+                dt = samples.get(i + start).time - samples.get(i - 1 + start).time;
+                if (dt > 5 * N * Sample.SAMPLE_PERIOD)
+                {
+                    PAINT.setColor(0xFF000000);
+                    x = (i - N) * xScale + padding;
+
+                    dt = ((int)(dt * 100.0)) / 100.0;
+
+                    canvas.drawLine(x, 0, x, getHeight(), PAINT);
+                    PAINT.setTextSize(16f);
+                    PAINT.setTextAlign(Paint.Align.LEFT);
+                    canvas.drawText(dt + " seconds", x + 16f, 16f, PAINT);
+                }
             }
         }
     }
 
-    /*
-     * Draws the impact regions.
-     */
-    private void drawImpactRegions(Canvas canvas)
-    {
-        PAINT.setStrokeWidth(4.0f);
-        PAINT.setColor(Color.WHITE);
-
-        PAINT.setTextSize(32.0f);
-
-        ImpactRegionExtractor.ImpactRegion r;
-
-        float x;
-
-        for (ImpactRegionWrapper rw: impactRegions)
-        {
-            r = rw.impactRegion;
-            canvas.drawLine(r.getStart() * xScale, padding, r.getStart() * xScale, getHeight() - padding, PAINT);
-            canvas.drawLine(x = (r.getEnd() * xScale), padding, r.getEnd() * xScale, getHeight() - padding, PAINT);
-
-            if (rw.forceReceived)
-            {
-//                canvas.drawText("HardSoft: " + rw.hardSoft, x + 16.0f, padding + 48.0f, PAINT);
-//                canvas.drawText("HitDrop: " + rw.hitDrop, x + 16.0f, padding + 72.0f, PAINT);
+//    /*
+//     * Draws the impact regions.
+//     */
+//    private void drawImpactRegions(Canvas canvas)
+//    {
+//        PAINT.setStrokeWidth(4.0f);
+//        PAINT.setColor(Color.WHITE);
+//
+//        PAINT.setTextSize(32.0f);
+//
+//        ImpactRegionExtractor.ImpactRegion r;
+//
+//        float x;
+//
+//        for (ImpactRegionWrapper rw: impactRegions)
+//        {
+//            r = rw.impactRegion;
+//            canvas.drawLine(r.getStart() * xScale, padding, r.getStart() * xScale, getHeight() - padding, PAINT);
+//            canvas.drawLine(x = (r.getEnd() * xScale), padding, r.getEnd() * xScale, getHeight() - padding, PAINT);
+//
+//            if (rw.forceReceived)
+//            {
+////                canvas.drawText("HardSoft: " + rw.hardSoft, x + 16.0f, padding + 48.0f, PAINT);
+////                canvas.drawText("HitDrop: " + rw.hitDrop, x + 16.0f, padding + 72.0f, PAINT);
 //                boolean hit = rw.hitDrop < 0.5f;
 //                boolean hard = rw.hardSoft > 0.5f;
+////
+////                float hitP, hardP;
+////
+////                if (hit)
+////                    hitP = (1.0f - rw.hitDrop) * 100.0f;
+////                else
+////                    hitP = rw.hitDrop * 100.0f;
+////
+////                if (hard)
+////                    hardP = rw.hardSoft * 100.0f;
+////                else
+////                    hardP = (1.0f - rw.hardSoft) * 100.0f;
 //
-//                float hitP, hardP;
+////                canvas.drawText((hit ? "Hit": "Drop") + " (certainty: " + (int) hitP + " %)", x + 16.0f,
+////                        padding + 48.0f, PAINT);
+////                canvas.drawText((hard ? "Hard": "Soft") + " (certainty: " + (int) hardP + " %)", x + 16.0f,
+////                        padding + 96.0f, PAINT);
+////                canvas.drawText((hard ? "Hard": "Soft") + " " + (hit ? "Hit": "Drop") + " (" + (int) (hitP * hardP / 100.0f) + "%)",
+////                        x + 16.0F, padding + 48.0f, PAINT);
 //
-//                if (hit)
-//                    hitP = (1.0f - rw.hitDrop) * 100.0f;
-//                else
-//                    hitP = rw.hitDrop * 100.0f;
-//
-//                if (hard)
-//                    hardP = rw.hardSoft * 100.0f;
-//                else
-//                    hardP = (1.0f - rw.hardSoft) * 100.0f;
-
-//                canvas.drawText((hit ? "Hit": "Drop") + " (certainty: " + (int) hitP + " %)", x + 16.0f,
-//                        padding + 48.0f, PAINT);
-//                canvas.drawText((hard ? "Hard": "Soft") + " (certainty: " + (int) hardP + " %)", x + 16.0f,
-//                        padding + 96.0f, PAINT);
-//                canvas.drawText((hard ? "Hard": "Soft") + " " + (hit ? "Hit": "Drop") + " (" + (int) (hitP * hardP / 100.0f) + "%)",
+//                canvas.drawText("Force = " + rw.force + " N",
 //                        x + 16.0F, padding + 48.0f, PAINT);
+//            }
+//        }
+//    }
 
-                canvas.drawText("Force = " + rw.force + " N",
-                        x + 16.0F, padding + 48.0f, PAINT);
-            }
-        }
-    }
+//    /*
+//     * Async task for doing region extraction.
+//     */
+//    private class RegionExtractor extends AsyncTask<ImpactData, Void, ArrayList<ImpactRegionExtractor.ImpactRegion>>
+//    {
+//        @Override
+//        protected ArrayList<ImpactRegionExtractor.ImpactRegion> doInBackground(ImpactData... params)
+//        {
+//            if (params.length == 0)
+//            {
+//                Log.w(TAG, "No ImpactData provided to DataView for region extraction!");
+//                return new ArrayList<>(0);
+//            }
+//
+//            return ImpactRegionExtractor.findImpactRegions(params[0]);
+//        }
+//
+//        @Override
+//        protected void onPostExecute(ArrayList<ImpactRegionExtractor.ImpactRegion> impactRegions)
+//        {
+//            DataView.this.impactRegions = new ArrayList<>(impactRegions.size());
+//
+//            for (ImpactRegionExtractor.ImpactRegion region: impactRegions)
+//            {
+//                DataView.this.impactRegions.add(new ImpactRegionWrapper(region));
+//            }
+//
+//            Log.d(TAG, "Found " + impactRegions.size() + " Impact Regions");
+//
+//            invalidate();
+//        }
+//    }
 
-    /*
-     * Returns the Data to draw or null.
-     * // TODO won't always want Type 2 Data
-     */
-    private static ImpactData getDataToDraw()
-    {
-        if (MainActivity.getBluetoothBridge().getLastImpact() != null)
-            return MainActivity.getBluetoothBridge().getLastImpact().getImpactData();
-        else
-            return null;
-    }
-
-    /*
-     * Async task for doing region extraction.
-     */
-    private class RegionExtractor extends AsyncTask<ImpactData, Void, ArrayList<ImpactRegionExtractor.ImpactRegion>>
-    {
-        @Override
-        protected ArrayList<ImpactRegionExtractor.ImpactRegion> doInBackground(ImpactData... params)
-        {
-            if (params.length == 0)
-            {
-                Log.w(TAG, "No ImpactData provided to DataView for region extraction!");
-                return new ArrayList<>(0);
-            }
-
-            return ImpactRegionExtractor.findImpactRegions(params[0]);
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<ImpactRegionExtractor.ImpactRegion> impactRegions)
-        {
-            DataView.this.impactRegions = new ArrayList<>(impactRegions.size());
-
-            for (ImpactRegionExtractor.ImpactRegion region: impactRegions)
-            {
-                DataView.this.impactRegions.add(new ImpactRegionWrapper(region));
-            }
-
-            Log.d(TAG, "Found " + impactRegions.size() + " Impact Regions");
-
-            invalidate();
-        }
-    }
-
-    /**
-     * Wrapper for an impact region in the data.
-     */
-    public static class ImpactRegionWrapper implements Parcelable
-    {
-        // The Impact Region
-        private ImpactRegionExtractor.ImpactRegion impactRegion;
-
-        // The force
-        private float force;
-
-//        // hit / drop
-//        private float hitDrop;
-//        // hard / soft
-//        private float hardSoft;
-
-        // Whether the force has been requested
-        private boolean forceRequested;
-        // Whether the force has been received
-        private boolean forceReceived;
-
-        /**
-         * Creates an ImpactRegionWrapper.
-         * @param impactRegion The wrapped ImpactRegion
-         */
-        public ImpactRegionWrapper(ImpactRegionExtractor.ImpactRegion impactRegion)
-        {
-            this.impactRegion = impactRegion;
-        }
-
-        /**
-         * Creates this ImpactRegion from the specified Parcel.
-         * @param in The Parcel
-         */
-        public ImpactRegionWrapper(Parcel in)
-        {
-            this.impactRegion = in.readParcelable(ImpactRegionExtractor.ImpactRegion.class.getClassLoader());
-
-            float[] arr = new float[3];
-            in.readFloatArray(arr);
-            force = arr[0];
-//            hardSoft = arr[1];
-//            hitDrop = arr[2];
-            byte[] bytes = new byte[2];
-            in.readByteArray(bytes);
-            forceRequested = bytes[0] == 1;
-            forceReceived = bytes[1] == 1;
-
-//            Log.d(TAG, "Hard Soft: " + hardSoft);
-//            Log.d(TAG, "Hit Drop: " + hitDrop);
-        }
-
-        /**
-         * Creator for ImpactRegionWrappers.
-         */
-        public static final Creator<ImpactRegionWrapper> CREATOR = new Creator<ImpactRegionWrapper>()
-        {
-            public ImpactRegionWrapper createFromParcel(Parcel in)
-            {
-                return new ImpactRegionWrapper(in);
-            }
-
-            public ImpactRegionWrapper[] newArray(int size)
-            {
-                return new ImpactRegionWrapper[size];
-            }
-        };
+//    /**
+//     * Wrapper for an impact region in the data.
+//     */
+//    public static class ImpactRegionWrapper implements Parcelable
+//    {
+//        // The Impact Region
+//        private ImpactRegionExtractor.ImpactRegion impactRegion;
+//
+//        // The force
+//        private float force;
+//
+////        // hit / drop
+////        private float hitDrop;
+////        // hard / soft
+////        private float hardSoft;
+//
+//        // Whether the force has been requested
+//        private boolean forceRequested;
+//        // Whether the force has been received
+//        private boolean forceReceived;
+//
+//        /**
+//         * Creates an ImpactRegionWrapper.
+//         * @param impactRegion The wrapped ImpactRegion
+//         */
+//        public ImpactRegionWrapper(ImpactRegionExtractor.ImpactRegion impactRegion)
+//        {
+//            this.impactRegion = impactRegion;
+//        }
+//
+//        /**
+//         * Creates this ImpactRegion from the specified Parcel.
+//         * @param in The Parcel
+//         */
+//        public ImpactRegionWrapper(Parcel in)
+//        {
+//            this.impactRegion = in.readParcelable(ImpactRegionExtractor.ImpactRegion.class.getClassLoader());
+//
+//            float[] arr = new float[3];
+//            in.readFloatArray(arr);
+//            force = arr[0];
+////            hardSoft = arr[1];
+////            hitDrop = arr[2];
+//            byte[] bytes = new byte[2];
+//            in.readByteArray(bytes);
+//            forceRequested = bytes[0] == 1;
+//            forceReceived = bytes[1] == 1;
+//
+////            Log.d(TAG, "Hard Soft: " + hardSoft);
+////            Log.d(TAG, "Hit Drop: " + hitDrop);
+//        }
+//
+//        /**
+//         * Creator for ImpactRegionWrappers.
+//         */
+//        public static final Creator<ImpactRegionWrapper> CREATOR = new Creator<ImpactRegionWrapper>()
+//        {
+//            public ImpactRegionWrapper createFromParcel(Parcel in)
+//            {
+//                return new ImpactRegionWrapper(in);
+//            }
+//
+//            public ImpactRegionWrapper[] newArray(int size)
+//            {
+//                return new ImpactRegionWrapper[size];
+//            }
+//        };
 
 //        /**
 //         * Requests the force for this ImpactRegion to be calculated.
@@ -582,34 +677,43 @@ public class DataView extends View
 //                Log.d(TAG, "Force is: " + force + " N");
 //            }
 //        }
+//
+//        /**
+//         * Describe the kinds of special objects contained in this Parcelable's
+//         * marshalled representation.
+//         *
+//         * @return a bitmask indicating the set of special object types marshalled
+//         * by the Parcelable.
+//         */
+//        @Override
+//        public int describeContents()
+//        {
+//            return 0;
+//        }
+//
+//        /**
+//         * Flatten this object in to a Parcel.
+//         *
+//         * @param dest  The Parcel in which the object should be written.
+//         * @param flags Additional flags about how the object should be written.
+//         *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
+//         */
+//        @Override
+//        public void writeToParcel(Parcel dest, int flags)
+//        {
+//            dest.writeParcelable(impactRegion, 0);
+////            dest.writeFloatArray(new float[] {force, hardSoft, hitDrop});
+//            dest.writeFloatArray(new float[] {force, 0.0f, 0.0f});
+//            dest.writeByteArray(new byte[] {(byte) (forceRequested ? 1: 0), (byte) (forceReceived ? 1: 0)});
+//        }
+//    }
 
-        /**
-         * Describe the kinds of special objects contained in this Parcelable's
-         * marshalled representation.
-         *
-         * @return a bitmask indicating the set of special object types marshalled
-         * by the Parcelable.
-         */
-        @Override
-        public int describeContents()
-        {
-            return 0;
-        }
-
-        /**
-         * Flatten this object in to a Parcel.
-         *
-         * @param dest  The Parcel in which the object should be written.
-         * @param flags Additional flags about how the object should be written.
-         *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
-         */
-        @Override
-        public void writeToParcel(Parcel dest, int flags)
-        {
-            dest.writeParcelable(impactRegion, 0);
-//            dest.writeFloatArray(new float[] {force, hardSoft, hitDrop});
-            dest.writeFloatArray(new float[] {force, 0.0f, 0.0f});
-            dest.writeByteArray(new byte[] {(byte) (forceRequested ? 1: 0), (byte) (forceReceived ? 1: 0)});
-        }
+    /**
+     * Simple Supplier functional interface.
+     * @param <T> The type of the supplied data
+     */
+    public interface Supplier<T>
+    {
+        T get();
     }
 }

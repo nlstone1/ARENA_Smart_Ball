@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <TextView style="@style/TextTitle"
+        android:text="@string/continuous_read"
+        android:id="@+id/textview_contread"
+        android:textSize="@dimen/text_large"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <!-- Footer Layout -->
+    <LinearLayout style="?android:attr/buttonBarStyle"
+        android:id="@+id/linearlayout_contread_footer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/capture_header_size"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:orientation="horizontal">
+
+        <!-- Start/Stop Button -->
+        <Button style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/button_contread_start_stop"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/start"
+            android:textSize="@dimen/text_large"/>
+
+        <!-- Reset Button -->
+        <Button style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/button_contread_clear"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/clear"
+            android:textSize="@dimen/text_large"/>
+
+        <!-- Download Button -->
+        <Button style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/button_contread_save"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/save"
+            android:textSize="@dimen/text_large"/>
+
+    </LinearLayout>
+
+    <!-- Separators -->
+    <View style="@style/verticalSeparator"
+        android:layout_below="@id/relativelayout_capture_header"/>
+    <View style="@style/verticalSeparator"
+          android:layout_above="@id/linearlayout_capture_footer"/>
+
+    <!-- Data View -->
+    <arena.arenasmartball.views.DataView
+        android:id="@+id/dataview_dataview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textview_contread"
+        android:background="@color/colorLtGray"
+        android:layout_above="@+id/progressbar_download"
+        android:layout_marginStart="8sp"
+        android:layout_marginEnd="8sp">
+
+    </arena.arenasmartball.views.DataView>
+
+    <!-- Download progress -->
+    <ProgressBar style="@android:style/Widget.DeviceDefault.ProgressBar.Horizontal"
+        android:id="@+id/progressbar_download"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="false"
+        android:layout_above="@id/linearlayout_contread_footer"/>
+
+    <!-- Separator -->
+    <View style="@style/verticalSeparator"
+        android:layout_below="@id/progressbar_download"/>
+
+</RelativeLayout>

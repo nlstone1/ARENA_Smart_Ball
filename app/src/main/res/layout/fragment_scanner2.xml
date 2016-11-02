@@ -47,6 +47,9 @@
 
     </RelativeLayout>
 
+    <!-- Separator -->
+    <View style="@style/verticalSeparator"/>
+
     <!-- List view containing found balls -->
     <ListView
         android:id="@+id/listview_scan_results"
