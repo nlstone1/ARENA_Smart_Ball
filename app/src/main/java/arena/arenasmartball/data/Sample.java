@@ -16,8 +16,8 @@ public class Sample
 	/** Constant through which to convert samples to Gs */
 	public static final double SAMPLE_TO_G = 0.002;
 
-    /** The sample frequency. */
-	public static final double SAMPLE_FREQUENCY = 0.001;
+    /** The sample period. */
+	public static final double SAMPLE_PERIOD = 0.001;
 	
 //	// Denotes an unset-time stamp
 //	private static double NULL_TIME = Double.MIN_VALUE;

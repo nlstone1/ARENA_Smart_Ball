@@ -29,6 +29,7 @@
     <string name="discover">Discover</string>
     <string name="connect">Connect</string>
     <string name="disconnect">Disconnect</string>
+    <string name="continuous_read">Continuous Read</string>
     <string name="no_device_chosen">No Device Chosen</string>
     <string name="uuid">UUID: %s</string>
     <string name="readyCaps">READY</string>
@@ -43,6 +44,9 @@
     <string name="capture_next_impact">Capture Next Impact</string>
     <string name="ready">Ready</string>
     <string name="save">Save</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="clear">Clear</string>
     <string name="ball_reset">Ball Reset</string>
     <string name="impact_detected">Impact Detected</string>
     <string name="waiting_for_impact_timed_out">Waiting for Impact Timed Out</string>

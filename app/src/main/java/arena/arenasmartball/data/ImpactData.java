@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import arena.arenasmartball.MainActivity;
+
 /**
  * Encapsulates a data time series.
  * @author Nathaniel Stone
@@ -19,8 +21,13 @@ public class ImpactData implements DataDecompressor.DecompressedDataCallback
     /** The number of samples that were requested. */
     public final int NUM_SAMPLES_REQUESTED;
 
+    public final boolean GLOBAL_TIMES;
+
     // The DataDecompressor to use to decompress data
     private DataDecompressor dataDecompressor;
+
+    private int numSamplesMark;
+    private double startTimeMark, startTimeOff;
 
     /**
      * Creates an empty ImpactData.
@@ -28,9 +35,21 @@ public class ImpactData implements DataDecompressor.DecompressedDataCallback
      */
     public ImpactData(int numSamplesRequested)
     {
+        this(numSamplesRequested, false);
+    }
+
+    /**
+     * Creates an empty ImpactData.
+     * @param numSamplesRequested The number of samples that were requested
+     * @param globalTimes Whether to use global time stamps
+     */
+    public ImpactData(int numSamplesRequested, boolean globalTimes)
+    {
         NUM_SAMPLES_REQUESTED = numSamplesRequested;
         SAMPLES = new ArrayList<>();
         dataDecompressor = new DataDecompressor(this);
+
+        GLOBAL_TIMES = globalTimes;
     }
 
 //	/**
@@ -41,6 +60,24 @@ public class ImpactData implements DataDecompressor.DecompressedDataCallback
 //	{
 //		SAMPLES = samples;
 //	}
+
+    public void mark(double time)
+    {
+        if (GLOBAL_TIMES)
+        {
+            startTimeMark = time;
+            numSamplesMark = 0;
+
+            if (SAMPLES.isEmpty())
+            {
+                startTimeOff = time;
+            }
+        }
+        else
+        {
+            throw new IllegalArgumentException("This setting is available for only global times!");
+        }
+    }
 
     /**
      * Adds a line of raw impact data to this ImpactData.
@@ -184,7 +221,15 @@ public class ImpactData implements DataDecompressor.DecompressedDataCallback
     @Override
     public void onNewSample(Sample sample)
     {
-        if (SAMPLES.size() < NUM_SAMPLES_REQUESTED)
+        if (NUM_SAMPLES_REQUESTED < 0 || SAMPLES.size() < NUM_SAMPLES_REQUESTED)
+        {
             SAMPLES.add(sample);
+
+            if (GLOBAL_TIMES)
+            {
+                sample.time = startTimeMark - startTimeOff + numSamplesMark * Sample.SAMPLE_PERIOD;
+                ++numSamplesMark;
+            }
+        }
     }
 }

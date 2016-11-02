@@ -56,6 +56,13 @@ public class Impact implements SmartBall.DataListener
         time = System.currentTimeMillis();
     }
 
+    public Impact(ImpactData data, long time, String ballName)
+    {
+        this.impactData = data;
+        this.time = time;
+        this.ballName = ballName;
+    }
+
 //    /**
 //     * Clears the data in this Impact.
 //     */
@@ -328,6 +335,9 @@ public class Impact implements SmartBall.DataListener
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(getTime());
         String name = (raw ? "RAW_" : "");
+
+        if (impactData.NUM_SAMPLES_REQUESTED < 0)
+            name = "CONT_" + name;
 
         return name + "SBDATA_" + ballName + String.format(Locale.ENGLISH, "_%04d%02d%02d_%02d%02d%02d.csv", c.get(Calendar.YEAR),
                 c.get(Calendar.DAY_OF_MONTH), 1 + c.get(Calendar.MONTH),

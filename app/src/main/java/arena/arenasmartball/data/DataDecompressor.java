@@ -89,18 +89,18 @@ public class DataDecompressor
             // Decompress the sample
             if (csample.isCompressed()) // csample contains offsets for two samples
             {
-                sample = new Sample((numSamplesCreated++) * Sample.SAMPLE_FREQUENCY, previousSample.x + csample.DATA[0], previousSample.y + csample.DATA[1], previousSample.z + csample.DATA[2]);
+                sample = new Sample((numSamplesCreated++) * Sample.SAMPLE_PERIOD, previousSample.x + csample.DATA[0], previousSample.y + csample.DATA[1], previousSample.z + csample.DATA[2]);
 //                sample.setTime();
                 callback.onNewSample(sample);
 
-                sample = new Sample((numSamplesCreated++) * Sample.SAMPLE_FREQUENCY, sample.x + csample.DATA[3], sample.y + csample.DATA[4], sample.z + csample.DATA[5]);
+                sample = new Sample((numSamplesCreated++) * Sample.SAMPLE_PERIOD, sample.x + csample.DATA[3], sample.y + csample.DATA[4], sample.z + csample.DATA[5]);
 //                sample.setTime((numSamplesCreated++) * Sample.SAMPLE_FREQUENCY);
                 callback.onNewSample(sample);
             }
             else // csample contains a single Sample
             {
                 sample = csample.toSample();
-                sample.time = (numSamplesCreated++) * Sample.SAMPLE_FREQUENCY;
+                sample.time = (numSamplesCreated++) * Sample.SAMPLE_PERIOD;
                 callback.onNewSample(sample);
             }
 
