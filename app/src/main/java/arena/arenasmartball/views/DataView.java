@@ -399,23 +399,38 @@ public class DataView extends View// implements View.OnClickListener
             xScale = (getWidth() - 2.0f * (padding + 2.0f)) / (size);
 
             // Initialize prevPt
-            prevPt[0] = (float)(samples.get(start).x * Sample.SAMPLE_TO_G);
-            prevPt[1] = (float)(samples.get(start).y * Sample.SAMPLE_TO_G);
-            prevPt[2] = (float)(samples.get(start).z * Sample.SAMPLE_TO_G);
+            samples.get(start).toFloatArray(prevPt);
+
+            prevPt[0] = prevPt[0] * yScale + getHeight() / 2f;
+            prevPt[1] = prevPt[1] * yScale + getHeight() / 2f;
+            prevPt[2] = prevPt[2] * yScale + getHeight() / 2f;
+
+//            prevPt[0] = (float)(samples.get(start).x * Sample.SAMPLE_TO_G) * yScale + getHeight() / 2f;
+//            prevPt[1] = (float)(samples.get(start).y * Sample.SAMPLE_TO_G) * yScale + getHeight() / 2f;
+//            prevPt[2] = (float)(samples.get(start).z * Sample.SAMPLE_TO_G) * yScale + getHeight() / 2f;
 
             // Draw the curves
             for (int i = N; i < size; i += N)
             {
-                pt[0] = (float)(samples.get(i + start).x * Sample.SAMPLE_TO_G);
-                pt[1] = (float)(samples.get(i + start).y * Sample.SAMPLE_TO_G);
-                pt[2] = (float)(samples.get(i + start).z * Sample.SAMPLE_TO_G);
+                // Grab the next point
+                samples.get(i + start).toFloatArray(pt);
+
+//                pt[0] = (float)(samples.get(i + start).x * Sample.SAMPLE_TO_G) * yScale + getHeight() / 2f;
+//                pt[1] = (float)(samples.get(i + start).y * Sample.SAMPLE_TO_G) * yScale + getHeight() / 2f;
+//                pt[2] = (float)(samples.get(i + start).z * Sample.SAMPLE_TO_G) * yScale + getHeight() / 2f;
 
                 // Draw the line segment
                 for (int j = 0; j < NUM_CURVES; ++j)
                 {
+                    // Transform the point
+                    pt[j] = pt[j] * yScale + getHeight() / 2;
+
                     PAINT.setColor(COLORS[j]);
-                    canvas.drawLine((i - N) * xScale + padding, prevPt[j] * yScale + getHeight() / 2,
-                            i * xScale + padding, pt[j] * yScale + getHeight() / 2, PAINT);
+                    canvas.drawLine(
+                            (i - N) * xScale + padding, // X1
+                            prevPt[j],                  // Y1
+                            i * xScale + padding,       // X2
+                            pt[j], PAINT);              // Y2
 
                     // Set the previous point
                     prevPt[j] = pt[j];
