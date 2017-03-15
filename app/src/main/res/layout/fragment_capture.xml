@@ -80,7 +80,9 @@
     <View style="@style/verticalSeparator"
         android:layout_below="@id/relativelayout_capture_header"/>
     <View style="@style/verticalSeparator"
-          android:layout_above="@id/linearlayout_capture_footer"/>
+          android:layout_above="@id/linearlayout_capture_footer"
+          android:layout_marginTop="16dp"
+          android:layout_marginBottom="16dp"/>
 
     <!-- Capture button -->
     <Button style="?android:attr/buttonBarButtonStyle"
