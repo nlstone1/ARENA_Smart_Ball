@@ -3,6 +3,7 @@ package arena.arenasmartball.fragments;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -372,6 +373,16 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
+
+                // Check for automatic downloads
+                if (!timeOut)
+                {
+                    if (PreferencesFragment.isAutomaticDownload())
+                    {
+                        DownloadFragment.setAutomaticDownload(true);
+                        DrawerItem.DOWNLOAD_DRAWER.openDrawer(MainActivity.getCurrent());
+                    }
+                }
             }
             else
             {

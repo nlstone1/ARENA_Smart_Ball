@@ -10,6 +10,7 @@
     <string name="capture_drawer_name">Capture</string>
     <string name="download_drawer_name">Download</string>
     <string name="data_drawer_name">Data</string>
+    <string name="settings_drawer_name">Settings</string>
 
     <!-- Text Strings -->
     <string name="text_about">About</string>
@@ -106,5 +107,14 @@
     <string name="error">Error</string>
     <string name="kick_event">Kick Event</string>
     <string name="file_size">File Size</string>
+
+    <!-- Preferences -->
+    <string name="pref_automatic_download_id">pref_automatic_download</string>
+
+    <!-- Preference Names -->
+    <string name="pref_automatic_download">Automatic Download</string>
+
+    <!-- Preference Descriptions -->
+    <string name="pref_automatic_download_dscr">Begin data downloads as soon as they occur</string>
 
 </resources>

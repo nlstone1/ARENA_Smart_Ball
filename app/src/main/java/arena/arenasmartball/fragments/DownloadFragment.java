@@ -42,6 +42,9 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
     // Denotes whether or not a data transmission was begun
     private static boolean transmissionBegun;
 
+    // Whether download should begin automatically
+    private static boolean shouldBeginDownload;
+
 //    // Records the time of the last data download request
 //    private static long timeOfLastDownload;
 
@@ -85,6 +88,18 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
 //    {
 //        dataView.save(bundle);
 //    }
+
+    @Override
+    public void onOpen()
+    {
+        super.onOpen();
+
+        if (shouldBeginDownload)
+        {
+            shouldBeginDownload = false;
+            beginDownload();
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -253,16 +268,7 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
         // Download requested
         if (v.getId() == R.id.button_download_read)
         {
-            ball.addDataListener(this);
-
-            // Cancel the transmission if one is in progress
-            if (ball.isDataTransmitInProgress())
-                GattCommandUtils.executeEndTransmissionCommandSequence(ball, null);
-            else
-            {
-                transmissionBegun = false;
-                GattCommandUtils.executeDataTransmitCommandSequence(ball, 1096, 2, null); // TODO, 1096 is max
-            }
+            beginDownload();
         }
         // Save requested
         else if (v.getId() == R.id.button_download_save)
@@ -298,6 +304,37 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
         }
 
         setValuesForCurrentState(MainActivity.getBluetoothBridge());
+    }
+
+    /**
+     * Begins download of data from the ball.
+     */
+    public void beginDownload()
+    {
+        SmartBall ball = MainActivity.getBluetoothBridge().getSmartBall();
+
+        if (ball == null)
+            return;
+
+        ball.addDataListener(this);
+
+        // Cancel the transmission if one is in progress
+        if (ball.isDataTransmitInProgress())
+            GattCommandUtils.executeEndTransmissionCommandSequence(ball, null);
+        else
+        {
+            transmissionBegun = false;
+            GattCommandUtils.executeDataTransmitCommandSequence(ball, 1096, 2, null); // TODO, 1096 is max
+        }
+    }
+
+    /**
+     * Sets whether the next download should begin automatically.
+     * @param automaticDownload Whether to begin download automatically
+     */
+    public static void setAutomaticDownload(boolean automaticDownload)
+    {
+        shouldBeginDownload = automaticDownload;
     }
 
     /**

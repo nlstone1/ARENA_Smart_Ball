@@ -6,11 +6,15 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.BoolRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.design.widget.NavigationView;
@@ -73,6 +77,9 @@ public class MainActivity extends AppCompatActivity
     // The NavigationView
     private NavigationView navigationView;
 
+    // Reference to SharedPreferences object
+    private SharedPreferences prefs;
+
     // Bundle key for saving the index of the current drawer
     private static final String DRAWER_INDEX_BUNDLE_KEY = "arena.arenasmartball.MainActivity.drawerIndex";
     private static final String DRAWER_FRAGMENT_BUNDLE_KEY = "arena.arenasmartball.MainActivity.drawerFragment";
@@ -129,6 +136,9 @@ public class MainActivity extends AppCompatActivity
 
         // Set the content view
         setContentView(R.layout.activity_main);
+
+        // Get the SharedPreferences
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         // Initialize the Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -443,6 +453,37 @@ public class MainActivity extends AppCompatActivity
     public static MainActivity getCurrent()
     {
         return mainActivity;
+    }
+
+    /**
+     * Returns the SharedPreferences for the current MainActivity.
+     * @return The SharedPreferences
+     */
+    public static SharedPreferences getPrefs()
+    {
+        return mainActivity == null ? null: mainActivity.prefs;
+    }
+
+    /**
+     * Convenience method to get a String resource.
+     * @param resid The resource id
+     * @return The String value of the resource
+     */
+    public static String getStringRes(@StringRes int resid)
+    {
+        return mainActivity == null ? null: mainActivity.getString(resid);
+    }
+
+    /**
+     * Convenience method to get a Boolean resource.
+     * @param resid The resource id
+     * @return The Boolean value of the resource
+     */
+    public static boolean getBoolRes(@BoolRes int resid)
+    {
+        Resources r = mainActivity == null ? null: mainActivity.getResources();
+
+        return r != null && r.getBoolean(resid);
     }
 
     /*
