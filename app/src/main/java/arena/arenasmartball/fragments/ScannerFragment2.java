@@ -201,10 +201,15 @@ public class ScannerFragment2 extends SimpleFragment implements CompoundButton.O
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
     {
-        if (isChecked)
-            MainActivity.getBluetoothBridge().startScanning();
+        if (MainActivity.getCurrent().checkLocation())
+        {
+            if (isChecked)
+                MainActivity.getBluetoothBridge().startScanning();
+            else
+                MainActivity.getBluetoothBridge().stopScanning();
+        }
         else
-            MainActivity.getBluetoothBridge().stopScanning();
+            scanSwitch.setChecked(false);
     }
 
     /**

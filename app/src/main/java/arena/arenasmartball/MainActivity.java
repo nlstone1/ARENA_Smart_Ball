@@ -3,9 +3,11 @@ package arena.arenasmartball;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
@@ -554,8 +556,36 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Checks whether location services are enabled.
+     * For some reason this is required to get scan results.
+     */
+    public boolean checkLocation()
+    {
+        LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        {
+            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+            alertDialog.setTitle(getString(R.string.warning));
+            alertDialog.setMessage(getString(R.string.location_explanation));
+            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
+                    new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {}
+                    });
+            alertDialog.show();
+
+            return false;
+        }
+
+        return true;
+    }
+
     /*
-     * Checks for a dangerous permission.
+     * Checks for permissions.
      */
     private void acquirePermissions()
     {

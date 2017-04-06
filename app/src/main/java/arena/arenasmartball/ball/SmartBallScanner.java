@@ -6,7 +6,9 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.os.Build;
 import android.os.ParcelUuid;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,6 +66,8 @@ public class SmartBallScanner
         @Override
         public void onScanResult(int callbackType, ScanResult result)
         {
+            Log.d(TAG, "onScanResult(" + callbackType + ", " + result + ")");
+
             super.onScanResult(callbackType, result);
 
             // Process result
@@ -81,6 +85,8 @@ public class SmartBallScanner
         @Override
         public void onBatchScanResults(List<ScanResult> results)
         {
+            Log.d(TAG, "onBatchScanResults(" + results + ")");
+
             super.onBatchScanResults(results);
 
             // Process result
@@ -96,6 +102,8 @@ public class SmartBallScanner
         @Override
         public void onScanFailed(int errorCode)
         {
+            Log.d(TAG, "onScanFailed(" + errorCode + ")");
+
             super.onScanFailed(errorCode);
 
             // Set flag
@@ -201,8 +209,18 @@ public class SmartBallScanner
         for (SmartBallScannerListener listener: listeners)
             listener.onScanStarted();
 
+        ScanSettings.Builder b = new ScanSettings.Builder();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            b.setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES);
+            b.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE);
+        }
+
+        b.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
+
         // Start scan
-        scanner.startScan(scanFilters, new ScanSettings.Builder().build(), internalCallback);
+        scanner.startScan(scanFilters, b.build(), internalCallback);
     }
 
     /**

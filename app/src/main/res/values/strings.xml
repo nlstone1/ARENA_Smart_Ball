@@ -76,6 +76,7 @@
     <string name="write_ext_storage_denied_explanation">"This application will not be able to save impact data without permission to write to external storage."</string>
     <string name="access_bluetooth_explanation">This application uses Bluetooth to communicate with the ball</string>
     <string name="access_bluetooth_denied_explanation">This application will not be able to connect to a ball without Bluetooth</string>
+    <string name="location_explanation">Location services must be enabled to find Smart Balls. Location can be enabled from your device\'s Settings</string>
 
     <!-- Service names -->
     <string name="generic_access">Generic Access</string>
