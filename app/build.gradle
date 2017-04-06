@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    buildToolsVersion '25.0.0'
 
     packagingOptions {
         exclude 'assets/org/apache/commons/math3/exception/util/LocalizedFormats_fr.properties'

@@ -13,8 +13,10 @@
 
     <!-- Text Strings -->
     <string name="text_about">About</string>
+    <string name="warning">Warning</string>
     <string name="location_permission">Location Permission</string>
     <string name="write_ext_storage_permission">Write Permission</string>
+    <string name="bluetooth_permission">Bluetooth Permission</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_settings">Settings</string>
@@ -72,7 +74,8 @@
     <string name="access_location_denied_explanation">"This application will not be able to scan for Smart Balls without knowing the device's location."</string>
     <string name="write_ext_storage_explanation">"This application needs to write to the external storage in order to save impact data collected from Smart Balls."</string>
     <string name="write_ext_storage_denied_explanation">"This application will not be able to save impact data without permission to write to external storage."</string>
-
+    <string name="access_bluetooth_explanation">This application uses Bluetooth to communicate with the ball</string>
+    <string name="access_bluetooth_denied_explanation">This application will not be able to connect to a ball without Bluetooth</string>
 
     <!-- Service names -->
     <string name="generic_access">Generic Access</string>

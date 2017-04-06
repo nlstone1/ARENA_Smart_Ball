@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -26,6 +27,8 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import arena.arenasmartball.correlation.Correlator;
@@ -72,6 +75,35 @@ public class MainActivity extends AppCompatActivity
     private static final String DRAWER_INDEX_BUNDLE_KEY = "arena.arenasmartball.MainActivity.drawerIndex";
     private static final String DRAWER_FRAGMENT_BUNDLE_KEY = "arena.arenasmartball.MainActivity.drawerFragment";
 
+    // Required permissions
+    private static final String[] PERMISSIONS = {
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN };
+
+    // Permission reasons
+    private static final int[] PERMISSION_MESSAGE = {
+            R.string.access_location_explanation,
+            R.string.write_ext_storage_explanation,
+            R.string.access_bluetooth_explanation,
+            R.string.access_bluetooth_explanation};
+
+    // Permission denied messages
+    private static final int[] PERMISSION_DENIED_MESSAGE = {
+            R.string.access_location_denied_explanation,
+            R.string.write_ext_storage_denied_explanation,
+            R.string.access_bluetooth_denied_explanation,
+            R.string.access_bluetooth_denied_explanation};
+
+    // Permission Titles
+    private static final int[] PERMISSION_TITLES = {
+            R.string.location_permission,
+            R.string.write_ext_storage_permission,
+            R.string.bluetooth_permission,
+            R.string.bluetooth_permission
+    };
+
     /**
      * Gets the HUDFragment.
      * @return The HUDFragment
@@ -117,6 +149,9 @@ public class MainActivity extends AppCompatActivity
         // Populate the Drawer items
         populateNavigationDrawer(navigationView);
 
+        // Check permissions
+        acquirePermissions();
+
         // Create the BluetoothBridge
         bluetoothBridge.setActivity(this);
 
@@ -142,63 +177,6 @@ public class MainActivity extends AppCompatActivity
                 }
             });
             alertDialog.show();
-        }
-
-        // Request dangerous permissions
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED)
-        {
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION))
-            {
-                // Show explanation explaining why the app needs to access coarse location
-                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-                alertDialog.setTitle(getString(R.string.location_permission));
-                alertDialog.setMessage(getString(R.string.access_location_explanation));
-                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                        new DialogInterface.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which)
-                            {}
-                        });
-                alertDialog.show();
-            }
-            else
-            {
-                // No explanation needed, we can request the permission
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                        PERMISSIONS_REQUEST_COARSE_LOCATION);
-            }
-        }
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED)
-        {
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE))
-            {
-                // Show explanation explaining why the app needs to access coarse location
-                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-                alertDialog.setTitle(getString(R.string.write_ext_storage_permission));
-                alertDialog.setMessage(getString(R.string.write_ext_storage_explanation));
-                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                        new DialogInterface.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which)
-                            {}
-                        });
-                alertDialog.show();
-            }
-            else
-            {
-                // No explanation needed, we can request the permission
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        PERMISSIONS_REQUEST_STORAGE);
-            }
         }
 
         // Implement the App Indexing API
@@ -362,38 +340,45 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
     {
-        switch (requestCode)
+        Log.d(TAG, "RequestResult: " + Arrays.toString(permissions) + Arrays.toString(grantResults));
+
+        // Happens if permission request is cancelled
+        if (permissions.length == 0)
         {
-            case PERMISSIONS_REQUEST_COARSE_LOCATION:
+            // Simply request them again
+            acquirePermissions();
+            return;
+        }
+
+        // Determine which permissions were denied
+        ArrayList<Integer> deniedCodes = new ArrayList<>();
+        String permission;
+        int code;
+
+        for (int i = 0; i < permissions.length; ++i)
+        {
+            permission = permissions[i];
+            code = getPermissionCode(permission);
+
+            if (code == -1)
+                Log.e(TAG, "Unrecognized permission requested: " + permission);
+            else if (grantResults[i] != PackageManager.PERMISSION_GRANTED)
+                deniedCodes.add(code);
+        }
+
+        if (!deniedCodes.isEmpty())
+        {
+            // Tell the user why denied permission matter
+            String msg = "Some permissions were denied:";
+
+            for (int c : deniedCodes)
             {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length == 0 || (grantResults[0] != PackageManager.PERMISSION_GRANTED))
-                {
-                    // Explain to the user that the app will not work without the permissions
-                    AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-                    alertDialog.setTitle(getString(R.string.location_permission));
-                    alertDialog.setMessage(getString(R.string.access_location_denied_explanation));
-                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                            new DialogInterface.OnClickListener()
-                            {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which)
-                                {}
-                            });
-                    alertDialog.show();
-                }
-                break;
+                msg += "\n " + getString(PERMISSION_DENIED_MESSAGE[c]);
             }
 
-            case PERMISSIONS_REQUEST_STORAGE:
-            {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length == 0 || (grantResults[0] != PackageManager.PERMISSION_GRANTED))
-                {
-                    // Explain to the user that the app will not work without the permissions
-                    AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-                    alertDialog.setTitle(getString(R.string.write_ext_storage_permission));
-                    alertDialog.setMessage(getString(R.string.write_ext_storage_denied_explanation));
+            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                    alertDialog.setTitle(getString(R.string.warning));
+                    alertDialog.setMessage(msg);
                     alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                             new DialogInterface.OnClickListener()
                             {
@@ -402,9 +387,6 @@ public class MainActivity extends AppCompatActivity
                                 {}
                             });
                     alertDialog.show();
-                }
-                break;
-            }
         }
     }
 // TODO
@@ -570,5 +552,88 @@ public class MainActivity extends AppCompatActivity
             textToSpeech.speak(text, flush ? TextToSpeech.QUEUE_FLUSH: TextToSpeech.QUEUE_ADD,
                     null, "utterance" + ++utteranceNum);
         }
+    }
+
+    /*
+     * Checks for a dangerous permission.
+     */
+    private void acquirePermissions()
+    {
+        // Permissions to request without explanation
+        ArrayList<Integer> perms = new ArrayList<>();
+
+        for (int i = 0; i < PERMISSIONS.length; ++i)
+        {
+            if (ContextCompat.checkSelfPermission(this, PERMISSIONS[i]) != PackageManager.PERMISSION_GRANTED)
+            {
+                final int code = i;
+
+                // Need to request permission
+
+                // Check whether explanation is first needed
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, PERMISSIONS[i]))
+                {
+                    Log.d(TAG, "Showing explanation for " + PERMISSIONS[i]);
+
+                    // Show explanation explaining why the app needs to access coarse location
+                    AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                    alertDialog.setTitle(getString(PERMISSION_TITLES[i]));
+                    alertDialog.setMessage(getString(PERMISSION_MESSAGE[i]));
+                    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Ok",
+                        new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                // Only request the permission if the user allows
+                                ActivityCompat.requestPermissions(MainActivity.this,
+                                        new String[]{PERMISSIONS[code]}, code);
+                            }
+                        });
+                    alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No",
+                        new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {}
+                        });
+                    alertDialog.show();
+                }
+                else
+                {
+                    Log.d(TAG, "Need to request " + PERMISSIONS[i]);
+                    // No explanation needed, request the permission
+                    perms.add(i);
+                    //ActivityCompat.requestPermissions(MainActivity.this, new String[]{PERMISSIONS[i]}, i);
+                }
+            }
+            else
+            {
+                Log.d(TAG, "Has permission: " + PERMISSIONS[i]);
+            }
+        }
+
+        // Finally request all permissions for which no explanation is needed
+        if (!perms.isEmpty())
+        {
+            String[] permsToRequest = new String[perms.size()];
+            for (int i = 0; i < perms.size(); ++i)
+                permsToRequest[i] = PERMISSIONS[perms.get(i)];
+
+            Log.d(TAG, "Requesting: " + Arrays.toString(permsToRequest));
+            ActivityCompat.requestPermissions(this, permsToRequest, 0xFF);
+        }
+    }
+
+    /*
+     * Finds integer code for specified permission.
+     */
+    private static int getPermissionCode(String permission)
+    {
+        for (int i = 0; i < PERMISSIONS.length; ++i)
+            if (permission.equals(PERMISSIONS[i]))
+                return i;
+
+        return -1;
     }
 }
