@@ -379,8 +379,16 @@ public class CaptureFragment extends SimpleFragment implements View.OnClickListe
                 {
                     if (PreferencesFragment.isAutomaticDownload())
                     {
-                        DownloadFragment.setAutomaticDownload(true);
-                        DrawerItem.DOWNLOAD_DRAWER.openDrawer(MainActivity.getCurrent());
+                        final MainActivity main = getMainActivity();
+                        main.runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                DownloadFragment.setAutomaticDownload(true);
+                                DrawerItem.DOWNLOAD_DRAWER.openDrawer(main);
+                            }
+                        });
                     }
                 }
             }

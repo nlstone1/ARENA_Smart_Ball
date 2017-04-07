@@ -90,9 +90,9 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
 //    }
 
     @Override
-    public void onOpen()
+    public void onResume()
     {
-        super.onOpen();
+        super.onResume();
 
         if (shouldBeginDownload)
         {
@@ -393,13 +393,16 @@ public class DownloadFragment extends SimpleFragment implements View.OnClickList
         if (event == SmartBall.DataEvent.TRANSMISSION_BEGUN)
             transmissionBegun = true;
 
-        getMainActivity().runOnUiThread(new Runnable()
+        if (getMainActivity() != null)
         {
-            @Override
-            public void run()
+            getMainActivity().runOnUiThread(new Runnable()
             {
-                setValuesForCurrentState(MainActivity.getBluetoothBridge());
-            }
-        });
+                @Override
+                public void run()
+                {
+                    setValuesForCurrentState(MainActivity.getBluetoothBridge());
+                }
+            });
+        }
     }
 }
